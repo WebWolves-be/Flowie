@@ -25,7 +25,7 @@ internal static class TaskEndpoints
                 ParentTaskId = parentTaskId
             };
             
-            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+            var result = await mediator.Send(query, cancellationToken);
             return Results.Ok(result);
         })
         .WithName("GetTasks")
@@ -42,7 +42,7 @@ internal static class TaskEndpoints
             
             try
             {
-                var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+                var result = await mediator.Send(query, cancellationToken);
                 return Results.Ok(result);
             }
             catch (InvalidOperationException ex)
@@ -61,7 +61,7 @@ internal static class TaskEndpoints
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+                var result = await mediator.Send(command, cancellationToken);
                 return Results.Created($"/api/projects/{projectId}/tasks/{result}", new { Id = result });
             }
             catch (InvalidOperationException ex)
@@ -81,7 +81,7 @@ internal static class TaskEndpoints
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+                var result = await mediator.Send(command, cancellationToken);
                 return Results.Ok(new { Success = result });
             }
             catch (InvalidOperationException ex)
@@ -103,7 +103,7 @@ internal static class TaskEndpoints
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+                var result = await mediator.Send(command, cancellationToken);
                 return Results.Ok(new { Success = result });
             }
             catch (InvalidOperationException ex)
@@ -125,7 +125,7 @@ internal static class TaskEndpoints
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+                var result = await mediator.Send(command, cancellationToken);
                 return Results.Ok(new { Success = result });
             }
             catch (InvalidOperationException ex)

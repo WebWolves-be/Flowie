@@ -18,7 +18,7 @@ internal static class TaskTypeEndpoints
         taskTypes.MapGet("/", async (IMediator mediator, CancellationToken cancellationToken) =>
         {
             var query = new GetTaskTypesQuery();
-            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+            var result = await mediator.Send(query, cancellationToken);
             return Results.Ok(result);
         })
         .WithName("GetTaskTypes")
@@ -29,8 +29,8 @@ internal static class TaskTypeEndpoints
         {
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-                return Results.Created($"/api/task-types/{result}", new { Id = result });
+                var result = await mediator.Send(command, cancellationToken);
+                return Results.Created($"/api/task-types/{result.Id}", result);
             }
             catch (InvalidOperationException ex)
             {
@@ -41,15 +41,15 @@ internal static class TaskTypeEndpoints
         .WithDescription("Create a new task type");
 
         // Update task type
-        taskTypes.MapPut("/{id:guid}", async (Guid id, UpdateTaskTypeCommand command, IMediator mediator, CancellationToken cancellationToken) =>
+        taskTypes.MapPut("/{id:int}", async (int id, UpdateTaskTypeCommand command, IMediator mediator, CancellationToken cancellationToken) =>
         {
             // Set the ID from the route parameter
             command = command with { Id = id };
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-                return Results.Ok(new { Success = result });
+                var result = await mediator.Send(command, cancellationToken);
+                return Results.Ok(result);
             }
             catch (InvalidOperationException ex)
             {
@@ -60,14 +60,14 @@ internal static class TaskTypeEndpoints
         .WithDescription("Update a task type");
 
         // Delete task type
-        taskTypes.MapDelete("/{id:guid}", async (Guid id, IMediator mediator, CancellationToken cancellationToken) =>
+        taskTypes.MapDelete("/{id:int}", async (int id, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var command = new DeleteTaskTypeCommand { Id = id };
+            var command = new DeleteTaskTypeCommand(id);
             
             try
             {
-                var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-                return Results.Ok(new { Success = result });
+                var result = await mediator.Send(command, cancellationToken);
+                return Results.Ok(result);
             }
             catch (InvalidOperationException ex)
             {

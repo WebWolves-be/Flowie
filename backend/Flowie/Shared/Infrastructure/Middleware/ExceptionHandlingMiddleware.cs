@@ -24,25 +24,25 @@ internal class ExceptionHandlingMiddleware
         
         try
         {
-            await _next(httpContext).ConfigureAwait(false);
+            await _next(httpContext);
         }
         catch (ValidationException ex)
         {
             // Log and handle specific known exception
             _logError(_logger, ex);
-            await HandleExceptionAsync(httpContext, ex).ConfigureAwait(false);
+            await HandleExceptionAsync(httpContext, ex);
         }
         catch (KeyNotFoundException ex)
         {
             // Log and handle specific known exception
             _logError(_logger, ex);
-            await HandleExceptionAsync(httpContext, ex).ConfigureAwait(false);
+            await HandleExceptionAsync(httpContext, ex);
         }
         catch (Exception ex) when (LogAndHandleException(ex))
         {
             // This code is never reached because LogAndHandleException always returns false
             // This pattern allows us to log and swallow exceptions in one go
-            await HandleExceptionAsync(httpContext, ex).ConfigureAwait(false);
+            await HandleExceptionAsync(httpContext, ex);
         }
     }
     
@@ -76,6 +76,6 @@ internal class ExceptionHandlingMiddleware
                 : null
         };
         
-        await context.Response.WriteAsJsonAsync(response).ConfigureAwait(false);
+        await context.Response.WriteAsJsonAsync(response);
     }
 }

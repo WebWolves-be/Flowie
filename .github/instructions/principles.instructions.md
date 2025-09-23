@@ -15,11 +15,14 @@ applyTo: '**'
 - Use async/await for all I/O bound operations. Never use ConfigureAwait(false).
 - When using record use the constructor syntax (e.g., `public record Project(int Id, string Name);`).
 - Use Primary Constructors for classes when possible (e.g., `public class ProjectService(IProjectRepository repository) { ... }`).
+- Make custom exceptions when needed (e.g., `ProjectNotFoundException`).
 
 ## Minimal Api
 
 - Endpoints should be close to the feature they serve (e.g., `Features/Projects/CreateProject/CreateProjectEndpoint.cs`).
-- All feature based endpoints should be registrated in a single file per feature (e.g., `Features/Projects/ProjectsEndpoints.cs`).
+- All endpoints should be registrated together in a single file per feature (e.g., `Features/Projects/ProjectsEndpoints.cs`).
+- No validation logic in the endpoint, use MediatR pipeline behaviors for that.
+- No exception handling in the endpoint, use middleware for that or MediatR.
 
 ## MediatR
 

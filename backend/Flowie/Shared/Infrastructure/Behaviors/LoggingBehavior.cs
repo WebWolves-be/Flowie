@@ -29,7 +29,7 @@ internal class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest
         _handlingRequest(_logger, requestName, null);
         
         var stopwatch = Stopwatch.StartNew();
-        var response = await next().ConfigureAwait(false);
+        var response = await next();
         stopwatch.Stop();
         
         _handledRequest(_logger, requestName, stopwatch.ElapsedMilliseconds, null);

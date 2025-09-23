@@ -7,21 +7,19 @@ using Task = Flowie.Shared.Domain.Entities.Task;
 namespace Flowie.Features.Tasks.CreateTask;
 
 internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, CreateTaskResponse>
-
-    public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+{
+    public async Task<CreateTaskResponse> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         
-        // Get the project ID from the route parameters or context
-        // This would be set by the endpoint before passing the command to the handler
-        Guid projectId = Guid.Empty; // This will be set by the endpoint
+        // Get the project ID from the request
+        var projectId = request.ProjectId;
         
         // Get the parent task ID if this is a subtask
         var parentTaskId = request.ParentTaskId;
 
         // Verify project exists
-        var project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken)
-            .ConfigureAwait(false);
+        var project = await dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
             
         if (project == null)
         {
@@ -31,9 +29,8 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
         // Verify parent task exists if it's specified
         if (parentTaskId.HasValue)
         {
-            var parentTask = await _dbContext.Tasks
-                .FirstOrDefaultAsync(t => t.Id == parentTaskId.Value, cancellationToken)
-                .ConfigureAwait(false);
+            var parentTask = await dbContext.Tasks
+                .FirstOrDefaultAsync(t => t.Id == parentTaskId.Value, cancellationToken);
                 
             if (parentTask == null)
             {
@@ -55,16 +52,14 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
             Title = request.Title,
             Description = request.Description,
             TypeId = request.TypeId,
-            Deadline = request.Deadline,
+            DueDate = request.DueDate,
             Status = WorkflowTaskStatus.Pending,
-            AssigneeId = request.AssigneeId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            AssigneeId = request.AssigneeId
         };
 
-        _dbContext.Tasks.Add(task);
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        dbContext.Tasks.Add(task);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        return task.Id;
+        return new CreateTaskResponse(task.Id);
     }
 }
