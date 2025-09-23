@@ -3,9 +3,8 @@ using MediatR;
 
 namespace Flowie.Features.Tasks.UpdateTaskStatus;
 
-public record UpdateTaskStatusCommand : IRequest<bool>
-{
-    public Guid ProjectId { get; init; }
-    public Guid TaskId { get; init; }
-    public WorkflowTaskStatus Status { get; init; }
-}
+public record UpdateTaskStatusCommand(
+    int ProjectId,
+    int TaskId,
+    WorkflowTaskStatus Status
+) : IRequest<bool>;

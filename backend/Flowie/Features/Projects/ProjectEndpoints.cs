@@ -29,15 +29,8 @@ internal static class ProjectEndpoints
         {
             var query = new GetProjectByIdQuery(id);
             
-            try
-            {
-                var result = await mediator.Send(query, cancellationToken);
-                return Results.Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.NotFound(ex.Message);
-            }
+            var result = await mediator.Send(query, cancellationToken);
+            return Results.Ok(result);
         })
         .WithName("GetProjectById")
         .WithDescription("Get a project by ID");
@@ -57,15 +50,8 @@ internal static class ProjectEndpoints
             // Create new command with ID from route parameter
             var updatedCommand = command with { Id = id };
             
-            try
-            {
-                var result = await mediator.Send(updatedCommand, cancellationToken);
-                return Results.Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var result = await mediator.Send(updatedCommand, cancellationToken);
+            return Results.Ok(result);
         })
         .WithName("UpdateProject")
         .WithDescription("Update a project");

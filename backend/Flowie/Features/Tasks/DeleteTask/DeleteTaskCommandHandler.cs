@@ -5,21 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.DeleteTask;
 
-public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand, bool>
+internal class DeleteTaskCommandHandler(AppDbContext dbContext) : IRequestHandler<DeleteTaskCommand, bool>
 {
-    private readonly AppDbContext _dbContext;
-
-    public DeleteTaskCommandHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    }
 
     public async Task<bool> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         // Load the task and its subtasks
-        var task = await _dbContext.Tasks
+        var task = await dbContext.Tasks
             .Include(t => t.Subtasks)
             .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
 
@@ -35,8 +29,8 @@ public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand, bool>
         }
 
         // Remove the task
-        _dbContext.Tasks.Remove(task);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.Tasks.Remove(task);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }

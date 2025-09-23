@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.TaskTypes.GetTaskTypes;
 
-public class GetTaskTypesQueryHandler(AppDbContext dbContext) 
+internal class GetTaskTypesQueryHandler(AppDbContext dbContext) 
     : IRequestHandler<GetTaskTypesQuery, IEnumerable<TaskTypeResponse>>
 {
     public async Task<IEnumerable<TaskTypeResponse>> Handle(GetTaskTypesQuery request, CancellationToken cancellationToken)

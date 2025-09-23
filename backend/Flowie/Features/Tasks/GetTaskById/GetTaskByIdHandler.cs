@@ -1,16 +1,17 @@
 using Flowie.Features.Tasks.GetTasks;
 using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Enums;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.GetTaskById;
 
-public class GetTaskByIdHandler : IRequestHandler<GetTaskByIdQuery, TaskDto>
+public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskByIdQuery, TaskDto>
 {
     private readonly AppDbContext _dbContext;
 
-    public GetTaskByIdHandler(AppDbContext dbContext)
+    public GetTaskByIdQueryHandler(AppDbContext dbContext)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
@@ -24,12 +25,11 @@ public class GetTaskByIdHandler : IRequestHandler<GetTaskByIdQuery, TaskDto>
             .Include(t => t.TaskType)
             .Include(t => t.Assignee)
             .Include(t => t.Subtasks)
-            .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
 
         if (task == null)
         {
-            throw new InvalidOperationException($"Task with ID {request.TaskId} not found in project with ID {request.ProjectId}.");
+            throw new TaskNotFoundException(request.TaskId, request.ProjectId);
         }
 
         // Map to DTO

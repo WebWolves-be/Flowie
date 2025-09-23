@@ -1,10 +1,11 @@
 using Flowie.Infrastructure.Database;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.TaskTypes.DeleteTaskType;
 
-public class DeleteTaskTypeCommandHandler(AppDbContext dbContext) 
+internal class DeleteTaskTypeCommandHandler(AppDbContext dbContext) 
     : IRequestHandler<DeleteTaskTypeCommand, DeleteTaskTypeResponse>
 {
     public async Task<DeleteTaskTypeResponse> Handle(DeleteTaskTypeCommand request, CancellationToken cancellationToken)
@@ -17,7 +18,7 @@ public class DeleteTaskTypeCommandHandler(AppDbContext dbContext)
 
         if (hasRelatedTasks)
         {
-            throw new InvalidOperationException("Cannot delete task type that is in use by existing tasks.");
+            throw new TaskTypeInUseException(request.Id);
         }
 
         // Get the task type to delete
@@ -26,7 +27,7 @@ public class DeleteTaskTypeCommandHandler(AppDbContext dbContext)
 
         if (taskType == null)
         {
-            throw new InvalidOperationException($"Task type with ID {request.Id} not found.");
+            throw new TaskTypeNotFoundException(request.Id);
         }
 
         // Delete the task type

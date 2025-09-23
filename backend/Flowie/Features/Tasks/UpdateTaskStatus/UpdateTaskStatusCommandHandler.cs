@@ -6,21 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.UpdateTaskStatus;
 
-public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCommand, bool>
+internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext) : IRequestHandler<UpdateTaskStatusCommand, bool>
 {
-    private readonly AppDbContext _dbContext;
-
-    public UpdateTaskStatusCommandHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    }
 
     public async Task<bool> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         // Get the task to update
-        var task = await _dbContext.Tasks
+        var task = await dbContext.Tasks
             .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
 
         if (task == null)
@@ -28,23 +22,24 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
             throw new TaskNotFoundException(request.TaskId, request.ProjectId);
         }
 
-        // Update the status
+                // Update the task status
         task.Status = request.Status;
-        task.UpdatedAt = DateTime.UtcNow;
-
-        // If the task is completed or done, set the completion date
-        if (request.Status == WorkflowTaskStatus.Completed || request.Status == WorkflowTaskStatus.Done)
+        
+        // If the task is being completed, set the completed date
+        if (request.Status == WorkflowTaskStatus.Done || request.Status == WorkflowTaskStatus.Completed)
         {
             task.CompletedAt = DateTime.UtcNow;
         }
-        // If the task is no longer completed, clear the completion date
-        else if (task.CompletedAt.HasValue)
+        else
         {
             task.CompletedAt = null;
         }
 
+        // Update the timestamp
+        task.UpdatedAt = DateTime.UtcNow;
+
         // Save changes
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }

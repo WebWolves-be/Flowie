@@ -1,10 +1,11 @@
 using Flowie.Infrastructure.Database;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.TaskTypes.UpdateTaskType;
 
-public class UpdateTaskTypeCommandHandler(AppDbContext dbContext) 
+internal class UpdateTaskTypeCommandHandler(AppDbContext dbContext) 
     : IRequestHandler<UpdateTaskTypeCommand, UpdateTaskTypeResponse>
 {
     public async Task<UpdateTaskTypeResponse> Handle(UpdateTaskTypeCommand request, CancellationToken cancellationToken)
@@ -17,7 +18,7 @@ public class UpdateTaskTypeCommandHandler(AppDbContext dbContext)
 
         if (taskType == null)
         {
-            throw new InvalidOperationException($"Task type with ID {request.Id} not found.");
+            throw new TaskTypeNotFoundException(request.Id);
         }
 
         // Check if name is being changed and if it would conflict
@@ -28,7 +29,7 @@ public class UpdateTaskTypeCommandHandler(AppDbContext dbContext)
 
             if (nameExists)
             {
-                throw new InvalidOperationException($"Task type with name '{request.Name}' already exists.");
+                throw new TaskTypeAlreadyExistsException(request.Name!, true);
             }
 
             taskType.Name = request.Name;

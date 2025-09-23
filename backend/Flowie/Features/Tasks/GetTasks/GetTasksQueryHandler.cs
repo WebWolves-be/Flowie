@@ -1,11 +1,12 @@
 using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Enums;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.GetTasks;
 
-public class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetTasksQuery, IEnumerable<TaskResponse>>
+internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetTasksQuery, IEnumerable<TaskResponse>>
 {
     public async Task<IEnumerable<TaskResponse>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
@@ -17,7 +18,7 @@ public class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetT
 
         if (!projectExists)
         {
-            throw new InvalidOperationException($"Project with ID {request.ProjectId} not found.");
+            throw new ProjectNotFoundException(request.ProjectId);
         }
 
         // Check if parent task exists if specified
@@ -28,7 +29,7 @@ public class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetT
 
             if (!parentTaskExists)
             {
-                throw new InvalidOperationException($"Parent task with ID {request.ParentTaskId} not found in project with ID {request.ProjectId}.");
+                throw new ParentTaskNotFoundException(request.ParentTaskId.Value, request.ProjectId);
             }
         }
 

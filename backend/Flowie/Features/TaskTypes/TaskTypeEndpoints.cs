@@ -27,15 +27,8 @@ internal static class TaskTypeEndpoints
         // Create task type
         taskTypes.MapPost("/", async (CreateTaskTypeCommand command, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                var result = await mediator.Send(command, cancellationToken);
-                return Results.Created($"/api/task-types/{result.Id}", result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var result = await mediator.Send(command, cancellationToken);
+            return Results.Created($"/api/task-types/{result.Id}", result);
         })
         .WithName("CreateTaskType")
         .WithDescription("Create a new task type");
@@ -46,15 +39,8 @@ internal static class TaskTypeEndpoints
             // Set the ID from the route parameter
             command = command with { Id = id };
             
-            try
-            {
-                var result = await mediator.Send(command, cancellationToken);
-                return Results.Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var result = await mediator.Send(command, cancellationToken);
+            return Results.Ok(result);
         })
         .WithName("UpdateTaskType")
         .WithDescription("Update a task type");
@@ -64,15 +50,8 @@ internal static class TaskTypeEndpoints
         {
             var command = new DeleteTaskTypeCommand(id);
             
-            try
-            {
-                var result = await mediator.Send(command, cancellationToken);
-                return Results.Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var result = await mediator.Send(command, cancellationToken);
+            return Results.Ok(result);
         })
         .WithName("DeleteTaskType")
         .WithDescription("Delete a task type");

@@ -2,11 +2,12 @@ using MediatR;
 
 namespace Flowie.Features.Tasks.UpdateTask;
 
-public record UpdateTaskCommand : IRequest<bool>
-{
-    public string? Title { get; init; }
-    public string? Description { get; init; }
-    public Guid? TypeId { get; init; }
-    public DateOnly? Deadline { get; init; }
-    public Guid? AssigneeId { get; init; }
-}
+public record UpdateTaskCommand(
+    int ProjectId,
+    int TaskId,
+    string? Title = null,
+    string? Description = null,
+    int? TypeId = null,
+    DateOnly? Deadline = null,
+    int? AssigneeId = null
+) : IRequest<bool>;

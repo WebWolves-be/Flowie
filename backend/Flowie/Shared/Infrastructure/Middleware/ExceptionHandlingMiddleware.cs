@@ -1,4 +1,5 @@
 using FluentValidation;
+using Flowie.Shared.Domain.Exceptions;
 
 namespace Flowie.Infrastructure.Middleware;
 
@@ -38,6 +39,12 @@ internal class ExceptionHandlingMiddleware
             _logError(_logger, ex);
             await HandleExceptionAsync(httpContext, ex);
         }
+        catch (DomainException ex)
+        {
+            // Log and handle domain-specific exception
+            _logError(_logger, ex);
+            await HandleExceptionAsync(httpContext, ex);
+        }
         catch (Exception ex) when (LogAndHandleException(ex))
         {
             // This code is never reached because LogAndHandleException always returns false
@@ -62,6 +69,17 @@ internal class ExceptionHandlingMiddleware
         {
             ValidationException _ => StatusCodes.Status400BadRequest,
             KeyNotFoundException _ => StatusCodes.Status404NotFound,
+            TaskNotFoundException _ => StatusCodes.Status404NotFound,
+            ProjectNotFoundException _ => StatusCodes.Status404NotFound,
+            TaskTypeNotFoundException _ => StatusCodes.Status404NotFound,
+            EmployeeNotFoundException _ => StatusCodes.Status404NotFound,
+            ParentTaskNotFoundException _ => StatusCodes.Status404NotFound,
+            TaskWithSubtasksException _ => StatusCodes.Status400BadRequest,
+            TaskTypeInUseException _ => StatusCodes.Status400BadRequest,
+            TaskTypeAlreadyExistsException _ => StatusCodes.Status400BadRequest,
+            ParentTaskProjectMismatchException _ => StatusCodes.Status400BadRequest,
+            ConfigurationException _ => StatusCodes.Status500InternalServerError,
+            DomainException _ => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };
         

@@ -3,8 +3,4 @@ using MediatR;
 
 namespace Flowie.Features.Tasks.GetTaskById;
 
-public record GetTaskByIdQuery : IRequest<TaskDto>
-{
-    public Guid ProjectId { get; init; }
-    public Guid TaskId { get; init; }
-}
+public record GetTaskByIdQuery(int ProjectId, int TaskId) : IRequest<TaskDto>;

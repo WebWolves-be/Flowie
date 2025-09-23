@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Flowie.Shared.Domain.Exceptions;
 using Flowie.Shared.Infrastructure.Database.Interceptors;
 
 namespace Flowie.Infrastructure.Database;
@@ -29,7 +30,7 @@ internal static class DatabaseExtensions
             else
             {
                 options.UseSqlServer(connectionString ?? 
-                    throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
+                    throw new ConfigurationException("DefaultConnection", "Connection string 'DefaultConnection' not found."));
             }
         });
 

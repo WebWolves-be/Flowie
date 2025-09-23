@@ -1,4 +1,5 @@
 using Flowie.Infrastructure.Database;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,7 @@ internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandle
 
         if (project == null)
         {
-            throw new InvalidOperationException($"Project with ID {request.Id} not found.");
+            throw new ProjectNotFoundException(request.Id);
         }
 
         return new ProjectDetailResponse(

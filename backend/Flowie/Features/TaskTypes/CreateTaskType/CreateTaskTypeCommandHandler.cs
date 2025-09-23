@@ -1,11 +1,12 @@
 using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Entities;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.TaskTypes.CreateTaskType;
 
-public class CreateTaskTypeCommandHandler(AppDbContext dbContext) 
+internal class CreateTaskTypeCommandHandler(AppDbContext dbContext) 
     : IRequestHandler<CreateTaskTypeCommand, CreateTaskTypeResponse>
 {
     public async Task<CreateTaskTypeResponse> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)
@@ -18,7 +19,7 @@ public class CreateTaskTypeCommandHandler(AppDbContext dbContext)
 
         if (exists)
         {
-            throw new InvalidOperationException($"Task type with name '{request.Name}' already exists.");
+            throw new TaskTypeAlreadyExistsException(request.Name, true);
         }
 
         var taskType = new TaskType

@@ -1,5 +1,6 @@
 using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Enums;
+using Flowie.Shared.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Task = Flowie.Shared.Domain.Entities.Task;
@@ -21,7 +22,7 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
             
         if (project == null)
         {
-            throw new InvalidOperationException($"Project with ID {projectId} not found.");
+            throw new ProjectNotFoundException(projectId);
         }
 
         // Verify parent task exists if it's specified
@@ -32,13 +33,13 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
                 
             if (parentTask == null)
             {
-                throw new InvalidOperationException($"Parent task with ID {parentTaskId} not found.");
+                throw new ParentTaskNotFoundException(parentTaskId.Value);
             }
             
             // Ensure parent task belongs to the same project
             if (parentTask.ProjectId != projectId)
             {
-                throw new InvalidOperationException($"Parent task does not belong to project with ID {projectId}.");
+                throw new ParentTaskProjectMismatchException(parentTaskId.Value, projectId);
             }
         }
 
