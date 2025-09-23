@@ -27,7 +27,7 @@ public class Subtasks_PostTests : IClassFixture<WebApplicationFactory<Program>>
             Title = "New Subtask",
             Description = "Subtask description",
             TypeId = typeId,
-            Deadline = DateOnly.FromDateTime(DateTime.Now.AddDays(7))
+            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7))
         };
 
         // Act

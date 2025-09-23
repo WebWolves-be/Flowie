@@ -10,7 +10,7 @@ public record TaskDto(
     string? Description,
     int TypeId,
     string TypeName,
-    DateOnly? Deadline,
+    DateOnly? DueDate,
     WorkflowTaskStatus Status,
     int? AssigneeId,
     string? AssigneeName,

@@ -34,7 +34,7 @@ internal class GetTaskByIdQueryHandler(AppDbContext dbContext) : IRequestHandler
             Description: task.Description,
             TypeId: task.TypeId,
             TypeName: task.TaskType.Name,
-            Deadline: task.DueDate,
+            DueDate: task.DueDate,
             Status: task.Status,
             AssigneeId: task.AssigneeId,
             AssigneeName: task.Assignee?.Name,

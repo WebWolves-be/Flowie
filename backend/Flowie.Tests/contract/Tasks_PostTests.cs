@@ -27,7 +27,7 @@ public class Tasks_PostTests : IClassFixture<WebApplicationFactory<Program>>
             Title = "New Task",
             Description = "Task description",
             TypeId = typeId,
-            Deadline = DateOnly.FromDateTime(DateTime.Now.AddDays(7))
+            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7))
         };
 
         // Act

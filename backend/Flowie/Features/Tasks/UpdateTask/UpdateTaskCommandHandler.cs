@@ -46,9 +46,9 @@ internal class UpdateTaskCommandHandler(AppDbContext dbContext) : IRequestHandle
             task.TypeId = request.TypeId.Value;
         }
 
-        if (request.Deadline.HasValue)
+        if (request.DueDate.HasValue)
         {
-            task.DueDate = request.Deadline;
+            task.DueDate = request.DueDate;
         }
 
         if (request.AssigneeId.HasValue)

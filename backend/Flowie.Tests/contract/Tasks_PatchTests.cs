@@ -27,7 +27,7 @@ public class Tasks_PatchTests : IClassFixture<WebApplicationFactory<Program>>
             Title = "Updated Task Title",
             Description = "Updated task description",
             TypeId = typeId,
-            Deadline = DateOnly.FromDateTime(DateTime.Now.AddDays(14))
+            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(14))
         };
 
         // Act

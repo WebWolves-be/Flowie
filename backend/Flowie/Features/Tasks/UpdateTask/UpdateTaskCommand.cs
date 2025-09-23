@@ -8,6 +8,6 @@ public record UpdateTaskCommand(
     string? Title = null,
     string? Description = null,
     int? TypeId = null,
-    DateOnly? Deadline = null,
+    DateOnly? DueDate = null,
     int? AssigneeId = null
 ) : IRequest<bool>;
