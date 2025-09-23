@@ -1,0 +1,25 @@
+using FluentValidation;
+
+namespace Flowie.Features.Projects.UpdateProject;
+
+internal class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCommand>
+{
+    public UpdateProjectCommandValidator()
+    {
+        RuleFor(x => x.Title)
+            .MinimumLength(3)
+            .MaximumLength(200)
+            .When(x => !string.IsNullOrEmpty(x.Title))
+            .WithMessage("Title must be between 3 and 200 characters");
+
+        RuleFor(x => x.Description)
+            .MaximumLength(4000)
+            .When(x => !string.IsNullOrEmpty(x.Description))
+            .WithMessage("Description cannot exceed 4000 characters");
+
+        RuleFor(x => x.Company)
+            .IsInEnum()
+            .When(x => x.Company.HasValue)
+            .WithMessage("Company must be Immoseed or NovaraRealEstate");
+    }
+}

@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: Flowie Project Task Workflow API
+  version: 0.1.0
+servers:
+  - url: /api
+paths:
+  /projects:
+    get:
+      summary: List projects
+      parameters:
+        - in: query
+          name: company
+          schema:
+            type: string
+            enum: [Immoseed, NovaraRealEstate]
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+  /projects/{projectId}:
+    parameters:
+      - in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get project by id
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+    patch:
+      summary: Update project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Archive project
+      responses:
+        '204': { description: No Content }
+
+  /projects/{projectId}/tasks:
+    get:
+      summary: List tasks for a project
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201': { description: Created }
+
+  /tasks/{taskId}:
+    parameters:
+      - in: path
+        name: taskId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get task by id
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+    patch:
+      summary: Update task (title, description, type, deadline, assignee)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Archive task
+      responses:
+        '204': { description: No Content }
+
+  /tasks/{taskId}/status:
+    post:
+      summary: Change task status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeTaskStatusRequest'
+      responses:
+        '200': { description: Updated }
+
+  /tasks/{taskId}/subtasks:
+    get:
+      summary: List subtasks
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create subtask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201': { description: Created }
+
+  /task-types:
+    get:
+      summary: List task types
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create task type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskTypeRequest'
+      responses:
+        '201': { description: Created }
+
+  /task-types/{typeId}:
+    parameters:
+      - in: path
+        name: typeId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Update task type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskTypeRequest'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Deactivate task type
+      responses:
+        '204': { description: No Content }
+
+components:
+  schemas:
+    CreateProjectRequest:
+      type: object
+      required: [title, company]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description: { type: string, maxLength: 4000 }
+        company: { type: string, enum: [Immoseed, NovaraRealEstate] }
+    UpdateProjectRequest:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        company: { type: string, enum: [Immoseed, NovaraRealEstate] }
+    CreateTaskRequest:
+      type: object
+      required: [title, typeId]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description: { type: string, maxLength: 4000 }
+        typeId: { type: string, format: uuid }
+        deadline: { type: string, format: date }
+        assigneeId: { type: string, format: uuid }
+        parentTaskId: { type: string, format: uuid }
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        typeId: { type: string, format: uuid }
+        deadline: { type: string, format: date }
+        assigneeId: { type: string, format: uuid }
+    ChangeTaskStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [Pending, Ongoing, Done] }
+    CreateTaskTypeRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 100 }
+    UpdateTaskTypeRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 100 }

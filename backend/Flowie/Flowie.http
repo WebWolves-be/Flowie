@@ -1,0 +1,6 @@
+@Flowie_HostAddress = http://localhost:5229
+
+GET {{Flowie_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
