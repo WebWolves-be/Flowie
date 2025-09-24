@@ -32,10 +32,18 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Explicitly ignore obj directory content
+**/obj/**
+**/bin/**
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
+
+# EF Core auto-generated migrations
+**/Migrations/**/*.Designer.cs
+**/Migrations/**/obj/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
@@ -265,6 +273,13 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 
 # Business Intelligence projects
 *.rdl.data
