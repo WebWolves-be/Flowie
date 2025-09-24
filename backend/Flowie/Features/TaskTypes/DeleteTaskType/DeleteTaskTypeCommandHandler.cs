@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowie.Features.TaskTypes.DeleteTaskType;
 
 internal class DeleteTaskTypeCommandHandler(AppDbContext dbContext) 
-    : IRequestHandler<DeleteTaskTypeCommand, DeleteTaskTypeResponse>
+    : IRequestHandler<DeleteTaskTypeCommand, DeleteTaskTypeCommandResult>
 {
-    public async Task<DeleteTaskTypeResponse> Handle(DeleteTaskTypeCommand request, CancellationToken cancellationToken)
+    public async Task<DeleteTaskTypeCommandResult> Handle(DeleteTaskTypeCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -20,6 +20,6 @@ internal class DeleteTaskTypeCommandHandler(AppDbContext dbContext)
         dbContext.TaskTypes.Remove(taskType);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new DeleteTaskTypeResponse(true);
+        return new DeleteTaskTypeCommandResult(true);
     }
 }

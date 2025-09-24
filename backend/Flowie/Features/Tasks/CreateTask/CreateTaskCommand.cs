@@ -9,4 +9,4 @@ public record CreateTaskCommand(
     string? Description = null,
     DateOnly? DueDate = null,
     int? AssigneeId = null,
-    int? ParentTaskId = null) : IRequest<CreateTaskResponse>;
+    int? ParentTaskId = null) : IRequest<CreateTaskCommandResult>;

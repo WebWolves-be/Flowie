@@ -2,7 +2,7 @@ using Flowie.Shared.Domain.Enums;
 
 namespace Flowie.Features.Tasks.GetTasks;
 
-public record TaskResponse(
+public record GetTasksQueryResult(
     int Id,
     int ProjectId,
     int? ParentTaskId,

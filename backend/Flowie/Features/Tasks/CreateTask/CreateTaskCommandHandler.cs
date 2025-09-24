@@ -5,9 +5,9 @@ using Task = Flowie.Shared.Domain.Entities.Task;
 
 namespace Flowie.Features.Tasks.CreateTask;
 
-internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, CreateTaskResponse>
+internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, CreateTaskCommandResult>
 {
-    public async Task<CreateTaskResponse> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<CreateTaskCommandResult> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         
@@ -29,6 +29,6 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
         dbContext.Tasks.Add(task);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CreateTaskResponse(task.Id);
+        return new CreateTaskCommandResult(task.Id);
     }
 }

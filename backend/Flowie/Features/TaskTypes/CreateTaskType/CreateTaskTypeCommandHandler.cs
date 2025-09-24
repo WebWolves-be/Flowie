@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowie.Features.TaskTypes.CreateTaskType;
 
 internal class CreateTaskTypeCommandHandler(AppDbContext dbContext) 
-    : IRequestHandler<CreateTaskTypeCommand, CreateTaskTypeResponse>
+    : IRequestHandler<CreateTaskTypeCommand, CreateTaskTypeCommandResult>
 {
-    public async Task<CreateTaskTypeResponse> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)
+    public async Task<CreateTaskTypeCommandResult> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -30,6 +30,6 @@ internal class CreateTaskTypeCommandHandler(AppDbContext dbContext)
         dbContext.TaskTypes.Add(taskType);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CreateTaskTypeResponse(taskType.Id);
+        return new CreateTaskTypeCommandResult(taskType.Id);
     }
 }

@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowie.Features.TaskTypes.GetTaskTypes;
 
 internal class GetTaskTypesQueryHandler(AppDbContext dbContext) 
-    : IRequestHandler<GetTaskTypesQuery, IEnumerable<TaskTypeResponse>>
+    : IRequestHandler<GetTaskTypesQuery, IEnumerable<GetTaskTypesQueryResult>>
 {
-    public async Task<IEnumerable<TaskTypeResponse>> Handle(GetTaskTypesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<GetTaskTypesQueryResult>> Handle(GetTaskTypesQuery request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -15,7 +15,7 @@ internal class GetTaskTypesQueryHandler(AppDbContext dbContext)
             .OrderBy(t => t.Name)
             .ToListAsync(cancellationToken);
             
-        return taskTypes.Select(t => new TaskTypeResponse(
+        return taskTypes.Select(t => new GetTaskTypesQueryResult(
             Id: t.Id, 
             Name: t.Name
         ));
