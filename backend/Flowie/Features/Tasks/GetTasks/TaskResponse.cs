@@ -15,8 +15,8 @@ public record TaskResponse(
     string StatusName,
     int? AssigneeId,
     string? AssigneeName,
-    DateTime CreatedAt,
-    DateTime UpdatedAt,
-    DateTime? CompletedAt,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt,
+    DateTimeOffset? CompletedAt,
     int SubtaskCount,
     int CompletedSubtaskCount);

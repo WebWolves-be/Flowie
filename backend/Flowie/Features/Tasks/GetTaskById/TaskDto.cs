@@ -14,7 +14,7 @@ public record TaskDto(
     WorkflowTaskStatus Status,
     int? AssigneeId,
     string? AssigneeName,
-    DateTime CreatedAt,
-    DateTime UpdatedAt,
-    DateTime? CompletedAt,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt,
+    DateTimeOffset? CompletedAt,
     int SubtaskCount);

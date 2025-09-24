@@ -17,6 +17,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<IDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
+// Add TimeProvider
+builder.Services.AddSingleton(TimeProvider.System);
+
 // Add MediatR
 builder.Services.AddMediatR(typeof(Program).Assembly);
 

@@ -16,7 +16,7 @@ internal class GetTaskByIdQueryHandler(AppDbContext dbContext) : IRequestHandler
         // Get the task with all related data
         var task = await dbContext.Tasks
             .Include(t => t.TaskType)
-            .Include(t => t.Assignee)
+            .Include(t => t.Employee)
             .Include(t => t.Subtasks)
             .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
 
@@ -36,8 +36,8 @@ internal class GetTaskByIdQueryHandler(AppDbContext dbContext) : IRequestHandler
             TypeName: task.TaskType.Name,
             DueDate: task.DueDate,
             Status: task.Status,
-            AssigneeId: task.AssigneeId,
-            AssigneeName: task.Assignee?.Name,
+            AssigneeId: task.EmployeeId,
+            AssigneeName: task.Employee?.Name,
             CreatedAt: task.CreatedAt,
             UpdatedAt: task.UpdatedAt,
             CompletedAt: task.CompletedAt,

@@ -41,9 +41,9 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Task>
             .HasForeignKey(t => t.TypeId)
             .OnDelete(DeleteBehavior.Restrict);
             
-        builder.HasOne(t => t.Assignee)
+        builder.HasOne(t => t.Employee)
             .WithMany(e => e.AssignedTasks)
-            .HasForeignKey(t => t.AssigneeId)
+            .HasForeignKey(t => t.EmployeeId)
             .OnDelete(DeleteBehavior.SetNull)
             .IsRequired(false);
     }

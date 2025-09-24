@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Flowie.Shared.Infrastructure.Database.Interceptors;
 
-public class AuditableEntityInterceptor : SaveChangesInterceptor
+public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -16,7 +16,7 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var now = DateTime.UtcNow;
+        var now = timeProvider.GetUtcNow();
         var entries = eventData.Context.ChangeTracker.Entries<IAuditableEntity>();
 
         foreach (var entry in entries)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.UpdateTaskStatus;
 
-internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext) : IRequestHandler<UpdateTaskStatusCommand, bool>
+internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext, TimeProvider timeProvider) : IRequestHandler<UpdateTaskStatusCommand, bool>
 {
 
     public async Task<bool> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
@@ -28,7 +28,7 @@ internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext) : IRequest
         // If the task is being completed, set the completed date
         if (request.Status == WorkflowTaskStatus.Done || request.Status == WorkflowTaskStatus.Completed)
         {
-            task.CompletedAt = DateTime.UtcNow;
+            task.CompletedAt = timeProvider.GetUtcNow();
         }
         else
         {
@@ -36,7 +36,7 @@ internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext) : IRequest
         }
 
         // Update the timestamp
-        task.UpdatedAt = DateTime.UtcNow;
+        task.UpdatedAt = timeProvider.GetUtcNow();
 
         // Save changes
         await dbContext.SaveChangesAsync(cancellationToken);

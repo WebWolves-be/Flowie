@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.UpdateTask;
 
-internal class UpdateTaskCommandHandler(AppDbContext dbContext) : IRequestHandler<UpdateTaskCommand, bool>
+internal class UpdateTaskCommandHandler(AppDbContext dbContext, TimeProvider timeProvider) : IRequestHandler<UpdateTaskCommand, bool>
 {
     public async Task<bool> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
     {
@@ -48,17 +48,17 @@ internal class UpdateTaskCommandHandler(AppDbContext dbContext) : IRequestHandle
             // If AssigneeId is 0, we want to clear the assignee
             if (request.AssigneeId.Value == 0)
             {
-                task.AssigneeId = null;
+                task.EmployeeId = null;
             }
             else
             {
                 // Validation happens in validator
-                task.AssigneeId = request.AssigneeId.Value;
+                task.EmployeeId = request.AssigneeId.Value;
             }
         }
 
         // Update the timestamp
-        task.UpdatedAt = DateTime.UtcNow;
+        task.UpdatedAt = timeProvider.GetUtcNow();
 
         // Save changes
         await dbContext.SaveChangesAsync(cancellationToken);

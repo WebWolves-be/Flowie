@@ -23,7 +23,7 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
             TypeId = request.TypeId,
             DueDate = request.DueDate,
             Status = WorkflowTaskStatus.Pending,
-            AssigneeId = request.AssigneeId
+            EmployeeId = request.AssigneeId
         };
 
         dbContext.Tasks.Add(task);

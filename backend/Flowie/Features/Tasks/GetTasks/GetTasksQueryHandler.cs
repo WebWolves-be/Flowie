@@ -36,7 +36,7 @@ internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<Ge
         // Query tasks based on project ID and optional parent task ID
         var query = dbContext.Tasks
             .Include(t => t.TaskType)
-            .Include(t => t.Assignee)
+            .Include(t => t.Employee)
             .Include(t => t.Subtasks)
             .Where(t => t.ProjectId == request.ProjectId);
 
@@ -66,8 +66,8 @@ internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<Ge
             DueDate: t.DueDate,
             Status: t.Status,
             StatusName: t.Status.ToString(),
-            AssigneeId: t.AssigneeId,
-            AssigneeName: t.Assignee?.Name,
+            AssigneeId: t.EmployeeId,
+            AssigneeName: t.Employee?.Name,
             CreatedAt: t.CreatedAt,
             UpdatedAt: t.UpdatedAt,
             CompletedAt: t.CompletedAt,
