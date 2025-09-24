@@ -1,4 +1,4 @@
-using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Exceptions;
 using FluentValidation;
 
 namespace Flowie.Shared.Infrastructure.Middleware;

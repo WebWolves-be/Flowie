@@ -1,4 +1,4 @@
-namespace Flowie.Shared.Domain.Exceptions;
+namespace Flowie.Shared.Infrastructure.Exceptions;
 
 /// <summary>
 /// Base exception for all domain-specific exceptions.
