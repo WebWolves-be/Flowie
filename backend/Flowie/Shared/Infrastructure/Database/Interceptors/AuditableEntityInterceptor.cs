@@ -24,7 +24,6 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.CreatedAt = now;
-                entry.Entity.UpdatedAt = now;
             }
             else if (entry.State == EntityState.Modified)
             {
