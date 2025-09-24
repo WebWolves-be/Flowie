@@ -1,6 +1,6 @@
-using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Enums;
 using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +19,7 @@ internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext) : IRequest
 
         if (task == null)
         {
-            throw new TaskNotFoundException(request.TaskId, request.ProjectId);
+            throw new EntityNotFoundException("Task", $"{request.TaskId} in project {request.ProjectId}");
         }
 
                 // Update the task status

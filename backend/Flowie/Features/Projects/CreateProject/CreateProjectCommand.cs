@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Flowie.Features.Projects.CreateProject;
 
-internal record CreateProjectCommand(string Title, string? Description, Company Company) : IRequest<int>;
+internal record CreateProjectCommand(string Title, string? Description, Company Company) : IRequest<Unit>;

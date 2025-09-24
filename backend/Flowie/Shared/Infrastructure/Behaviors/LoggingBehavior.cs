@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using MediatR;
 
-namespace Flowie.Infrastructure.Behaviors;
+namespace Flowie.Shared.Infrastructure.Behaviors;
 
 internal class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

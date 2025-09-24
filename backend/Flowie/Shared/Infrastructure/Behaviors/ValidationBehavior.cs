@@ -1,7 +1,7 @@
 using FluentValidation;
 using MediatR;
 
-namespace Flowie.Infrastructure.Behaviors;
+namespace Flowie.Shared.Infrastructure.Behaviors;
 
 internal class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

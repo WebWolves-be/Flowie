@@ -1,6 +1,6 @@
-using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Enums;
 using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +18,7 @@ internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<Ge
 
         if (!projectExists)
         {
-            throw new ProjectNotFoundException(request.ProjectId);
+            throw new EntityNotFoundException("Project", request.ProjectId);
         }
 
         // Check if parent task exists if specified
@@ -29,7 +29,7 @@ internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<Ge
 
             if (!parentTaskExists)
             {
-                throw new ParentTaskNotFoundException(request.ParentTaskId.Value, request.ProjectId);
+                throw new EntityNotFoundException("Parent Task", $"{request.ParentTaskId.Value} in project {request.ProjectId}");
             }
         }
 

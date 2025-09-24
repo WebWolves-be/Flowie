@@ -1,6 +1,6 @@
-using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Entities;
 using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

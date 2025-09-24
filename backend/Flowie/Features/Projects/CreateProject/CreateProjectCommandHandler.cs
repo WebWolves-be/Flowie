@@ -1,25 +1,22 @@
-using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Entities;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 
 namespace Flowie.Features.Projects.CreateProject;
 
-internal class CreateProjectCommandHandler(IDbContext dbContext) : IRequestHandler<CreateProjectCommand, int>
+internal class CreateProjectCommandHandler(IDbContext dbContext) : IRequestHandler<CreateProjectCommand, Unit>
 {
-    public async Task<int> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        
-        var project = new Project
+        dbContext.Projects.Add(new Project
         {
             Title = request.Title,
             Description = request.Description,
             Company = request.Company
-        };
-
-        dbContext.Projects.Add(project);
+        });
+        
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return project.Id;
+        return Unit.Value;
     }
 }

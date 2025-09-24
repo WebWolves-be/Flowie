@@ -1,9 +1,9 @@
+using System.Reflection;
 using Flowie.Shared.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using Task = Flowie.Shared.Domain.Entities.Task;
 
-namespace Flowie.Infrastructure.Database;
+namespace Flowie.Shared.Infrastructure.Database;
 
 public class AppDbContext : DbContext, IDbContext
 {

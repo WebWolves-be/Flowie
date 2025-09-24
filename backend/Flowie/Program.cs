@@ -1,9 +1,9 @@
 using Flowie.Features.Projects;
 using Flowie.Features.Tasks;
 using Flowie.Features.TaskTypes;
-using Flowie.Infrastructure.Behaviors;
-using Flowie.Infrastructure.Database;
-using Flowie.Infrastructure.Middleware;
+using Flowie.Shared.Infrastructure.Behaviors;
+using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
 

@@ -11,6 +11,9 @@ public abstract class BaseEntityConfiguration<TEntity> : IEntityTypeConfiguratio
     {
         builder.HasKey(e => e.Id);
         
+        builder.Property(e => e.Id)
+            .UseIdentityColumn();
+        
         builder.Property(e => e.CreatedAt)
             .IsRequired();
             

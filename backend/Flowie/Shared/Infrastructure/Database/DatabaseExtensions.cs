@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using Flowie.Shared.Domain.Exceptions;
 using Flowie.Shared.Infrastructure.Database.Interceptors;
+using Microsoft.EntityFrameworkCore;
 
-namespace Flowie.Infrastructure.Database;
+namespace Flowie.Shared.Infrastructure.Database;
 
 internal static class DatabaseExtensions
 {

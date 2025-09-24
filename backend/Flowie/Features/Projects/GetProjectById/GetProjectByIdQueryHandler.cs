@@ -1,26 +1,27 @@
-using Flowie.Infrastructure.Database;
+using Flowie.Shared.Domain.Enums;
 using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Projects.GetProjectById;
 
-internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandler<GetProjectByIdQuery, ProjectDetailResponse>
+internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandler<GetProjectByIdQuery, GetProjectByIdQueryResult>
 {
-    public async Task<ProjectDetailResponse> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
+    public async Task<GetProjectByIdQueryResult> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        
-        var project = await dbContext.Projects
+        var project = await dbContext
+            .Projects
+            .AsNoTracking()
             .Include(p => p.Tasks)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
-        if (project == null)
+        if (project is null)
         {
-            throw new ProjectNotFoundException(request.Id);
+            throw new EntityNotFoundException("Project", request.Id);
         }
 
-        return new ProjectDetailResponse(
+        return new GetProjectByIdQueryResult(
             project.Id,
             project.Title,
             project.Description,
@@ -29,7 +30,7 @@ internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandle
             project.UpdatedAt,
             project.ArchivedAt,
             project.Tasks.Count,
-            project.Tasks.Count(t => t.Status == Shared.Domain.Enums.WorkflowTaskStatus.Done)
+            project.Tasks.Count(t => t.Status == WorkflowTaskStatus.Done)
         );
     }
 }

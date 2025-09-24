@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Flowie.Infrastructure.Database;
+namespace Flowie.Shared.Infrastructure.Database;
 
 internal class AppDbContextDesignTimeFactory : IDesignTimeDbContextFactory<AppDbContext>
 {

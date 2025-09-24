@@ -1,5 +1,4 @@
-using Flowie.Infrastructure.Database;
-using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,23 +11,10 @@ internal class DeleteTaskTypeCommandHandler(AppDbContext dbContext)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // Check if there are any tasks using this task type
-        var hasRelatedTasks = await dbContext.Tasks
-            .AnyAsync(t => t.TypeId == request.Id, cancellationToken);
-
-        if (hasRelatedTasks)
-        {
-            throw new TaskTypeInUseException(request.Id);
-        }
-
         // Get the task type to delete
+        // We can safely use Single here because validation already happened via the validator
         var taskType = await dbContext.TaskTypes
-            .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
-
-        if (taskType == null)
-        {
-            throw new TaskTypeNotFoundException(request.Id);
-        }
+            .SingleAsync(t => t.Id == request.Id, cancellationToken);
 
         // Delete the task type
         dbContext.TaskTypes.Remove(taskType);

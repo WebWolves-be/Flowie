@@ -20,4 +20,3 @@ public record TaskResponse(
     DateTime? CompletedAt,
     int SubtaskCount,
     int CompletedSubtaskCount);
-}

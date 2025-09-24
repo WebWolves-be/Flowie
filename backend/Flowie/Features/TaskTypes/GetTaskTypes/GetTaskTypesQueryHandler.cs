@@ -1,4 +1,4 @@
-using Flowie.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

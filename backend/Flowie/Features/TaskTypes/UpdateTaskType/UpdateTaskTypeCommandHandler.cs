@@ -1,5 +1,5 @@
-using Flowie.Infrastructure.Database;
 using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,13 +18,14 @@ internal class UpdateTaskTypeCommandHandler(AppDbContext dbContext)
 
         if (taskType == null)
         {
-            throw new TaskTypeNotFoundException(request.Id);
+            throw new EntityNotFoundException("TaskType", request.Id);
         }
 
         // Check if name is being changed and if it would conflict
         if (request.Name != null && request.Name != taskType.Name)
         {
-            var nameExists = await dbContext.TaskTypes
+            var nameExists = await dbContext
+                .TaskTypes
                 .AnyAsync(t => t.Name == request.Name && t.Id != request.Id, cancellationToken);
 
             if (nameExists)

@@ -1,6 +1,6 @@
 namespace Flowie.Features.Projects.GetProjects;
 
-internal record ProjectResponse(
+internal record GetProjectsQueryResult(
     int Id,
     string Title, 
     string? Description,

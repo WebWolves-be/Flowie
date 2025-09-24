@@ -7,4 +7,4 @@ internal record UpdateProjectCommand(
     int Id, 
     string? Title = null, 
     string? Description = null, 
-    Company? Company = null) : IRequest<UpdateProjectResponse>;
+    Company? Company = null) : IRequest<Unit>;
