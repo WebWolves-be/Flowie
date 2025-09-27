@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{B849
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{C351E8D6-5A8C-4CF1-9C2B-C6712A6943F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowie", "backend\Flowie\Flowie.csproj", "{40869DA0-14AD-49C7-9320-292E3712BE53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowie.Api", "backend\Flowie.Api\Flowie.Api.csproj", "{40869DA0-14AD-49C7-9320-292E3712BE53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
