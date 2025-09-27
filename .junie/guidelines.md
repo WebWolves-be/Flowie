@@ -7,10 +7,10 @@ This document captures project-specific knowledge to speed up development. It in
 1) Build and configuration
 
 Backend API project
-- Path: backend\Flowie\Flowie.csproj
+- Path: backend\Flowie.Api\Flowie.Api.csproj
 - Target: net8.0; uses Minimal APIs (Program.cs) with MediatR and FluentValidation.
-- Build: dotnet build backend\Flowie\Flowie.csproj -c Debug
-- Run (HTTPS enabled by default): dotnet run --project backend\Flowie\Flowie.csproj -c Debug
+- Build: dotnet build backend\Flowie.Api\Flowie.Api.csproj -c Debug
+- Run (HTTPS enabled by default): dotnet run --project backend\Flowie.Api\Flowie.Api.csproj -c Debug
 - Swagger is enabled in Development environment only. Ensure ASPNETCORE_ENVIRONMENT=Development for interactive docs.
 
 Database configuration
@@ -33,14 +33,14 @@ Global analyzers
 2) Testing
 
 Projects and frameworks
-- Test project path: backend\Flowie.Tests\Flowie.Tests.csproj
+- As of 2025-09-27, no test project is present. Recommended path when added: backend\Flowie.Tests\Flowie.Tests.csproj
 - Frameworks and libs: xUnit, FluentAssertions, Moq, EFCore InMemory, Microsoft.NET.Test.Sdk.
 - Coverage: coverlet.msbuild is enabled with a hard threshold.
   - Enforced in csproj: <ThresholdType>line</ThresholdType>, <ThresholdStat>total</ThresholdStat>, <Threshold>80</Threshold>
   - Output: backend\Flowie.Tests\TestResults\coverage.cobertura.xml (by default from csproj)
 
 Running tests
-- Run only the test project (recommended; the .sln currently does not include the test project):
+- When a test project exists, run only the test project (recommended; the .sln may not include it by default):
   dotnet test backend\Flowie.Tests\Flowie.Tests.csproj -c Debug
 - If you prefer solution-level runs, add the test project to the solution once:
   dotnet sln Flowie.sln add backend\Flowie.Tests\Flowie.Tests.csproj
@@ -105,7 +105,7 @@ Testing tips specific to this codebase
 - When writing contract tests, assert on HTTP codes and DTO shapes; model binding and validators will already be exercised by the Minimal API layer.
 
 Code style and quality gates
-- Tests: TreatWarningsAsErrors=true and EnforceCodeStyleInBuild=true are enabled in Flowie.Tests; keep tests warning-free.
+- Tests: TreatWarningsAsErrors=true and EnforceCodeStyleInBuild=true should be enabled in Flowie.Tests when added; keep tests warning-free.
 - Solution-wide analyzers are configured via Directory.Build.props. If a rule is noisy for a specific file, suppress locally, not globally.
 
 Common pitfalls
@@ -114,8 +114,8 @@ Common pitfalls
 - Coverage threshold failures will fail CI runs; when touching non-tested endpoints or behaviors, budget time to extend tests accordingly.
 
 Appendix: Useful commands
-- Build API: dotnet build backend\Flowie\Flowie.csproj -c Release
-- Run API: dotnet run --project backend\Flowie\Flowie.csproj --launch-profile https (if you have multiple profiles)
+- Build API: dotnet build backend\Flowie.Api\Flowie.Api.csproj -c Release
+- Run API: dotnet run --project backend\Flowie.Api\Flowie.Api.csproj --launch-profile https (if you have multiple profiles)
 - Run tests: dotnet test backend\Flowie.Tests\Flowie.Tests.csproj -c Debug
 - Run with coverage explicitly (optional, already on in csproj): dotnet test backend\Flowie.Tests\Flowie.Tests.csproj -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
 - Add tests to solution: dotnet sln Flowie.sln add backend\Flowie.Tests\Flowie.Tests.csproj
