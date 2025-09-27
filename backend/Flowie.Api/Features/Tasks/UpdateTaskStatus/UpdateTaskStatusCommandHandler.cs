@@ -33,7 +33,7 @@ internal class UpdateTaskStatusCommandHandler(
             task.CompletedAt = null;
         }
 
-        if (request.Status is TaskStatus.Done or TaskStatus.Completed)
+        if (request.Status is TaskStatus.Done)
         {
             task.CompletedAt = timeProvider.GetUtcNow();
         }

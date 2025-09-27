@@ -32,7 +32,7 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
         builder.HasOne(t => t.ParentTask)
             .WithMany(t => t.Subtasks)
             .HasForeignKey(t => t.ParentTaskId)
-            .OnDelete(DeleteBehavior.Cascade)
+            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
             
         builder.HasOne(t => t.TaskType)

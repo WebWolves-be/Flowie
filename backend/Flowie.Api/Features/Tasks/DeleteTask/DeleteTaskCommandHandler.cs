@@ -1,6 +1,7 @@
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Features.Tasks.DeleteTask;
 
@@ -16,9 +17,19 @@ internal class DeleteTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
         {
             throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
+  
+        dbContext.Tasks.RemoveRange(task);
         
-        dbContext.Tasks.Remove(task);
-        
+        var subTasks = await dbContext
+            .Tasks
+            .Where(t => t.ParentTaskId == request.TaskId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var subTask in subTasks)
+        {
+            dbContext.Tasks.Remove(subTask);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

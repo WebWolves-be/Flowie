@@ -41,8 +41,7 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext)
                     UpdatedAt: t.UpdatedAt,
                     CompletedAt: t.CompletedAt,
                     SubtaskCount: t.Subtasks.Count,
-                    CompletedSubtaskCount: t.Subtasks.Count(st =>
-                        st.Status is TaskStatus.Done or TaskStatus.Completed)
+                    CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done)
                 ))
         ];
     }

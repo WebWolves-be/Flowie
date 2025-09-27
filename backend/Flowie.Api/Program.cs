@@ -7,12 +7,27 @@ using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
+using Flowie.Api.Shared.Infrastructure.Database.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.MapType<DateOnly>(() =>
+        new Microsoft.OpenApi.Models.OpenApiSchema
+        {
+            Type = "string",
+            Format = "date"
+        });
+    c.MapType<TimeOnly>(() =>
+        new Microsoft.OpenApi.Models.OpenApiSchema
+        {
+            Type = "string",
+            Format = "time"
+        });
+});
 
 // Add Database
 builder.Services.AddDatabase(builder.Configuration);
@@ -48,5 +63,7 @@ app.UseHttpsRedirection();
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();
+
+await DatabaseSeeder.SeedAsync(app.Services);
 
 app.Run();

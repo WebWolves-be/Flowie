@@ -6,7 +6,5 @@ public enum TaskStatus
         
     Ongoing = 1,
         
-    Done = 2,
-        
-    Completed = 3
+    Done = 2
 }

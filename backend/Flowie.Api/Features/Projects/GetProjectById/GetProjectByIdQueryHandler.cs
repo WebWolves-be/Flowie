@@ -26,8 +26,6 @@ internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandle
             project.Title,
             project.Description,
             project.Company.ToString(),
-            project.CreatedAt,
-            project.UpdatedAt,
             project.Tasks.Count,
             project.Tasks.Count(t => t.Status == TaskStatus.Done)
         );
