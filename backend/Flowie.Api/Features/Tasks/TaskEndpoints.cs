@@ -12,7 +12,7 @@ internal static class TaskEndpoints
     public static void MapTaskEndpoints(this IEndpointRouteBuilder app)
     {
         var tasks = app
-            .MapGroup("/api/projects/{projectId:int}/tasks")
+            .MapGroup("/api/tasks")
             .WithOpenApi()
             .WithTags("Tasks");
 
