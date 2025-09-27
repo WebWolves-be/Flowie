@@ -1,10 +1,12 @@
-namespace Flowie.Shared.Domain.Enums
+namespace Flowie.Shared.Domain.Enums;
+
+public enum TaskStatus
 {
-    public enum WorkflowTaskStatus
-    {
-        Pending,
-        Ongoing,
-        Done,
-        Completed
-    }
+    Pending = 0,
+        
+    Ongoing = 1,
+        
+    Done = 2,
+        
+    Completed = 3
 }

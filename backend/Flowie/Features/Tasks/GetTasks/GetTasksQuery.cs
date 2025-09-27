@@ -2,5 +2,4 @@ using MediatR;
 
 namespace Flowie.Features.Tasks.GetTasks;
 
-public record GetTasksQuery(int ProjectId, int? ParentTaskId = null) 
-    : IRequest<IEnumerable<GetTasksQueryResult>>;
+public record GetTasksQuery(int ProjectId) : IRequest<IEnumerable<GetTasksQueryResult>>;

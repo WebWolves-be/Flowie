@@ -6,14 +6,12 @@ public static class DeleteTaskTypeEndpoint
 {
     public static void Map(IEndpointRouteBuilder taskTypes)
     {
-        taskTypes.MapDelete("/{id:int}", async (int id, IMediator mediator, CancellationToken cancellationToken) =>
-        {
-            var command = new DeleteTaskTypeCommand(id);
-            
-            var result = await mediator.Send(command, cancellationToken);
-            return Results.Ok(result);
-        })
-        .WithName("DeleteTaskType")
-        .WithDescription("Delete a task type");
+        taskTypes.MapDelete("/{taskTypeId:int:required}",
+            async (int taskTypeId, IMediator mediator, CancellationToken cancellationToken) =>
+            {
+                await mediator.Send(new DeleteTaskTypeCommand(taskTypeId), cancellationToken);
+
+                return Results.Ok();
+            });
     }
 }

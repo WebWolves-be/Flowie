@@ -1,25 +1,27 @@
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
+using Flowie.Shared.Infrastructure.Exceptions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.TaskTypes.DeleteTaskType;
 
-internal class DeleteTaskTypeCommandHandler(AppDbContext dbContext) 
-    : IRequestHandler<DeleteTaskTypeCommand, DeleteTaskTypeCommandResult>
+internal class DeleteTaskTypeCommandHandler(DatabaseContext dbContext) 
+    : IRequestHandler<DeleteTaskTypeCommand, Unit>
 {
-    public async Task<DeleteTaskTypeCommandResult> Handle(DeleteTaskTypeCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DeleteTaskTypeCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        var taskType = await dbContext
+            .TaskTypes
+            .FindAsync([request.Id], cancellationToken);
 
-        // Get the task type to delete
-        // We can safely use Single here because validation already happened via the validator
-        var taskType = await dbContext.TaskTypes
-            .SingleAsync(t => t.Id == request.Id, cancellationToken);
-
-        // Delete the task type
+        if (taskType is null)
+        {
+            throw new EntityNotFoundException(nameof(taskType), request.Id);
+        }
+        
         dbContext.TaskTypes.Remove(taskType);
+        
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new DeleteTaskTypeCommandResult(true);
+        return Unit.Value;
     }
 }

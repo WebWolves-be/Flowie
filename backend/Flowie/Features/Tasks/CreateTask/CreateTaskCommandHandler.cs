@@ -1,34 +1,30 @@
-using Flowie.Shared.Domain.Enums;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Task = Flowie.Shared.Domain.Entities.Task;
+using TaskStatus = Flowie.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Features.Tasks.CreateTask;
 
-internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, CreateTaskCommandResult>
+internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, Unit>
 {
-    public async Task<CreateTaskCommandResult> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        
-        // All validations are already performed in the validator
-
-        // Create the task
         var task = new Task
         {
-            ProjectId = request.ProjectId,
-            ParentTaskId = request.ParentTaskId,
             Title = request.Title,
             Description = request.Description,
-            TypeId = request.TypeId,
             DueDate = request.DueDate,
-            Status = WorkflowTaskStatus.Pending,
-            EmployeeId = request.AssigneeId
+            Status = TaskStatus.Pending,
+            ProjectId = request.ProjectId,
+            TaskTypeId = request.TaskTypeId,
+            EmployeeId = request.EmployeeId,
+            ParentTaskId = request.ParentTaskId
         };
 
         dbContext.Tasks.Add(task);
+        
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CreateTaskCommandResult(task.Id);
+        return Unit.Value;
     }
 }

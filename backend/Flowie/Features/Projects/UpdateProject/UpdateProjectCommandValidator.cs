@@ -19,7 +19,6 @@ internal class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCo
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .When(x => x.Company.HasValue)
             .WithMessage("Company must be Immoseed or NovaraRealEstate");
     }
 }

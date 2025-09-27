@@ -1,5 +1,4 @@
 using Flowie.Shared.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Flowie.Shared.Infrastructure.Database.Configurations;

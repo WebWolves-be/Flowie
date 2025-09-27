@@ -8,9 +8,9 @@ public class Project : BaseEntity
 
     public string? Description { get; set; }
 
-    public Company Company { get; set; }
+    public bool IsDeleted { get; set; }
 
-    public DateTimeOffset? ArchivedAt { get; set; }
+    public Company Company { get; set; }
     
     public ICollection<Task> Tasks { get; } = [];
 }

@@ -1,6 +1,6 @@
 namespace Flowie.Shared.Infrastructure.Exceptions;
 
-public class ConfigurationException : DomainException
+public class ConfigurationException : Exception
 {
     public string? ConfigurationKey { get; }
 

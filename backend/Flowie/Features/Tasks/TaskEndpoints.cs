@@ -1,4 +1,3 @@
-using Flowie.Features.Tasks.ChangeTaskStatus;
 using Flowie.Features.Tasks.CreateTask;
 using Flowie.Features.Tasks.DeleteTask;
 using Flowie.Features.Tasks.GetTaskById;
@@ -12,7 +11,8 @@ internal static class TaskEndpoints
 {
     public static void MapTaskEndpoints(this IEndpointRouteBuilder app)
     {
-        var tasks = app.MapGroup("/api/projects/{projectId:int}/tasks")
+        var tasks = app
+            .MapGroup("/api/projects/{projectId:int}/tasks")
             .WithOpenApi()
             .WithTags("Tasks");
 
@@ -21,7 +21,6 @@ internal static class TaskEndpoints
         CreateTaskEndpoint.Map(tasks);
         UpdateTaskEndpoint.Map(tasks);
         UpdateTaskStatusEndpoint.Map(tasks);
-        ChangeTaskStatusEndpoint.Map(tasks);
         DeleteTaskEndpoint.Map(tasks);
     }
 }

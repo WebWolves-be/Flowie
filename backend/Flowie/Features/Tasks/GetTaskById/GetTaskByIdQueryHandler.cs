@@ -1,47 +1,45 @@
-using Flowie.Shared.Domain.Enums;
 using Flowie.Shared.Infrastructure.Exceptions;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.GetTaskById;
 
-internal class GetTaskByIdQueryHandler(AppDbContext dbContext) : IRequestHandler<GetTaskByIdQuery, GetTaskByIdQueryResult>
+internal class GetTaskByIdQueryHandler(DatabaseContext dbContext)
+    : IRequestHandler<GetTaskByIdQuery, GetTaskByIdQueryResult>
 {
-
     public async Task<GetTaskByIdQueryResult> Handle(GetTaskByIdQuery request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-
-        // Get the task with all related data
-        var task = await dbContext.Tasks
+        var task = await dbContext
+            .Tasks
+            .AsNoTracking()
             .Include(t => t.TaskType)
             .Include(t => t.Employee)
             .Include(t => t.Subtasks)
-            .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
 
-        if (task == null)
+        if (task is null)
         {
-            throw new EntityNotFoundException("Task", $"{request.TaskId} in project {request.ProjectId}");
+            throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
 
-        // Map to DTO
-        return new GetTaskByIdQueryResult(
-            Id: task.Id,
-            ProjectId: task.ProjectId,
-            ParentTaskId: task.ParentTaskId,
-            Title: task.Title,
-            Description: task.Description,
-            TypeId: task.TypeId,
-            TypeName: task.TaskType.Name,
-            DueDate: task.DueDate,
-            Status: task.Status,
-            AssigneeId: task.EmployeeId,
-            AssigneeName: task.Employee?.Name,
-            CreatedAt: task.CreatedAt,
-            UpdatedAt: task.UpdatedAt,
-            CompletedAt: task.CompletedAt,
-            SubtaskCount: task.Subtasks.Count
+        return new GetTaskByIdQueryResult
+        (
+            task.Id,
+            task.ProjectId,
+            task.ParentTaskId,
+            task.Title,
+            task.Description,
+            task.TaskTypeId,
+            task.TaskType.Name,
+            task.DueDate,
+            task.Status,
+            task.EmployeeId,
+            task.Employee?.Name,
+            task.CreatedAt,
+            task.UpdatedAt,
+            task.CompletedAt,
+            task.Subtasks.Count
         );
     }
 }

@@ -1,37 +1,26 @@
 using Flowie.Shared.Infrastructure.Exceptions;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.DeleteTask;
 
-internal class DeleteTaskCommandHandler(AppDbContext dbContext) : IRequestHandler<DeleteTaskCommand, bool>
+internal class DeleteTaskCommandHandler(DatabaseContext dbContext) : IRequestHandler<DeleteTaskCommand, Unit>
 {
-
-    public async Task<bool> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        var task = await dbContext
+            .Tasks
+            .FindAsync([request.TaskId], cancellationToken);
 
-        // Load the task and its subtasks
-        var task = await dbContext.Tasks
-            .Include(t => t.Subtasks)
-            .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
-
-        if (task == null)
+        if (task is null)
         {
-            throw new EntityNotFoundException("Task", $"{request.TaskId} in project {request.ProjectId}");
+            throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
-
-        // Check if the task has subtasks
-        if (task.Subtasks.Count > 0)
-        {
-            throw new TaskWithSubtasksException(task.Id);
-        }
-
-        // Remove the task
+        
         dbContext.Tasks.Remove(task);
+        
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Unit.Value;
     }
 }

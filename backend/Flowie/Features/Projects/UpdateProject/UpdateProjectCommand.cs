@@ -4,7 +4,7 @@ using MediatR;
 namespace Flowie.Features.Projects.UpdateProject;
 
 internal record UpdateProjectCommand(
-    int Id, 
-    string? Title = null, 
-    string? Description = null, 
-    Company? Company = null) : IRequest<Unit>;
+    int ProjectId, 
+    string Title, 
+    string Description, 
+    Company Company) : IRequest<Unit>;

@@ -1,9 +1,9 @@
-using Flowie.Shared.Domain.Enums;
+using TaskStatus = Flowie.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Features.Tasks.GetTasks;
 
 public record GetTasksQueryResult(
-    int Id,
+    int TaskId,
     int ProjectId,
     int? ParentTaskId,
     string Title,
@@ -11,10 +11,10 @@ public record GetTasksQueryResult(
     int TypeId,
     string TypeName,
     DateOnly? DueDate,
-    WorkflowTaskStatus Status,
+    TaskStatus Status,
     string StatusName,
-    int? AssigneeId,
-    string? AssigneeName,
+    int? EmployeeId,
+    string? EmployeeName,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? CompletedAt,

@@ -6,9 +6,9 @@ public static class UpdateProjectEndpoint
 {
     public static void Map(IEndpointRouteBuilder projects)
     {
-        projects.MapPut("/{id:int:required}", async (int id, UpdateProjectCommand command, IMediator mediator, CancellationToken cancellationToken) =>
+        projects.MapPut("/{projectId:int:required}", async (int projectId, UpdateProjectCommand command, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var updatedCommand = command with { Id = id };
+            var updatedCommand = command with { ProjectId = projectId };
            
             await mediator.Send(updatedCommand, cancellationToken);
             

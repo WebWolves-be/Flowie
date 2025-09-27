@@ -1,9 +1,10 @@
 namespace Flowie.Shared.Infrastructure.Exceptions;
 
-public class EntityNotFoundException : DomainException
+public class EntityNotFoundException : Exception
 {
     public string EntityName { get; }
-    public object EntityId { get; }
+    
+    public int EntityId { get; }
 
     public EntityNotFoundException() : base("Entity not found.")
     {
@@ -17,7 +18,7 @@ public class EntityNotFoundException : DomainException
     {
     }
 
-    public EntityNotFoundException(string entityName, object entityId) 
+    public EntityNotFoundException(string entityName, int entityId) 
         : base($"{entityName} with ID {entityId} not found.")
     {
         EntityName = entityName;

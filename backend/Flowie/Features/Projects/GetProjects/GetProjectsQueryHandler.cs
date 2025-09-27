@@ -1,13 +1,15 @@
-using Flowie.Shared.Domain.Enums;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TaskStatus = Flowie.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Features.Projects.GetProjects;
 
-internal class GetProjectsQueryHandler(IDbContext dbContext) : IRequestHandler<GetProjectsQuery, List<GetProjectsQueryResult>>
+internal class GetProjectsQueryHandler(IDbContext dbContext)
+    : IRequestHandler<GetProjectsQuery, List<GetProjectsQueryResult>>
 {
-    public async Task<List<GetProjectsQueryResult>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
+    public async Task<List<GetProjectsQueryResult>> Handle(GetProjectsQuery request,
+        CancellationToken cancellationToken)
     {
         var query = dbContext
             .Projects
@@ -21,17 +23,17 @@ internal class GetProjectsQueryHandler(IDbContext dbContext) : IRequestHandler<G
         }
 
         var projects = await query
-            .Where(p => p.ArchivedAt == null)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new GetProjectsQueryResult(
-                p.Id,
-                p.Title,
-                p.Description,
-                p.Company.ToString(),
-                p.CreatedAt,
-                p.Tasks.Count,
-                p.Tasks.Count(t => t.Status == WorkflowTaskStatus.Done)
-            ))
+            .Select(p =>
+                new GetProjectsQueryResult(
+                    p.Id,
+                    p.Title,
+                    p.Description,
+                    p.Company.ToString(),
+                    p.CreatedAt,
+                    p.Tasks.Count,
+                    p.Tasks.Count(t => t.Status == TaskStatus.Done)
+                ))
             .ToListAsync(cancellationToken);
 
         return projects;

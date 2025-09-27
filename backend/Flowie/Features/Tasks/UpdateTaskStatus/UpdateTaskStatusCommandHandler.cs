@@ -1,46 +1,45 @@
-using Flowie.Shared.Domain.Enums;
 using Flowie.Shared.Infrastructure.Exceptions;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using TaskStatus = Flowie.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Features.Tasks.UpdateTaskStatus;
 
-internal class UpdateTaskStatusCommandHandler(AppDbContext dbContext, TimeProvider timeProvider) : IRequestHandler<UpdateTaskStatusCommand, bool>
+internal class UpdateTaskStatusCommandHandler(
+    DatabaseContext dbContext,
+    TimeProvider timeProvider) : IRequestHandler<UpdateTaskStatusCommand, Unit>
 {
-
-    public async Task<bool> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-
-        // Get the task to update
-        var task = await dbContext.Tasks
-            .FirstOrDefaultAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
-
-        if (task == null)
-        {
-            throw new EntityNotFoundException("Task", $"{request.TaskId} in project {request.ProjectId}");
-        }
-
-                // Update the task status
-        task.Status = request.Status;
+        var task = await dbContext
+            .Tasks
+            .FindAsync([request.TaskId], cancellationToken);
         
-        // If the task is being completed, set the completed date
-        if (request.Status == WorkflowTaskStatus.Done || request.Status == WorkflowTaskStatus.Completed)
+        if (task is null)
         {
-            task.CompletedAt = timeProvider.GetUtcNow();
+            throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
-        else
+
+        task.Status = request.Status;
+
+        if (request.Status == TaskStatus.Pending)
         {
+            task.StartedAt = null;
+            task.CompletedAt = null;
+        }
+        else if (request.Status == TaskStatus.Ongoing)
+        {
+            task.StartedAt = timeProvider.GetUtcNow();
             task.CompletedAt = null;
         }
 
-        // Update the timestamp
-        task.UpdatedAt = timeProvider.GetUtcNow();
+        if (request.Status is TaskStatus.Done or TaskStatus.Completed)
+        {
+            task.CompletedAt = timeProvider.GetUtcNow();
+        }
 
-        // Save changes
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Unit.Value;
     }
 }

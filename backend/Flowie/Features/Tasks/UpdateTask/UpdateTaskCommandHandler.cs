@@ -1,68 +1,30 @@
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
+using Flowie.Shared.Infrastructure.Exceptions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.UpdateTask;
 
-internal class UpdateTaskCommandHandler(AppDbContext dbContext, TimeProvider timeProvider) : IRequestHandler<UpdateTaskCommand, bool>
+internal class UpdateTaskCommandHandler(DatabaseContext dbContext) : IRequestHandler<UpdateTaskCommand, Unit>
 {
-    public async Task<bool> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        var task = await dbContext
+            .Tasks
+            .FindAsync([request.TaskId], cancellationToken);
 
-        // Get the task to update - validation is already done in validator
-        var task = await dbContext.Tasks
-            .SingleAsync(t => t.Id == request.TaskId && t.ProjectId == request.ProjectId, cancellationToken);
-
-        // Update task properties that are provided in the request
-        if (request.Title != null)
+        if (task is null)
         {
-            task.Title = request.Title;
+            throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
 
-        if (request.Description != null)
-        {
-            task.Description = request.Description;
-        }
+        task.Title = request.Title;
+        task.Description = request.Description;
+        task.DueDate = request.DueDate;
+        task.TaskTypeId = request.TaskTypeId;
+        task.EmployeeId = request.EmployeeId;
 
-        if (request.TypeId.HasValue)
-        {
-            // Validation happens in validator
-            if (request.TypeId.Value == 0)
-            {
-                // Special case: If TypeId is 0, we're not changing it
-            }
-            else
-            {
-                task.TypeId = request.TypeId.Value;
-            }
-        }
-
-        if (request.DueDate.HasValue)
-        {
-            task.DueDate = request.DueDate;
-        }
-
-        if (request.AssigneeId.HasValue)
-        {
-            // If AssigneeId is 0, we want to clear the assignee
-            if (request.AssigneeId.Value == 0)
-            {
-                task.EmployeeId = null;
-            }
-            else
-            {
-                // Validation happens in validator
-                task.EmployeeId = request.AssigneeId.Value;
-            }
-        }
-
-        // Update the timestamp
-        task.UpdatedAt = timeProvider.GetUtcNow();
-
-        // Save changes
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Unit.Value;
     }
 }

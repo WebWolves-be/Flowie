@@ -1,8 +1,8 @@
-namespace Flowie.Shared.Domain.Enums
+namespace Flowie.Shared.Domain.Enums;
+
+public enum Company
 {
-    public enum Company
-    {
-        Immoseed,
-        NovaraRealEstate
-    }
+    Immoseed = 0,
+        
+    NovaraRealEstate = 1
 }

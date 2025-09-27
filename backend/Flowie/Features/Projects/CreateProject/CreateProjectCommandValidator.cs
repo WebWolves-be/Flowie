@@ -18,6 +18,6 @@ internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCo
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .WithMessage("Company must be Immoseed or NovaraRealEstate");
+            .WithMessage("Company must be Immoseed or Novara Real Estate");
     }
 }

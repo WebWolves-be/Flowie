@@ -1,10 +1,9 @@
-using Flowie.Shared.Domain.Enums;
 using MediatR;
+using TaskStatus = Flowie.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Features.Tasks.UpdateTaskStatus;
 
 public record UpdateTaskStatusCommand(
-    int ProjectId,
     int TaskId,
-    WorkflowTaskStatus Status
-) : IRequest<bool>;
+    TaskStatus Status
+) : IRequest<Unit>;

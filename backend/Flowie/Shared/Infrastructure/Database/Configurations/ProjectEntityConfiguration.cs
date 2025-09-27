@@ -1,5 +1,4 @@
 using Flowie.Shared.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Flowie.Shared.Infrastructure.Database.Configurations;
@@ -19,8 +18,5 @@ public class ProjectEntityConfiguration : BaseEntityConfiguration<Project>
             
         builder.Property(e => e.Company)
             .HasConversion<string>();
-            
-        builder.Property(e => e.ArchivedAt)
-            .IsRequired(false);
     }
 }

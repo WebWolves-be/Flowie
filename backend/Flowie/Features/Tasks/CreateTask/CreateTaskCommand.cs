@@ -5,8 +5,8 @@ namespace Flowie.Features.Tasks.CreateTask;
 public record CreateTaskCommand(
     int ProjectId, 
     string Title, 
-    int TypeId,
+    int TaskTypeId,
+    DateOnly DueDate,
+    int EmployeeId,
     string? Description = null,
-    DateOnly? DueDate = null,
-    int? AssigneeId = null,
-    int? ParentTaskId = null) : IRequest<CreateTaskCommandResult>;
+    int? ParentTaskId = null) : IRequest<Unit>;

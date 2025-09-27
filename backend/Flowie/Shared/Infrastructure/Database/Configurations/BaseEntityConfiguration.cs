@@ -16,8 +16,5 @@ public abstract class BaseEntityConfiguration<TEntity> : IEntityTypeConfiguratio
         
         builder.Property(e => e.CreatedAt)
             .IsRequired();
-            
-        builder.Property(e => e.UpdatedAt)
-            .IsRequired();
     }
 }

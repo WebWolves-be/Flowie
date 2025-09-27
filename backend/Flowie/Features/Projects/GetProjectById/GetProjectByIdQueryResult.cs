@@ -7,6 +7,5 @@ internal record GetProjectByIdQueryResult(
     string Company,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
-    DateTimeOffset? ArchivedAt,
     int TaskCount,
     int CompletedTaskCount);

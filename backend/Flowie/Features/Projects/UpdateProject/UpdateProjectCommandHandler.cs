@@ -1,7 +1,6 @@
 using Flowie.Shared.Infrastructure.Exceptions;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Projects.UpdateProject;
 
@@ -11,27 +10,16 @@ internal class UpdateProjectCommandHandler(IDbContext dbContext) : IRequestHandl
     {
         var project = await dbContext
             .Projects
-            .FindAsync([request.Id], cancellationToken);
+            .FindAsync([request.ProjectId], cancellationToken);
 
-        if (project == null)
+        if (project is null)
         {
-            throw new EntityNotFoundException("Project", request.Id);
+            throw new EntityNotFoundException("Project", request.ProjectId);
         }
 
-        if (request.Title != null)
-        {
-            project.Title = request.Title;
-        }
-        
-        if (request.Description != null)
-        {
-            project.Description = request.Description;
-        }
-        
-        if (request.Company.HasValue)
-        {
-            project.Company = request.Company.Value;
-        }
+        project.Title = request.Title;
+        project.Description = request.Description;
+        project.Company = request.Company;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

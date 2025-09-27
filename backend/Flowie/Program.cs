@@ -3,6 +3,7 @@ using Flowie.Features.Tasks;
 using Flowie.Features.TaskTypes;
 using Flowie.Shared.Infrastructure.Behaviors;
 using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using Flowie.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
@@ -15,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 // Add Database
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddScoped<IDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+builder.Services.AddScoped<IDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
 
 // Add TimeProvider
 builder.Services.AddSingleton(TimeProvider.System);
@@ -27,8 +28,7 @@ builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Add MediatR Behaviors
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddMediatorBehaviors();
 
 var app = builder.Build();
 

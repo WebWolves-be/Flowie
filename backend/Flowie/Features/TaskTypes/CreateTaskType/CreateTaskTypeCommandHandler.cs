@@ -1,25 +1,24 @@
 using Flowie.Shared.Domain.Entities;
-using Flowie.Shared.Infrastructure.Database;
+using Flowie.Shared.Infrastructure.Database.Context;
 using MediatR;
 
 namespace Flowie.Features.TaskTypes.CreateTaskType;
 
-internal class CreateTaskTypeCommandHandler(AppDbContext dbContext) 
-    : IRequestHandler<CreateTaskTypeCommand, CreateTaskTypeCommandResult>
+internal class CreateTaskTypeCommandHandler(DatabaseContext dbContext)
+    : IRequestHandler<CreateTaskTypeCommand, Unit>
 {
-    public async Task<CreateTaskTypeCommandResult> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        dbContext.TaskTypes.Add(
+            new TaskType
+            {
+                Name = request.Name,
+                Active = true
+            }
+        );
 
-        var taskType = new TaskType
-        {
-            Name = request.Name,
-            Active = true
-        };
-
-        dbContext.TaskTypes.Add(taskType);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CreateTaskTypeCommandResult(taskType.Id);
+        return Unit.Value;
     }
 }

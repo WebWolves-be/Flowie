@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Flowie.Features.TaskTypes.DeleteTaskType;
 
-public record DeleteTaskTypeCommand(int Id) : IRequest<DeleteTaskTypeCommandResult>;
+public record DeleteTaskTypeCommand(int Id) : IRequest<Unit>;
