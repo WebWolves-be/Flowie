@@ -1,4 +1,4 @@
-using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Exceptions;
 using Flowie.Shared.Infrastructure.Database.Interceptors;
 using Microsoft.EntityFrameworkCore;
 

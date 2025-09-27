@@ -1,3 +1,3 @@
 namespace Flowie.Features.TaskTypes.CreateTaskType;
 
-public record CreateTaskTypeResponse(int Id);
+public record CreateTaskTypeCommandResult(int Id);

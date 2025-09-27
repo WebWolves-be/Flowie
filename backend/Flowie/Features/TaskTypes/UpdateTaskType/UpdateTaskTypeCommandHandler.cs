@@ -1,4 +1,3 @@
-using Flowie.Shared.Domain.Exceptions;
 using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -6,39 +5,28 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowie.Features.TaskTypes.UpdateTaskType;
 
 internal class UpdateTaskTypeCommandHandler(AppDbContext dbContext) 
-    : IRequestHandler<UpdateTaskTypeCommand, UpdateTaskTypeResponse>
+    : IRequestHandler<UpdateTaskTypeCommand, UpdateTaskTypeCommandResult>
 {
-    public async Task<UpdateTaskTypeResponse> Handle(UpdateTaskTypeCommand request, CancellationToken cancellationToken)
+    public async Task<UpdateTaskTypeCommandResult> Handle(UpdateTaskTypeCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         // Get the task type to update
         var taskType = await dbContext.TaskTypes
             .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
+            
+        // The validator will handle checking if the task type exists
+        // and if the name is unique, so we can assume it's valid here
 
-        if (taskType == null)
+        // Update name if provided
+        if (request.Name != null)
         {
-            throw new EntityNotFoundException("TaskType", request.Id);
-        }
-
-        // Check if name is being changed and if it would conflict
-        if (request.Name != null && request.Name != taskType.Name)
-        {
-            var nameExists = await dbContext
-                .TaskTypes
-                .AnyAsync(t => t.Name == request.Name && t.Id != request.Id, cancellationToken);
-
-            if (nameExists)
-            {
-                throw new TaskTypeAlreadyExistsException(request.Name!, true);
-            }
-
-            taskType.Name = request.Name;
+            taskType!.Name = request.Name;
         }
 
         // Save changes
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new UpdateTaskTypeResponse(true);
+        return new UpdateTaskTypeCommandResult(true);
     }
 }

@@ -1,14 +1,14 @@
 using Flowie.Shared.Domain.Enums;
-using Flowie.Shared.Domain.Exceptions;
+using Flowie.Shared.Infrastructure.Exceptions;
 using Flowie.Shared.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.GetTasks;
 
-internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetTasksQuery, IEnumerable<TaskResponse>>
+internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<GetTasksQuery, IEnumerable<GetTasksQueryResult>>
 {
-    public async Task<IEnumerable<TaskResponse>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<GetTasksQueryResult>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -55,7 +55,7 @@ internal class GetTasksQueryHandler(AppDbContext dbContext) : IRequestHandler<Ge
         var tasks = await query.ToListAsync(cancellationToken);
 
         // Map to response objects
-        return tasks.Select(t => new TaskResponse(
+        return tasks.Select(t => new GetTasksQueryResult(
             Id: t.Id,
             ProjectId: t.ProjectId,
             ParentTaskId: t.ParentTaskId,

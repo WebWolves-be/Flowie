@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.CreateTask;
 
-internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
+public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {
     private readonly AppDbContext _dbContext;
     

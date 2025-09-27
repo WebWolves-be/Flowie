@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Features.Tasks.UpdateTask;
 
-internal class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskCommand>
+public class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskCommand>
 {
     private readonly AppDbContext _dbContext;
 

@@ -1,4 +1,4 @@
-namespace Flowie.Shared.Domain.Exceptions;
+namespace Flowie.Shared.Infrastructure.Exceptions;
 
 public class TaskTypeAlreadyExistsException : DomainException
 {

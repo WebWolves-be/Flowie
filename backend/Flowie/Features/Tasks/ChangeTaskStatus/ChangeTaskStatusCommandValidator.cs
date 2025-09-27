@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace Flowie.Features.Tasks.ChangeTaskStatus;
 
-public class ChangeTaskStatusValidator : AbstractValidator<ChangeTaskStatusCommand>
+public class ChangeTaskStatusCommandValidator : AbstractValidator<ChangeTaskStatusCommand>
 {
-    public ChangeTaskStatusValidator()
+    public ChangeTaskStatusCommandValidator()
     {
         RuleFor(x => x.Status)
             .IsInEnum()
