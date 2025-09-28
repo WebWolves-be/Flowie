@@ -1,24 +1,8 @@
 import {inject, Injectable, signal} from "@angular/core";
 import {HttpClient} from '@angular/common/http';
-import {catchError, map, Observable, of, tap, throwError} from 'rxjs';
-
-export interface LoginRequest {
-    email: string;
-    password: string;
-    // When true, server will issue a persistent auth cookie (default ~14 days)
-    rememberMe?: boolean;
-}
-
-export interface AuthResponse {
-    // Identity API doesn't return user info by default, but we can structure for future needs
-    success: boolean;
-    message?: string;
-}
-
-export interface User {
-    email: string;
-    isAuthenticated: boolean;
-}
+import {catchError, map, Observable, of, tap} from 'rxjs';
+import {LoginRequest} from "../models/login-request.model";
+import {User} from "../models/user.model";
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
@@ -48,7 +32,7 @@ export class AuthService {
                 }
             }),
             map(() => true),
-            catchError(() => throwError(() => false))
+            catchError(() => of(false))
         );
     }
 

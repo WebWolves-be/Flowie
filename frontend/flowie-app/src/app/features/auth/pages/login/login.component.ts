@@ -1,9 +1,10 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
-import {AuthService, LoginRequest} from '../../services/auth.service';
+import {AuthService} from '../../services/auth.service';
 import {CommonModule} from '@angular/common';
 import {catchError, EMPTY, finalize} from "rxjs";
+import {LoginRequest} from "../../models/login-request.model";
 
 @Component({
     selector: 'app-login',
@@ -33,16 +34,10 @@ export class LoginComponent implements OnInit {
     }
 
     ngOnInit() {
+        // If already authenticated (from APP_INITIALIZER or previous login), redirect to dashboard
         if (this.#authService.isAuthenticated()) {
             void this.#router.navigate(['/dashboard']);
-            return;
         }
-
-        this.#authService.checkSession().subscribe(isAuthenticated => {
-            if (isAuthenticated) {
-                void this.#router.navigate(['/dashboard']);
-            }
-        });
     }
 
     onSubmit() {

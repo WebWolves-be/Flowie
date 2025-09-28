@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {CanActivate, Router} from '@angular/router';
-import {map, Observable} from 'rxjs';
+import {map, Observable, of} from 'rxjs';
 import {AuthService} from '../features/auth/services/auth.service';
 
 @Injectable({
@@ -17,14 +17,14 @@ export class AuthGuard implements CanActivate {
             return true;
         }
 
+        // If not authenticated, check session again (this handles the case where APP_INITIALIZER might have failed)
         return this.#authService.checkSession().pipe(
-            map(isAuthenticated => {
-                if (isAuthenticated) {
+            map(sessionValid => {
+                if (sessionValid) {
                     return true;
                 }
 
                 void this.#router.navigate(['/login']);
-
                 return false;
             })
         );
