@@ -4,4 +4,4 @@ namespace Flowie.Api.Features.Tasks.GetTasks;
 
 public record GetTasksQuery(
     int ProjectId,
-    bool OnlyShowMyTasks) : IRequest<IEnumerable<GetTasksQueryResult>>;
+    bool OnlyShowMyTasks) : IRequest<GetTasksQueryResult>;

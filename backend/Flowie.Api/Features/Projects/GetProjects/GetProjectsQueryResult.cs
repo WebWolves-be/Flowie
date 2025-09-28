@@ -1,6 +1,8 @@
 namespace Flowie.Api.Features.Projects.GetProjects;
 
-internal record GetProjectsQueryResult(
+internal record GetProjectsQueryResult(IReadOnlyCollection<ProjectDto> Projects);
+    
+internal record ProjectDto(
     int ProjectId,
     string Title,
     string Company,

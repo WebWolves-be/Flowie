@@ -6,11 +6,11 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Tasks.GetTasks;
 
-internal class GetTasksQueryHandler(DatabaseContext dbContext, ICurrentUserService currentUserService)
-    : IRequestHandler<GetTasksQuery, IEnumerable<GetTasksQueryResult>>
+internal class GetTasksQueryHandler(
+    DatabaseContext dbContext,
+    ICurrentUserService currentUserService) : IRequestHandler<GetTasksQuery, GetTasksQueryResult>
 {
-    public async Task<IEnumerable<GetTasksQueryResult>> Handle(
-        GetTasksQuery request, CancellationToken cancellationToken)
+    public async Task<GetTasksQueryResult> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
         var query = dbContext
             .Tasks
@@ -18,7 +18,7 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext, ICurrentUserServi
             .Include(t => t.TaskType)
             .Include(t => t.Employee)
             .Include(t => t.Subtasks)
-                .ThenInclude(st => st.Employee)
+            .ThenInclude(st => st.Employee)
             .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == null);
 
         if (request.OnlyShowMyTasks)
@@ -26,47 +26,50 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext, ICurrentUserServi
             var userId = currentUserService.UserId;
             query = query.Where(t => t.Employee != null && t.Employee.UserId == userId);
         }
-        
-        var tasks = await query.ToListAsync(cancellationToken);
 
-        return
-        [
-            .. tasks.Select(t =>
-                new GetTasksQueryResult(
-                    TaskId: t.Id,
-                    ProjectId: t.ProjectId,
-                    ParentTaskId: t.ParentTaskId,
-                    Title: t.Title,
-                    Description: t.Description,
-                    TypeId: t.TaskTypeId,
-                    TypeName: t.TaskType.Name,
-                    DueDate: t.DueDate,
-                    Status: t.Status,
-                    StatusName: t.Status.ToString(),
-                    EmployeeId: t.EmployeeId,
-                    EmployeeName: t.Employee?.Name,
-                    CreatedAt: t.CreatedAt,
-                    UpdatedAt: t.UpdatedAt,
-                    CompletedAt: t.CompletedAt,
-                    SubtaskCount: t.Subtasks.Count,
-                    CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done),
-                    Subtasks: [
-                        .. t.Subtasks.Select(st => new GetTasksSubtaskResult(
-                            TaskId: st.Id,
-                            ParentTaskId: st.ParentTaskId,
-                            Title: st.Title,
-                            Description: st.Description,
-                            DueDate: st.DueDate,
-                            Status: st.Status,
-                            StatusName: st.Status.ToString(),
-                            EmployeeId: st.EmployeeId,
-                            EmployeeName: st.Employee?.Name,
-                            CreatedAt: st.CreatedAt,
-                            UpdatedAt: st.UpdatedAt,
-                            CompletedAt: st.CompletedAt
-                        ))
-                    ]
-                ))
-        ];
+        var result = await query.ToListAsync(cancellationToken);
+
+        var tasks =
+            result
+                .Select(t =>
+                    new TaskDto(
+                        TaskId: t.Id,
+                        ProjectId: t.ProjectId,
+                        ParentTaskId: t.ParentTaskId,
+                        Title: t.Title,
+                        Description: t.Description,
+                        TypeId: t.TaskTypeId,
+                        TypeName: t.TaskType.Name,
+                        DueDate: t.DueDate,
+                        Status: t.Status,
+                        StatusName: t.Status.ToString(),
+                        EmployeeId: t.EmployeeId,
+                        EmployeeName: t.Employee?.Name,
+                        CreatedAt: t.CreatedAt,
+                        UpdatedAt: t.UpdatedAt,
+                        CompletedAt: t.CompletedAt,
+                        SubtaskCount: t.Subtasks.Count,
+                        CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done),
+                        Subtasks:
+                        [
+                            .. t.Subtasks.Select(st => new SubtaskDto(
+                                TaskId: st.Id,
+                                ParentTaskId: st.ParentTaskId,
+                                Title: st.Title,
+                                Description: st.Description,
+                                DueDate: st.DueDate,
+                                Status: st.Status,
+                                StatusName: st.Status.ToString(),
+                                EmployeeId: st.EmployeeId,
+                                EmployeeName: st.Employee?.Name,
+                                CreatedAt: st.CreatedAt,
+                                UpdatedAt: st.UpdatedAt,
+                                CompletedAt: st.CompletedAt
+                            ))
+                        ]
+                    ))
+                .ToList();
+
+        return new GetTasksQueryResult(tasks);
     }
 }

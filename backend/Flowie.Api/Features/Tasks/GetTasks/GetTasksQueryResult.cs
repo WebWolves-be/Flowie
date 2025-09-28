@@ -2,7 +2,9 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Tasks.GetTasks;
 
-public record GetTasksQueryResult(
+public record GetTasksQueryResult(IReadOnlyCollection<TaskDto> Tasks);
+
+public record TaskDto(
     int TaskId,
     int ProjectId,
     int? ParentTaskId,
@@ -20,9 +22,9 @@ public record GetTasksQueryResult(
     DateTimeOffset? CompletedAt,
     int SubtaskCount,
     int CompletedSubtaskCount,
-    IEnumerable<GetTasksSubtaskResult> Subtasks);
+    IEnumerable<SubtaskDto> Subtasks);
 
-public record GetTasksSubtaskResult(
+public record SubtaskDto(
     int TaskId,
     int? ParentTaskId,
     string Title,
@@ -34,4 +36,5 @@ public record GetTasksSubtaskResult(
     string? EmployeeName,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
-    DateTimeOffset? CompletedAt);
+    DateTimeOffset? CompletedAt
+);

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Flowie.Api.Features.Projects.GetProjects;
 
-internal record GetProjectsQuery(Company? Company = null) : IRequest<List<GetProjectsQueryResult>>;
+internal record GetProjectsQuery(Company? Company = null) : IRequest<GetProjectsQueryResult>;

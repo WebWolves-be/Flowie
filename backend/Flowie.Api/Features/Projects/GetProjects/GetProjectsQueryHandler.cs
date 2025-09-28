@@ -7,9 +7,9 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 namespace Flowie.Api.Features.Projects.GetProjects;
 
 internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
-    : IRequestHandler<GetProjectsQuery, List<GetProjectsQueryResult>>
+    : IRequestHandler<GetProjectsQuery, GetProjectsQueryResult>
 {
-    public async Task<List<GetProjectsQueryResult>> Handle(GetProjectsQuery request,
+    public async Task<GetProjectsQueryResult> Handle(GetProjectsQuery request,
         CancellationToken cancellationToken)
     {
         var query = databaseContext
@@ -26,7 +26,7 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
         var projects = await query
             .OrderByDescending(p => p.CreatedAt)
             .Select(p =>
-                new GetProjectsQueryResult(
+                new ProjectDto(
                     p.Id,
                     p.Title,
                     p.Company.ToString(),
@@ -35,6 +35,6 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
                 ))
             .ToListAsync(cancellationToken);
 
-        return projects;
+        return new GetProjectsQueryResult(projects);
     }
 }
