@@ -11,6 +11,7 @@ internal static class ProjectEndpoints
     {
         var projects = app
             .MapGroup("/api/projects")
+            .RequireAuthorization()
             .WithOpenApi()
             .WithTags("Projects");
 

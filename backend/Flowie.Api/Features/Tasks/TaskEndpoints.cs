@@ -13,6 +13,7 @@ internal static class TaskEndpoints
     {
         var tasks = app
             .MapGroup("/api/tasks")
+            .RequireAuthorization()
             .WithOpenApi()
             .WithTags("Tasks");
 

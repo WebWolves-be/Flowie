@@ -10,6 +10,7 @@ internal static class TaskTypeEndpoints
     {
         var taskTypes = app
             .MapGroup("/api/task-types")
+            .RequireAuthorization()
             .WithOpenApi()
             .WithTags("TaskTypes");
 

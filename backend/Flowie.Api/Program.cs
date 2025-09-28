@@ -8,6 +8,12 @@ using Flowie.Api.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
 using Flowie.Api.Shared.Infrastructure.Database.Seeding;
+using Flowie.Api.Shared.Domain.Entities;
+using Flowie.Api.Shared.Domain.Entities.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +38,31 @@ builder.Services.AddSwaggerGen(c =>
 // Add Database
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<IDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
+
+// Add Identity API endpoints
+builder.Services
+    .AddIdentityApiEndpoints<User>()
+    .AddEntityFrameworkStores<DatabaseContext>();
+
+// Add Authorization services
+builder.Services.AddAuthorization();
+
+// Data Protection keys persistence
+builder.Services.AddDataProtection()
+    .SetApplicationName("Flowie")
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "keys")));
+
+// Add CORS for Angular frontend
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // Add TimeProvider
 builder.Services.AddSingleton(TimeProvider.System);
@@ -59,11 +90,21 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
+// Use CORS
+app.UseCors();
+
+// Use Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Map API endpoints
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();
 
+// Map Identity API endpoints
+app.MapIdentityApi<User>();
+
 await DatabaseSeeder.SeedAsync(app.Services);
 
-app.Run();
+await app.RunAsync();

@@ -7,7 +7,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database;
 
 internal static class DatabaseExtensions
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    public static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("FlowieDb");
 
@@ -23,7 +23,5 @@ internal static class DatabaseExtensions
                                  ?? throw new ConfigurationException(
                                      "FlowieDb", "Connection string 'FlowieDb' not found."));
         });
-
-        return services;
     }
 }

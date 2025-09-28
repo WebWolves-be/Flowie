@@ -1,4 +1,5 @@
 using Flowie.Api.Shared.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Flowie.Api.Shared.Infrastructure.Database.Configurations;
@@ -19,5 +20,9 @@ public class EmployeeEntityConfiguration : BaseEntityConfiguration<Employee>
             
         builder.HasIndex(e => e.Email)
             .IsUnique();
+        
+        builder.HasIndex(e => e.UserId)
+            .IsUnique()
+            .HasFilter("[UserId] IS NOT NULL");
     }
 }
