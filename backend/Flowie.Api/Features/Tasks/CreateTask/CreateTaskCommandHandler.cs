@@ -5,7 +5,7 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Tasks.CreateTask;
 
-internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<CreateTaskCommand, Unit>
+internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IRequestHandler<CreateTaskCommand, Unit>
 {
     public async Task<Unit> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
@@ -21,9 +21,9 @@ internal class CreateTaskCommandHandler(IDbContext dbContext) : IRequestHandler<
             ParentTaskId = request.ParentTaskId
         };
 
-        dbContext.Tasks.Add(task);
+        databaseContext.Tasks.Add(task);
         
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await databaseContext.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

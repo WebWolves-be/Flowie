@@ -8,12 +8,8 @@ using Flowie.Api.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
 using Flowie.Api.Shared.Infrastructure.Database.Seeding;
-using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Entities.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
-using System.IO;
-using Microsoft.AspNetCore.HttpOverrides;
 using Flowie.Api.Shared.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +34,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Add Database
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddScoped<IDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
+builder.Services.AddScoped<IDatabaseContext>(provider => provider.GetRequiredService<DatabaseContext>());
 
 // Add Identity API endpoints
 builder.Services
@@ -53,7 +49,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Data Protection keys persistence
-builder.Services.AddDataProtection()
+builder.Services
+    .AddDataProtection()
     .SetApplicationName("Flowie")
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "keys")));
 

@@ -6,11 +6,11 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Projects.GetProjectById;
 
-internal class GetProjectByIdQueryHandler(IDbContext dbContext) : IRequestHandler<GetProjectByIdQuery, GetProjectByIdQueryResult>
+internal class GetProjectByIdQueryHandler(IDatabaseContext databaseContext) : IRequestHandler<GetProjectByIdQuery, GetProjectByIdQueryResult>
 {
     public async Task<GetProjectByIdQueryResult> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
     {
-        var project = await dbContext
+        var project = await databaseContext
             .Projects
             .AsNoTracking()
             .Include(p => p.Tasks)

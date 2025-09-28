@@ -4,7 +4,7 @@ using Task = Flowie.Api.Shared.Domain.Entities.Task;
 
 namespace Flowie.Api.Shared.Infrastructure.Database.Context;
 
-public interface IDbContext
+public interface IDatabaseContext
 {
     DbSet<Project> Projects { get; set; }
     

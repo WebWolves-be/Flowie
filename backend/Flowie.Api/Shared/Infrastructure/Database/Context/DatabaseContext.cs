@@ -7,7 +7,7 @@ using Task = Flowie.Api.Shared.Domain.Entities.Task;
 
 namespace Flowie.Api.Shared.Infrastructure.Database.Context;
 
-public class DatabaseContext(DbContextOptions<DatabaseContext> options) : IdentityDbContext<User>(options), IDbContext
+public class DatabaseContext(DbContextOptions<DatabaseContext> options) : IdentityDbContext<User>(options), IDatabaseContext
 {
     public DbSet<Project> Projects { get; set; } = null!;
     

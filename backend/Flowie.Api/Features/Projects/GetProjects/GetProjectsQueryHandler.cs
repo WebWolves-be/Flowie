@@ -6,17 +6,13 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Projects.GetProjects;
 
-internal class GetProjectsQueryHandler(
-    IDbContext dbContext,
-    ICurrentUserService currentUserService)
+internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
     : IRequestHandler<GetProjectsQuery, List<GetProjectsQueryResult>>
 {
     public async Task<List<GetProjectsQueryResult>> Handle(GetProjectsQuery request,
         CancellationToken cancellationToken)
     {
-        var test = currentUserService.Claims;
-        
-        var query = dbContext
+        var query = databaseContext
             .Projects
             .AsNoTracking()
             .Include(p => p.Tasks)

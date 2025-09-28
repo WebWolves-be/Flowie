@@ -4,11 +4,11 @@ using MediatR;
 
 namespace Flowie.Api.Features.Projects.CreateProject;
 
-internal class CreateProjectCommandHandler(IDbContext dbContext) : IRequestHandler<CreateProjectCommand, Unit>
+internal class CreateProjectCommandHandler(IDatabaseContext databaseContext) : IRequestHandler<CreateProjectCommand, Unit>
 {
     public async Task<Unit> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        dbContext.Projects.Add(
+        databaseContext.Projects.Add(
             new Project
             {
                 Title = request.Title,
@@ -16,7 +16,7 @@ internal class CreateProjectCommandHandler(IDbContext dbContext) : IRequestHandl
                 Company = request.Company
             });
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await databaseContext.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

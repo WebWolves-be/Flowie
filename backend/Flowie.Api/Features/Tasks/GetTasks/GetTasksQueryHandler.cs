@@ -1,3 +1,4 @@
+using Flowie.Api.Shared.Infrastructure.Auth;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -5,7 +6,7 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Tasks.GetTasks;
 
-internal class GetTasksQueryHandler(DatabaseContext dbContext)
+internal class GetTasksQueryHandler(DatabaseContext dbContext, ICurrentUserService currentUserService)
     : IRequestHandler<GetTasksQuery, IEnumerable<GetTasksQueryResult>>
 {
     public async Task<IEnumerable<GetTasksQueryResult>> Handle(
@@ -19,6 +20,12 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext)
             .Include(t => t.Subtasks)
                 .ThenInclude(st => st.Employee)
             .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == null);
+
+        if (request.OnlyShowMyTasks)
+        {
+            var userId = currentUserService.UserId;
+            query = query.Where(t => t.Employee != null && t.Employee.UserId == userId);
+        }
         
         var tasks = await query.ToListAsync(cancellationToken);
 
