@@ -12,7 +12,14 @@ using Flowie.Api.Shared.Domain.Entities.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Flowie.Api.Shared.Infrastructure.Auth;
 
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, services, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -73,7 +80,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddMediatR(typeof(Program).Assembly);
 
 // Add FluentValidation
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Transient, includeInternalTypes: true);
 
 // Add MediatR Behaviors
 builder.Services.AddMediatorBehaviors();
@@ -89,6 +96,8 @@ if (app.Environment.IsDevelopment())
 
 // Add exception handling middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
