@@ -19,4 +19,19 @@ public record GetTasksQueryResult(
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? CompletedAt,
     int SubtaskCount,
-    int CompletedSubtaskCount);
+    int CompletedSubtaskCount,
+    IEnumerable<GetTasksSubtaskResult> Subtasks);
+
+public record GetTasksSubtaskResult(
+    int TaskId,
+    int? ParentTaskId,
+    string Title,
+    string? Description,
+    DateOnly? DueDate,
+    TaskStatus Status,
+    string StatusName,
+    int? EmployeeId,
+    string? EmployeeName,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt,
+    DateTimeOffset? CompletedAt);

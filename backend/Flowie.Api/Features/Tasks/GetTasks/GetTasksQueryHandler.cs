@@ -17,7 +17,8 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext)
             .Include(t => t.TaskType)
             .Include(t => t.Employee)
             .Include(t => t.Subtasks)
-            .Where(t => t.ProjectId == request.ProjectId);
+                .ThenInclude(st => st.Employee)
+            .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == null);
         
         var tasks = await query.ToListAsync(cancellationToken);
 
@@ -41,7 +42,23 @@ internal class GetTasksQueryHandler(DatabaseContext dbContext)
                     UpdatedAt: t.UpdatedAt,
                     CompletedAt: t.CompletedAt,
                     SubtaskCount: t.Subtasks.Count,
-                    CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done)
+                    CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done),
+                    Subtasks: [
+                        .. t.Subtasks.Select(st => new GetTasksSubtaskResult(
+                            TaskId: st.Id,
+                            ParentTaskId: st.ParentTaskId,
+                            Title: st.Title,
+                            Description: st.Description,
+                            DueDate: st.DueDate,
+                            Status: st.Status,
+                            StatusName: st.Status.ToString(),
+                            EmployeeId: st.EmployeeId,
+                            EmployeeName: st.Employee?.Name,
+                            CreatedAt: st.CreatedAt,
+                            UpdatedAt: st.UpdatedAt,
+                            CompletedAt: st.CompletedAt
+                        ))
+                    ]
                 ))
         ];
     }
