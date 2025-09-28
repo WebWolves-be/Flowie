@@ -11,6 +11,8 @@ using Flowie.Api.Shared.Infrastructure.Database.Seeding;
 using Flowie.Api.Shared.Domain.Entities.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Flowie.Api.Shared.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 using Serilog;
 
@@ -47,6 +49,16 @@ builder.Services.AddScoped<IDatabaseContext>(provider => provider.GetRequiredSer
 builder.Services
     .AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<DatabaseContext>();
+
+// Configure application cookie for cross-site (SPA on localhost:4200)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "Flowie";
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+});
 
 // Add Authorization services
 builder.Services.AddAuthorization();
@@ -99,10 +111,17 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSerilogRequestLogging();
 
+// Use CORS BEFORE HTTPS redirection
+app.UseCors();
+
 app.UseHttpsRedirection();
 
-// Use CORS
-app.UseCors();
+// Ensure cookies are compatible with cross-site SPA requests
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.None,
+    Secure = CookieSecurePolicy.Always
+});
 
 // Use Authentication and Authorization
 app.UseAuthentication();
