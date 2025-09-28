@@ -57,8 +57,7 @@ internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Excepti
             response = new
             {
                 Status = statusCode,
-                Message = exception.Message,
-                Errors = validationException.Errors.Select(e => new { e.PropertyName, e.ErrorMessage })
+                Errors = validationException.Errors.Select(e => new { e.ErrorMessage })
             };
         }
         else if (exception is EntityNotFoundException)
