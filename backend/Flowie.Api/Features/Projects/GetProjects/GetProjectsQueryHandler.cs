@@ -1,3 +1,4 @@
+using Flowie.Api.Shared.Infrastructure.Auth;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -5,12 +6,16 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Features.Projects.GetProjects;
 
-internal class GetProjectsQueryHandler(IDbContext dbContext)
+internal class GetProjectsQueryHandler(
+    IDbContext dbContext,
+    ICurrentUserService currentUserService)
     : IRequestHandler<GetProjectsQuery, List<GetProjectsQueryResult>>
 {
     public async Task<List<GetProjectsQueryResult>> Handle(GetProjectsQuery request,
         CancellationToken cancellationToken)
     {
+        var test = currentUserService.Claims;
+        
         var query = dbContext
             .Projects
             .AsNoTracking()

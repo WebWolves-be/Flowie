@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
 using Microsoft.AspNetCore.HttpOverrides;
+using Flowie.Api.Shared.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,10 @@ builder.Services
 
 // Add Authorization services
 builder.Services.AddAuthorization();
+
+// HttpContext accessor and current user service
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Data Protection keys persistence
 builder.Services.AddDataProtection()
