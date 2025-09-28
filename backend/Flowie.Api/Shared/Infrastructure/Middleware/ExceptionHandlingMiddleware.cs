@@ -5,16 +5,16 @@ namespace Flowie.Api.Shared.Infrastructure.Middleware;
 
 internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
-        private static readonly Action<ILogger, Exception> _logError =
-        LoggerMessage.Define(LogLevel.Error, new EventId(1, nameof(InvokeAsync)), 
+    private static readonly Action<ILogger, Exception> _logError =
+        LoggerMessage.Define(LogLevel.Error, new EventId(1, nameof(InvokeAsync)),
             "An unhandled exception occurred");
 
     private static readonly Action<ILogger, string, object, Exception?> _logEntityNotFound =
-        LoggerMessage.Define<string, object>(LogLevel.Warning, new EventId(2, nameof(InvokeAsync)), 
+        LoggerMessage.Define<string, object>(LogLevel.Warning, new EventId(2, nameof(InvokeAsync)),
             "Entity {EntityName} with ID {EntityId} not found");
 
     public async Task InvokeAsync(HttpContext httpContext)
-    {        
+    {
         try
         {
             await next(httpContext);
@@ -40,18 +40,18 @@ internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Excepti
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        
+
         var statusCode = exception switch
         {
             ValidationException _ => StatusCodes.Status400BadRequest,
             EntityNotFoundException _ => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status500InternalServerError
         };
-        
+
         context.Response.StatusCode = statusCode;
-        
+
         object response;
-        
+
         if (exception is ValidationException validationException)
         {
             response = new
@@ -74,7 +74,7 @@ internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Excepti
                 Status = statusCode,
             };
         }
-        
+
         await context.Response.WriteAsJsonAsync(response);
     }
 }
