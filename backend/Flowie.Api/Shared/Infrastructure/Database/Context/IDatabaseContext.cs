@@ -1,4 +1,5 @@
 using Flowie.Api.Shared.Domain.Entities;
+using Flowie.Api.Shared.Domain.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 using Task = Flowie.Api.Shared.Domain.Entities.Task;
 
@@ -13,6 +14,8 @@ public interface IDatabaseContext
     DbSet<TaskType> TaskTypes { get; set; }
     
     DbSet<Employee> Employees { get; set; }
+    
+    DbSet<RefreshToken> RefreshTokens { get; set; }
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

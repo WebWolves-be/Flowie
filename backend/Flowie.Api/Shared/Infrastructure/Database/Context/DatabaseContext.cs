@@ -17,6 +17,8 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
     
     public DbSet<Employee> Employees { get; set; } = null!;
     
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

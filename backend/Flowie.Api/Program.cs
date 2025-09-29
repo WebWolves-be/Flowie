@@ -1,3 +1,4 @@
+using Flowie.Api.Features.Auth;
 using Flowie.Api.Features.Projects;
 using Flowie.Api.Features.Tasks;
 using Flowie.Api.Features.TaskTypes;
@@ -9,11 +10,10 @@ using FluentValidation;
 using MediatR;
 using Flowie.Api.Shared.Infrastructure.Database.Seeding;
 using Flowie.Api.Shared.Domain.Entities.Identity;
-using Microsoft.AspNetCore.DataProtection;
 using Flowie.Api.Shared.Infrastructure.Auth;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,31 +33,114 @@ builder.Services.AddSwaggerGen(c =>
             Type = "string",
             Format = "date"
         });
+
     c.MapType<TimeOnly>(() =>
         new Microsoft.OpenApi.Models.OpenApiSchema
         {
             Type = "string",
             Format = "time"
         });
+    
+    // Add JWT Bearer token support to Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 // Add Database
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<IDatabaseContext>(provider => provider.GetRequiredService<DatabaseContext>());
 
-// Add Identity API endpoints
+// Configure JWT Settings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Add Identity without API endpoints (we'll create custom endpoints)
 builder.Services
-    .AddIdentityApiEndpoints<User>()
+    .AddIdentityCore<User>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = false;
+    })
     .AddEntityFrameworkStores<DatabaseContext>();
 
-// Configure application cookie for cross-site (SPA on localhost:4200)
-builder.Services.ConfigureApplicationCookie(options =>
+// Add JWT Bearer Authentication
+builder.Services.AddAuthentication(options =>
 {
-    options.Cookie.Name = "Flowie";
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.SlidingExpiration = true;
-    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.DefaultAuthenticateScheme = "Bearer";
+    options.DefaultChallengeScheme = "Bearer";
+    options.DefaultScheme = "Bearer";
+})
+.AddJwtBearer(options =>
+{
+    var jwtSection = builder.Configuration.GetSection(JwtSettings.SectionName);
+    var secretKey = jwtSection["SecretKey"];
+    var issuer = jwtSection["Issuer"];
+    var audience = jwtSection["Audience"];
+    
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        throw new InvalidOperationException("JWT SecretKey is not configured");
+    }
+    
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ValidateIssuer = true,
+        ValidIssuer = issuer,
+        ValidateAudience = true,
+        ValidAudience = audience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        RequireExpirationTime = true,
+        RequireSignedTokens = true
+    };
+    
+    // Enable detailed logging for debugging
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("JWT Token validated successfully");
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            Console.WriteLine($"JWT Challenge: {context.Error} - {context.ErrorDescription}");
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Add Authorization services
@@ -66,12 +149,6 @@ builder.Services.AddAuthorization();
 // HttpContext accessor and current user service
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-// Data Protection keys persistence
-builder.Services
-    .AddDataProtection()
-    .SetApplicationName("Flowie")
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "keys")));
 
 // Add CORS for Angular frontend
 builder.Services.AddCors(options =>
@@ -116,24 +193,15 @@ app.UseCors();
 
 app.UseHttpsRedirection();
 
-// Ensure cookies are compatible with cross-site SPA requests
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    MinimumSameSitePolicy = SameSiteMode.None,
-    Secure = CookieSecurePolicy.Always
-});
-
 // Use Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Map API endpoints
+app.MapAuthEndpoints();
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();
-
-// Map Identity API endpoints
-app.MapIdentityApi<User>();
 
 await DatabaseSeeder.SeedAsync(app.Services);
 

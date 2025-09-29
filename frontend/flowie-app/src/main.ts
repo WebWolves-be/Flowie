@@ -22,7 +22,25 @@ const routes: Routes = [
 ];
 
 function initializeApp(authService: AuthService) {
-    return () => firstValueFrom(authService.checkSession());
+    return () => {
+        console.log('🚀 APP_INITIALIZER: Starting session check...');
+        console.log('🚀 APP_INITIALIZER: Current browser cookies:', document.cookie);
+        
+        return firstValueFrom(authService.checkSession()).then(result => {
+            console.log('🚀 APP_INITIALIZER: Session check completed with result:', result);
+            if (result) {
+                console.log('✅ APP_INITIALIZER: User is authenticated');
+            } else {
+                console.log('ℹ️ APP_INITIALIZER: User is not authenticated (this is normal for first visit)');
+            }
+            return result;
+        }).catch(error => {
+            console.error('🚀 APP_INITIALIZER: Session check failed with error:', error);
+            // Don't fail app initialization just because session check failed
+            console.log('ℹ️ APP_INITIALIZER: Continuing with unauthenticated state');
+            return false;
+        });
+    };
 }
 
 bootstrapApplication(AppComponent, {

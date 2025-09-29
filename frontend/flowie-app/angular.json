@@ -67,7 +67,10 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "flowie-app:build"
+            "buildTarget": "flowie-app:build",
+            "ssl": true,
+            "host": "localhost",
+            "port": 4200
           },
           "configurations": {
             "production": {
