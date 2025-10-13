@@ -12,6 +12,8 @@ public interface IJwtService
     ClaimsPrincipal? ValidateToken(string token);
     
     DateTimeOffset GetTokenExpiration(string token);
+    
+    string? GetTokenId(string token);
 }
 
 public record TokenResponse(
