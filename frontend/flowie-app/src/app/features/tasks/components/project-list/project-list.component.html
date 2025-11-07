@@ -1,48 +1,72 @@
 <div class="space-y-3">
   <!-- Loading skeletons -->
-  <ng-container *ngIf="loading; else projectList">
-    <div class="p-3 rounded-lg border border-gray-200 animate-pulse" *ngFor="let _ of [1,2,3,4]">
-      <div class="flex items-start justify-between mb-2">
-        <div class="h-4 w-40 bg-gray-200 rounded"></div>
-        <div class="h-5 w-16 bg-gray-200 rounded-full"></div>
+  @if (loading()) {
+    @for (_ of [1,2,3,4]; track $index) {
+      <div class="p-3 rounded-lg border border-gray-200 animate-pulse">
+        <div class="flex items-start justify-between mb-2">
+          <div class="h-4 w-40 bg-gray-200 rounded"></div>
+          <div class="h-5 w-16 bg-gray-200 rounded-full"></div>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="h-3 w-16 bg-gray-200 rounded"></div>
+          <div class="h-3 w-10 bg-gray-200 rounded"></div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"></div>
       </div>
-      <div class="flex justify-between items-center">
-        <div class="h-3 w-16 bg-gray-200 rounded"></div>
-        <div class="h-3 w-10 bg-gray-200 rounded"></div>
-      </div>
-      <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"></div>
-    </div>
-  </ng-container>
-
-  <!-- Actual project list -->
-  <ng-template #projectList>
-    <div 
-      *ngFor="let project of projects" 
-      (click)="onSelectProject(project.id)"
-      [class.border-blue-600]="selectedProjectId === project.id"
-      [class.bg-blue-50]="selectedProjectId === project.id"
-      class="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-600 hover:bg-blue-50 transition-all">
-      <div class="flex items-start justify-between mb-2">
-        <h3 class="font-medium text-gray-900 text-sm">{{ project.name }}</h3>
-        <span 
-          [class.bg-amber-100]="project.company === Company.Immoseed"
-          [class.text-amber-800]="project.company === Company.Immoseed"
-          [class.bg-purple-100]="project.company === Company.NovaraRealEstate"
-          [class.text-purple-800]="project.company === Company.NovaraRealEstate"
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
-          {{ project.company === Company.NovaraRealEstate ? 'Novara' : project.company }}
-        </span>
-      </div>
-      <div class="flex justify-between items-center">
-        <span class="text-xs text-gray-500">{{ project.taskCount }} taken</span>
-        <span class="text-xs font-medium text-blue-600">{{ project.progress }}%</span>
-      </div>
-      <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+    }
+  } @else {
+    <!-- Actual project list -->
+    @if (projects().length > 0) {
+      @for (project of projects(); track project.id) {
         <div 
-          class="bg-blue-600 h-1 rounded-full" 
-          [style.width.%]="project.progress">
+          (click)="onSelectProject(project.id)"
+          [class.border-blue-600]="selectedProjectId() === project.id"
+          [class.bg-blue-50]="selectedProjectId() === project.id"
+          class="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-600 hover:bg-blue-50 transition-all">
+          <div class="flex items-start justify-between mb-2">
+            <h3 class="font-medium text-gray-900 text-sm">{{ project.name }}</h3>
+            <span 
+              [class.bg-amber-100]="project.company === Company.Immoseed"
+              [class.text-amber-800]="project.company === Company.Immoseed"
+              [class.bg-purple-100]="project.company === Company.NovaraRealEstate"
+              [class.text-purple-800]="project.company === Company.NovaraRealEstate"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
+              {{ project.company === Company.NovaraRealEstate ? 'Novara' : project.company }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-gray-500">{{ project.completedTasks }} / {{ project.taskCount }} taken</span>
+            <span 
+              class="text-xs font-medium"
+              [class.text-blue-600]="project.progress < 100"
+              [class.text-emerald-500]="project.progress === 100"
+            >
+              {{ project.progress }}%
+            </span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+            <div 
+              class="h-1 rounded-full"
+              [class.bg-blue-600]="project.progress < 100"
+              [class.bg-emerald-500]="project.progress === 100"
+              [style.width.%]="project.progress">
+            </div>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- No projects placeholder -->
+      <div class="flex items-center justify-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center">
+          <div class="mx-auto mb-3 h-10 w-10 text-gray-400">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8M8 17h5" />
+            </svg>
+          </div>
+          <p class="text-sm text-gray-600">Geen projecten gevonden voor deze selectie.</p>
         </div>
       </div>
-    </div>
-  </ng-template>
+    }
+  }
 </div>

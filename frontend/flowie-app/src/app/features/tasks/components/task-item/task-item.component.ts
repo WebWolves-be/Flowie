@@ -65,6 +65,61 @@ export class TaskItemComponent {
     return task.subtasks[task.subtasks.length - 1]?.deadline ?? '';
   });
 
+  private monthMap: Record<string, number> = {
+    'januari': 0,
+    'februari': 1,
+    'maart': 2,
+    'april': 3,
+    'mei': 4,
+    'juni': 5,
+    'juli': 6,
+    'augustus': 7,
+    'september': 8,
+    'oktober': 9,
+    'november': 10,
+    'december': 11
+  };
+
+  private parseDutchDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+    const m = dateStr.trim().toLowerCase().match(/^(\d{1,2})\s+([a-zA-Zèéëïäöü]+)\s+(\d{4})$/);
+    if (!m) return null;
+    const day = parseInt(m[1], 10);
+    const monthName = m[2];
+    const year = parseInt(m[3], 10);
+    const monthIndex = this.monthMap[monthName];
+    if (monthIndex === undefined) return null;
+    return new Date(year, monthIndex, day);
+  }
+
+  isTaskDeadlineOverdue = computed(() => {
+    const task = this.task();
+    if (!task.deadline || task.completed) return false;
+    const d = this.parseDutchDate(task.deadline);
+    if (!d) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d.getTime() < today.getTime();
+  });
+
+  isSubtaskOverdue(subtask: Subtask): boolean {
+    if (!subtask.deadline || subtask.done) return false;
+    const d = this.parseDutchDate(subtask.deadline);
+    if (!d) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d.getTime() < today.getTime();
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    const first = parts[0].charAt(0).toUpperCase();
+    const last = parts[parts.length - 1].charAt(0).toUpperCase();
+    return `${first}${last}`;
+  }
+
   toggleSubtasks() {
     this.showSubtasks.update(value => !value);
   }
@@ -109,5 +164,25 @@ export class TaskItemComponent {
   onDelete() {
     this.showMenu.set(false);
     // TODO: Implement delete functionality
+  }
+
+  onAddSubtask() {
+    this.showMenu.set(false);
+    const task = this.task();
+    if (!task.subtasks) task.subtasks = [];
+    task.subtasks.push({
+      title: 'Nieuwe subtaak',
+      assignee: task.assignee.name,
+      deadline: this.formatTodayDutch(),
+      done: false
+    });
+    // Emit toggle to trigger any parent refresh logic (reuse taskToggled)
+    this.taskToggled.emit(task.id);
+  }
+
+  private formatTodayDutch(): string {
+    const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+    const d = new Date();
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
 }

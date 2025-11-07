@@ -1,20 +1,19 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, input, output } from "@angular/core";
 import { Project } from "../../models/project.model";
 import { Company } from "../../models/company.enum";
 
 @Component({
   selector: "app-project-list",
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: "./project-list.component.html",
   styleUrl: "./project-list.component.scss"
 })
 export class ProjectListComponent {
-  @Input() projects: Project[] = [];
-  @Input() selectedProjectId?: number;
-  @Input() loading: boolean = false;
-  @Output() projectSelected = new EventEmitter<number>();
+  projects = input<Project[]>([]);
+  selectedProjectId = input<number>();
+  loading = input<boolean>(false);
+  projectSelected = output<number>();
 
   // Expose enum to template
   readonly Company = Company;

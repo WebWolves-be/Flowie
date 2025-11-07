@@ -1,0 +1,111 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-5">
+    @if (isDetailLoading()) {
+      <div class="animate-pulse">
+        <div class="h-8 w-72 bg-gray-200 rounded"></div>
+        <div class="h-4 w-96 bg-gray-200 rounded mt-3"></div>
+        <div class="h-4 w-80 bg-gray-200 rounded mt-2"></div>
+        <div class="flex space-x-3 mt-4">
+          <div class="h-9 w-36 bg-gray-200 rounded-lg"></div>
+          <div class="h-9 w-40 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+    } @else {
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <div class="flex items-center mb-2">
+            <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().name }}</h2>
+            <span 
+              [class.bg-amber-100]="project().company === Company.Immoseed"
+              [class.text-amber-800]="project().company === Company.Immoseed"
+              [class.bg-purple-100]="project().company === Company.NovaraRealEstate"
+              [class.text-purple-800]="project().company === Company.NovaraRealEstate"
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+              {{ project().company === Company.NovaraRealEstate ? 'Novara' : project().company }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 max-w-2xl">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            <i class="fas fa-plus mr-2"></i>Taak Toevoegen
+          </button>
+          <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+            <i class="fas fa-edit mr-2"></i>Project Bewerken
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-6 overflow-y-auto bg-gray-50 min-h-full">
+    @if (isDetailLoading()) {
+      <div class="mb-6 flex flex-wrap gap-2 animate-pulse">
+        <div class="h-8 w-24 bg-gray-200 rounded-full"></div>
+        <div class="h-8 w-36 bg-gray-200 rounded-full"></div>
+      </div>
+    } @else if (tasks().length > 0) {
+      <div class="mb-6 flex flex-wrap gap-2">
+        <button 
+          (click)="onToggleFilter(false)"
+          [class.bg-blue-600]="!showOnlyMyTasks()"
+          [class.text-white]="!showOnlyMyTasks()"
+          [class.bg-gray-200]="showOnlyMyTasks()"
+          [class.text-gray-700]="showOnlyMyTasks()"
+          class="task-filter px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
+          Alle Taken
+        </button>
+        <button 
+          (click)="onToggleFilter(true)"
+          [class.bg-blue-600]="showOnlyMyTasks()"
+          [class.text-white]="showOnlyMyTasks()"
+          [class.bg-gray-200]="!showOnlyMyTasks()"
+          [class.text-gray-700]="!showOnlyMyTasks()"
+          class="px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
+          <i class="fas fa-user mr-1"></i>Alleen Mijn Taken
+        </button>
+      </div>
+    }
+
+    @if (isLoadingTasks()) {
+      <div class="space-y-4 animate-pulse">
+        <div class="h-20 bg-gray-200 rounded-lg"></div>
+        <div class="h-20 bg-gray-200 rounded-lg"></div>
+        <div class="h-20 bg-gray-200 rounded-lg"></div>
+      </div>
+    } @else if (tasks().length === 0) {
+      <div class="flex items-center justify-center py-16 min-h-full">
+        <div class="text-center max-w-md px-6">
+          <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-blue-100 mb-6">
+            <svg class="h-12 w-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Geen taken gevonden</h3>
+          <p class="text-sm text-gray-500 mb-6">Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een nieuwe taak aan te maken.</p>
+          <div class="flex items-center justify-center space-x-2 text-gray-400">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-xs font-medium">Voeg je eerste taak toe</span>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        @for (task of tasks(); track task.id) {
+          <app-task-item 
+            [task]="task"
+            [isLast]="$last"
+            (taskToggled)="onTaskToggled(task.id)"
+            (taskClicked)="onTaskClicked(task.id)">
+          </app-task-item>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -6,7 +6,7 @@ export interface Task {
   title: string;
   description: string;
   completed: boolean;
-  category: string;
+  taskType: string; // renamed from category
   deadline: string;
   assignee: {
     name: string;
