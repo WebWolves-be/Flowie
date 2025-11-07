@@ -33,6 +33,8 @@ export class DashboardFacade {
   totalProjects = computed(() => this.allProjects().length);
   totalTasks = computed(() => this.allProjects().reduce((acc, p) => acc + p.taskCount, 0));
   completedTasks = computed(() => this.allProjects().reduce((acc, p) => acc + p.completedTasks, 0));
+  // For mock delta we simulate a previous period as 90% of current values
+  private previousCompletedTasks = computed(() => Math.round(this.completedTasks() * 0.9));
   overallProgressPct = computed(() => {
     const projects = this.allProjects();
     if (!projects.length) return 0;
@@ -40,9 +42,13 @@ export class DashboardFacade {
     const sum = projects.reduce((acc, p) => acc + p.progress, 0);
     return Math.round(sum / projects.length);
   });
+  private previousProgressPct = computed(() => Math.max(0, this.overallProgressPct() - 5));
   activeProjects = computed(() => this.allProjects().filter(p => p.progress > 0 && p.progress < 100).length);
+  private previousActiveProjects = computed(() => Math.max(0, this.activeProjects() - 1));
   completedProjects = computed(() => this.allProjects().filter(p => p.progress === 100).length);
+  private previousCompletedProjects = computed(() => Math.max(0, this.completedProjects() - 1));
   notStartedProjects = computed(() => this.allProjects().filter(p => p.progress === 0).length);
+  private previousNotStartedProjects = computed(() => this.notStartedProjects());
 
   private progressStatus = computed<'good' | 'warn' | 'bad'>(() => {
     const v = this.overallProgressPct();
@@ -62,32 +68,42 @@ export class DashboardFacade {
       key: 'completedTasks',
       label: 'Afgeronde taken',
       value: this.completedTasks(),
-      description: 'Taken gemarkeerd als voltooid'
+      description: 'Taken gemarkeerd als voltooid',
+      delta: this.completedTasks() - this.previousCompletedTasks(),
+      trend: this.completedTasks() === this.previousCompletedTasks() ? 'flat' : (this.completedTasks() > this.previousCompletedTasks() ? 'up' : 'down')
     },
     {
       key: 'overallProgress',
       label: 'Gemiddelde voortgang',
       value: this.overallProgressPct() + '%',
       description: 'Gemiddelde projectvoortgang',
-      status: this.progressStatus()
+      status: this.progressStatus(),
+      delta: this.overallProgressPct() - this.previousProgressPct(),
+      trend: this.overallProgressPct() === this.previousProgressPct() ? 'flat' : (this.overallProgressPct() > this.previousProgressPct() ? 'up' : 'down')
     },
     {
       key: 'activeProjects',
       label: 'Actieve projecten',
       value: this.activeProjects(),
-      description: 'Projecten in uitvoering'
+      description: 'Projecten in uitvoering',
+      delta: this.activeProjects() - this.previousActiveProjects(),
+      trend: this.activeProjects() === this.previousActiveProjects() ? 'flat' : (this.activeProjects() > this.previousActiveProjects() ? 'up' : 'down')
     },
     {
       key: 'completedProjects',
       label: 'Afgeronde projecten',
       value: this.completedProjects(),
-      description: 'Projecten 100% voltooid'
+      description: 'Projecten 100% voltooid',
+      delta: this.completedProjects() - this.previousCompletedProjects(),
+      trend: this.completedProjects() === this.previousCompletedProjects() ? 'flat' : (this.completedProjects() > this.previousCompletedProjects() ? 'up' : 'down')
     },
     {
       key: 'notStartedProjects',
       label: 'Nog niet gestart',
       value: this.notStartedProjects(),
-      description: 'Projecten zonder voortgang'
+      description: 'Projecten zonder voortgang',
+      delta: this.notStartedProjects() - this.previousNotStartedProjects(),
+      trend: this.notStartedProjects() === this.previousNotStartedProjects() ? 'flat' : (this.notStartedProjects() > this.previousNotStartedProjects() ? 'up' : 'down')
     }
   ]);
 }
