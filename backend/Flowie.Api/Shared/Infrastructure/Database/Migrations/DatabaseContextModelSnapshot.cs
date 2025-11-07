@@ -554,7 +554,8 @@ namespace Flowie.Api.Migrations
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Identity.User", b =>
                 {
-                    b.Navigation("Employee");
+                    b.Navigation("Employee")
+                        .IsRequired();
 
                     b.Navigation("RefreshTokens");
                 });

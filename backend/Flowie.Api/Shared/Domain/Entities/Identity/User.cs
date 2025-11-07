@@ -14,7 +14,7 @@ public class User : IdentityUser, IAuditableEntity
     
     public DateTimeOffset? UpdatedAt { get; set; }
 
-    public Employee? Employee { get; set; }
+    public Employee Employee { get; set; }
     
     public ICollection<RefreshToken> RefreshTokens { get; } = [];
 }

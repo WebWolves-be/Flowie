@@ -1,0 +1,161 @@
+<div class="flex h-full bg-white">
+  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <div class="p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Projecten</h2>
+        <button class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          <i class="fas fa-plus mr-1"></i>Nieuw
+        </button>
+      </div>
+      
+      <div class="flex space-x-2 mb-4">
+        <button
+          (click)="filterCompany('ALL')"
+          [class.bg-blue-600]="companyFilter() === 'ALL'"
+          [class.text-white]="companyFilter() === 'ALL'"
+          [class.bg-gray-200]="companyFilter() !== 'ALL'"
+          [class.text-gray-700]="companyFilter() !== 'ALL'"
+          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Alle</button>
+        <button
+          (click)="filterCompany(Company.Immoseed)"
+          [class.bg-blue-600]="companyFilter() === Company.Immoseed"
+          [class.text-white]="companyFilter() === Company.Immoseed"
+          [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
+          [class.text-gray-700]="companyFilter() !== Company.Immoseed"
+          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Immoseed</button>
+        <button
+          (click)="filterCompany(Company.NovaraRealEstate)"
+          [class.bg-blue-600]="companyFilter() === Company.NovaraRealEstate"
+          [class.text-white]="companyFilter() === Company.NovaraRealEstate"
+          [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
+          [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
+          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Novara</button>
+      </div>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto">
+      <div class="p-4">
+        <app-project-list 
+          [projects]="projects()" 
+          [selectedProjectId]="selectedProjectId()"
+          [loading]="isLoadingProjects()"
+          (projectSelected)="onProjectSelected($event)">
+        </app-project-list>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col">
+    @if (isLoadingTasks()) {
+      <!-- Loading Skeleton for Project Switch / Initial Load -->
+      <div class="flex-1 p-6 overflow-y-auto bg-gray-50 animate-pulse">
+        <div class="space-y-4">
+          <div class="h-8 w-64 bg-gray-200 rounded"></div>
+          <div class="h-4 w-96 bg-gray-200 rounded"></div>
+          <div class="h-4 w-80 bg-gray-200 rounded"></div>
+          <div class="flex space-x-2 mt-4">
+            <div class="h-8 w-24 bg-gray-200 rounded-full"></div>
+            <div class="h-8 w-32 bg-gray-200 rounded-full"></div>
+          </div>
+          <div class="space-y-3 mt-6">
+            <div class="h-20 bg-gray-200 rounded-lg"></div>
+            <div class="h-20 bg-gray-200 rounded-lg"></div>
+            <div class="h-20 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    } @else if (selectedProject()) {
+      <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ selectedProject()!.name }}</h2>
+            <p class="text-sm text-gray-500 mt-2 mb-3 max-w-2xl">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+            <div class="flex items-center mt-2">
+              <span 
+                [class.bg-amber-100]="selectedProject()!.company === Company.Immoseed"
+                [class.text-amber-800]="selectedProject()!.company === Company.Immoseed"
+                [class.bg-purple-100]="selectedProject()!.company === Company.NovaraRealEstate"
+                [class.text-purple-800]="selectedProject()!.company === Company.NovaraRealEstate"
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                {{ selectedProject()!.company === Company.NovaraRealEstate ? 'Novara' : selectedProject()!.company }}
+              </span>
+            </div>
+          </div>
+          <div class="flex space-x-3">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <i class="fas fa-plus mr-2"></i>Taak Toevoegen
+            </button>
+            <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+              <i class="fas fa-edit mr-2"></i>Project Bewerken
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <div class="mb-6 flex flex-wrap gap-2">
+          <button 
+            (click)="toggleTaskFilter(false)"
+            [class.bg-blue-600]="!showOnlyMyTasks()"
+            [class.text-white]="!showOnlyMyTasks()"
+            [class.bg-gray-200]="showOnlyMyTasks()"
+            [class.text-gray-700]="showOnlyMyTasks()"
+            class="task-filter px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
+            Alle Taken
+          </button>
+          <button 
+            (click)="toggleTaskFilter(true)"
+            [class.bg-blue-600]="showOnlyMyTasks()"
+            [class.text-white]="showOnlyMyTasks()"
+            [class.bg-gray-200]="!showOnlyMyTasks()"
+            [class.text-gray-700]="!showOnlyMyTasks()"
+            class="px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
+            <i class="fas fa-user mr-1"></i>Alleen Mijn Taken
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <app-task-item 
+            *ngFor="let task of tasks(); let last = last"
+            [task]="task"
+            [isLast]="last"
+            (taskToggled)="onTaskToggled($event)"
+            (taskClicked)="onTaskClicked($event)">
+          </app-task-item>
+        </div>
+      </div>
+    } @else {
+      <!-- Empty State Placeholder -->
+      <div class="flex-1 flex items-center justify-center bg-gray-50">
+        <div class="text-center max-w-md px-6">
+          <!-- Icon -->
+          <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-blue-100 mb-6">
+            <svg class="h-12 w-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          
+          <!-- Title -->
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+            Geen project geselecteerd
+          </h3>
+          
+          <!-- Description -->
+          <p class="text-sm text-gray-500 mb-6">
+            Selecteer een project uit de lijst aan de linkerkant om de taken te bekijken en te beheren.
+          </p>
+          
+          <!-- Decorative Element -->
+          <div class="flex items-center justify-center space-x-2 text-gray-400">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-xs font-medium">Kies een project om te starten</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

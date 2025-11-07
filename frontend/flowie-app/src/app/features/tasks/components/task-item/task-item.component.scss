@@ -1,0 +1,39 @@
+.progress-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px; /* square with rounded corners */
+  font-size: 12px;
+  font-weight: bold;
+
+  i {
+    font-size: 16px; /* Make icons slightly larger */
+  }
+}
+
+.progress-100 {
+  background-color: #10B981;
+  color: white;
+}
+
+.progress-default {
+  background-color: #DBEAFE; /* light blue (blue-100) */
+  color: #1E3A8A; /* blue-800 */
+}
+
+.progress-50-plus {
+  background-color: #F59E0B;
+  color: white;
+}
+
+.progress-under-50 {
+  background-color: #F97316;
+  color: white;
+}
+
+.progress-0 {
+  background-color: #E5E7EB;
+  color: #6B7280;
+}

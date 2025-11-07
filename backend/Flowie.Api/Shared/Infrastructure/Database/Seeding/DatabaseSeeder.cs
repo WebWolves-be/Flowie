@@ -14,6 +14,7 @@ public static class DatabaseSeeder
         
         var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var timeProvider = scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
         await db.Database.MigrateAsync(ct);
 
@@ -29,7 +30,8 @@ public static class DatabaseSeeder
             {
                 UserName = email,
                 Email = email,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                CreatedAt = timeProvider.GetUtcNow()
             };
 
             var createResult = await userManager.CreateAsync(user, password);

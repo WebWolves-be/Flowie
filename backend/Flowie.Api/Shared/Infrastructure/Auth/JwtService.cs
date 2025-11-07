@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -12,11 +13,13 @@ public class JwtService : IJwtService
 {
     private readonly JwtSettings _jwtSettings;
     private readonly TimeProvider _timeProvider;
+    private readonly ILogger<JwtService> _logger;
     
-    public JwtService(IOptions<JwtSettings> jwtSettings, TimeProvider timeProvider)
+    public JwtService(IOptions<JwtSettings> jwtSettings, TimeProvider timeProvider, ILogger<JwtService> logger)
     {
         _jwtSettings = jwtSettings.Value;
         _timeProvider = timeProvider;
+        _logger = logger;
     }
     
     public string GenerateAccessToken(User user)
@@ -30,14 +33,9 @@ public class JwtService : IJwtService
         
         var claims = new List<Claim>
         {
-            // Standard JWT claims (RFC 7519)
+            // Standard JWT claims (RFC 7519) - timestamps handled by JwtSecurityToken constructor
             new(JwtRegisteredClaimNames.Sub, user.Id),                    // Subject
             new(JwtRegisteredClaimNames.Jti, jti),                        // JWT ID (prevents replay)
-            new(JwtRegisteredClaimNames.Iss, _jwtSettings.Issuer),        // Issuer
-            new(JwtRegisteredClaimNames.Aud, _jwtSettings.Audience),      // Audience
-            new(JwtRegisteredClaimNames.Iat, now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),  // Issued At
-            new(JwtRegisteredClaimNames.Exp, expires.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64), // Expires
-            new(JwtRegisteredClaimNames.Nbf, now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),  // Not Before
             
             // User identity claims
             new(ClaimTypes.NameIdentifier, user.Id),
@@ -49,10 +47,10 @@ public class JwtService : IJwtService
             new("user_id", user.Id),
             new("token_type", "access_token"),
             new("scope", "api.access"),
-            new("version", user.TokenVersion.ToString()) // Token version for invalidation
+            new("version", user.TokenVersion.ToString(CultureInfo.InvariantCulture)) // Token version for invalidation
         };
         
-        Console.WriteLine($"JWT Token Generation - JTI: {jti}, Now: {now:yyyy-MM-dd HH:mm:ss} UTC, Expires: {expires:yyyy-MM-dd HH:mm:ss} UTC, ExpirationMinutes: {_jwtSettings.ExpirationInMinutes}");
+        _logger.LogDebug("JWT Token Generation - JTI: {Jti}, Now: {Now} UTC, Expires: {Expires} UTC, ExpirationMinutes: {ExpirationMinutes}", jti, now, expires, _jwtSettings.ExpirationInMinutes);
         
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
@@ -87,7 +85,7 @@ public class JwtService : IJwtService
             // Explicitly check the algorithm to prevent "alg: none" and algorithm substitution attacks
             if (jsonToken.Header.Alg != SecurityAlgorithms.HmacSha256)
             {
-                Console.WriteLine($"JWT Validation Failed: Invalid algorithm '{jsonToken.Header.Alg}', expected '{SecurityAlgorithms.HmacSha256}'");
+                _logger.LogWarning("JWT Validation Failed: Invalid algorithm {Algorithm}, expected {ExpectedAlgorithm}", jsonToken.Header.Alg, SecurityAlgorithms.HmacSha256);
                 return null;
             }
             
@@ -112,8 +110,8 @@ public class JwtService : IJwtService
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
                 
-                // No clock skew for better security
-                ClockSkew = TimeSpan.Zero,
+                // Allow 5 minutes clock skew for time synchronization issues
+                ClockSkew = TimeSpan.FromMinutes(5),
                 
                 // Additional security
                 RequireSignedTokens = true
@@ -124,7 +122,7 @@ public class JwtService : IJwtService
             // Additional validation - ensure the validated token is a JWT
             if (validatedToken is not JwtSecurityToken jwtToken)
             {
-                Console.WriteLine("JWT Validation Failed: Token is not a valid JWT");
+                _logger.LogWarning("JWT Validation Failed: Token is not a valid JWT");
                 return null;
             }
             
@@ -132,36 +130,36 @@ public class JwtService : IJwtService
             var tokenTypeClaim = principal.FindFirst("token_type")?.Value;
             if (tokenTypeClaim != null && tokenTypeClaim != "access_token")
             {
-                Console.WriteLine($"JWT Validation Failed: Invalid token type '{tokenTypeClaim}'");
+                _logger.LogWarning("JWT Validation Failed: Invalid token type {TokenType}", tokenTypeClaim);
                 return null;
             }
             
-            Console.WriteLine($"JWT Token validated successfully - JTI: {principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value}");
+            _logger.LogDebug("JWT Token validated successfully - JTI: {Jti}", principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value);
             return principal;
         }
         catch (SecurityTokenExpiredException ex)
         {
-            Console.WriteLine($"JWT Validation Failed: Token expired - {ex.Message}");
+            _logger.LogWarning("JWT Validation Failed: Token expired - {Message}", ex.Message);
             return null;
         }
         catch (SecurityTokenInvalidSignatureException ex)
         {
-            Console.WriteLine($"JWT Validation Failed: Invalid signature - {ex.Message}");
+            _logger.LogWarning("JWT Validation Failed: Invalid signature - {Message}", ex.Message);
             return null;
         }
         catch (SecurityTokenInvalidIssuerException ex)
         {
-            Console.WriteLine($"JWT Validation Failed: Invalid issuer - {ex.Message}");
+            _logger.LogWarning("JWT Validation Failed: Invalid issuer - {Message}", ex.Message);
             return null;
         }
         catch (SecurityTokenInvalidAudienceException ex)
         {
-            Console.WriteLine($"JWT Validation Failed: Invalid audience - {ex.Message}");
+            _logger.LogWarning("JWT Validation Failed: Invalid audience - {Message}", ex.Message);
             return null;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"JWT Validation Failed: {ex.Message}");
+            _logger.LogWarning("JWT Validation Failed: {Message}", ex.Message);
             return null;
         }
     }
@@ -175,7 +173,7 @@ public class JwtService : IJwtService
         var utcDateTime = DateTime.SpecifyKind(jwtToken.ValidTo, DateTimeKind.Utc);
         var utcDateTimeOffset = new DateTimeOffset(utcDateTime, TimeSpan.Zero);
         
-        Console.WriteLine($"JWT Token Expiration Check - ValidTo: {utcDateTimeOffset:yyyy-MM-dd HH:mm:ss} UTC, Offset: {utcDateTimeOffset.Offset}");
+        _logger.LogDebug("JWT Token Expiration Check - ValidTo: {ValidTo} UTC, Offset: {Offset}", utcDateTimeOffset, utcDateTimeOffset.Offset);
         
         return utcDateTimeOffset;
     }

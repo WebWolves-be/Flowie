@@ -16,6 +16,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -138,8 +140,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         RequireExpirationTime = true,
         
-        // No clock skew tolerance for better security
-        ClockSkew = TimeSpan.Zero,
+        // Allow 5 minutes clock skew for time synchronization issues
+        ClockSkew = TimeSpan.FromMinutes(5),
         
         // Token replay protection
         ValidateTokenReplay = false, // We use token versioning for invalidation
@@ -157,45 +159,69 @@ builder.Services.AddAuthentication(options =>
     {
         OnAuthenticationFailed = context =>
         {
-            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("JWT Authentication failed: {Message}", context.Exception.Message);
             return Task.CompletedTask;
         },
         OnTokenValidated = async context =>
         {
             // Validate token version against user record
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
             
             var userIdClaim = context.Principal.FindFirst("sub")?.Value;
             var versionClaim = context.Principal.FindFirst("version")?.Value;
             
-            if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(versionClaim))
+            if (string.IsNullOrEmpty(userIdClaim))
             {
-                Console.WriteLine("JWT Token validation failed: Missing user ID or version claim");
+                logger.LogWarning("JWT Token validation failed: Missing user ID claim");
                 context.Fail("Invalid token claims");
                 return;
             }
 
-            if (!int.TryParse(versionClaim, out var tokenVersion))
-            {
-                Console.WriteLine("JWT Token validation failed: Invalid version claim format");
-                context.Fail("Invalid token version");
-                return;
-            }
-            
-            // Check token version against user record 
+            // Check if user still exists and is not locked out
             var user = await userManager.FindByIdAsync(userIdClaim);
-            if (user == null || user.TokenVersion != tokenVersion)
+            if (user == null)
             {
-                Console.WriteLine($"JWT Token validation failed: Version mismatch (token: {tokenVersion}, user: {user?.TokenVersion})");
-                context.Fail("Token version mismatch - user logged out");
+                logger.LogWarning("JWT Token validation failed: User {UserId} not found", userIdClaim);
+                context.Fail("User not found");
                 return;
             }
+
+            // Check if user is locked out
+            if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)
+            {
+                logger.LogWarning("JWT Token validation failed: User {UserId} is locked out until {LockoutEnd}", userIdClaim, user.LockoutEnd);
+                context.Fail("User account is locked");
+                return;
+            }
+
+            // Only validate token version if the version claim exists
+            if (!string.IsNullOrEmpty(versionClaim))
+            {
+                if (!int.TryParse(versionClaim, out var tokenVersion))
+                {
+                    logger.LogWarning("JWT Token validation failed: Invalid version claim format for user {UserId}", userIdClaim);
+                    context.Fail("Invalid token version");
+                    return;
+                }
+                
+                // Check token version against user record - only fail if token version is older
+                if (user.TokenVersion > tokenVersion)
+                {
+                    logger.LogWarning("JWT Token validation failed: Token version {TokenVersion} is older than user version {UserVersion} for user {UserId}", 
+                        tokenVersion, user.TokenVersion, userIdClaim);
+                    context.Fail("Token version outdated - user logged out");
+                    return;
+                }
+            }
             
-            Console.WriteLine($"JWT Token validated successfully - Version: {tokenVersion}");
+            logger.LogDebug("JWT Token validated successfully for user {UserId} - Version: {TokenVersion}", userIdClaim, versionClaim ?? "none");
         },
         OnChallenge = context =>
         {
-            Console.WriteLine($"JWT Challenge: {context.Error}, {context.ErrorDescription}");
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("JWT Challenge: {Error}, {ErrorDescription}", context.Error, context.ErrorDescription);
             return Task.CompletedTask;
         }
     };
@@ -206,7 +232,6 @@ builder.Services.AddAuthorization();
 
 // HttpContext accessor
 builder.Services.AddHttpContextAccessor();
-// TODO: Add current user service if needed
 
 // Add CORS for Angular frontend
 builder.Services.AddCors(options =>
@@ -222,6 +247,80 @@ builder.Services.AddCors(options =>
 
 // Add TimeProvider
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Add Rate Limiting for Authentication endpoints
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    // Policy for login/register endpoints - stricter limits
+    rateLimiterOptions.AddPolicy("AuthPolicy", httpContext =>
+    {
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5, // Max 5 attempts
+                Window = TimeSpan.FromMinutes(1), // Per minute
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 2 // Allow 2 queued requests
+            });
+    });
+    
+    // Policy for refresh token endpoint - more lenient
+    rateLimiterOptions.AddPolicy("RefreshPolicy", httpContext =>
+    {
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10, // Max 10 refreshes
+                Window = TimeSpan.FromMinutes(1), // Per minute
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 3
+            });
+    });
+    
+    // Global rate limiting for all endpoints as fallback
+    rateLimiterOptions.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    {
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100, // 100 requests per minute globally
+                Window = TimeSpan.FromMinutes(1)
+            });
+    });
+    
+    // Configure rejection response
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    
+    // Custom response when rate limit is exceeded
+    rateLimiterOptions.OnRejected = async (context, _) =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        var clientIp = context.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var endpoint = context.HttpContext.Request.Path;
+        
+        logger.LogWarning("Rate limit exceeded for IP {ClientIp} on endpoint {Endpoint}", clientIp, endpoint);
+        
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        
+        var response = new
+        {
+            type = "https://tools.ietf.org/html/rfc6585#section-4",
+            title = "Too Many Requests",
+            status = 429,
+            detail = "Rate limit exceeded. Please try again later.",
+            instance = context.HttpContext.Request.Path.Value
+        };
+        
+        await context.HttpContext.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+    };
+});
 
 // Add MediatR
 builder.Services.AddMediatR(typeof(Program).Assembly);
@@ -247,6 +346,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseSerilogRequestLogging();
 
+// Use Rate Limiting BEFORE other middleware
+app.UseRateLimiter();
+
 // Use CORS BEFORE HTTPS redirection
 app.UseCors();
 
@@ -257,7 +359,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Map API endpoints
-app.MapSimpleAuthEndpoints();
+app.MapAuthEndpoints();
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();

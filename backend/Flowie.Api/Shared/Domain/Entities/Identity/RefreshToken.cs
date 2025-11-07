@@ -12,7 +12,7 @@ public class RefreshToken : BaseEntity
     
     public bool IsRevoked { get; set; }
     
-    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
+    public bool IsExpired(TimeProvider timeProvider) => timeProvider.GetUtcNow() >= ExpiresAt;
     
-    public bool IsActive => !IsRevoked && !IsExpired;
+    public bool IsActive(TimeProvider timeProvider) => !IsRevoked && !IsExpired(timeProvider);
 }

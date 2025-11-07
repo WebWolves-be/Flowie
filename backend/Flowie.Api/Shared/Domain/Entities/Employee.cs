@@ -12,7 +12,7 @@ public class Employee : BaseEntity
 
     public bool Active { get; set; } = true;
     
-    public required User User { get; set; }
+    public User? User { get; set; }
     
     public ICollection<Task> AssignedTasks { get; } = [];
 }

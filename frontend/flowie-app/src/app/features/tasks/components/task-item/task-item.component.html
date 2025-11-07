@@ -1,0 +1,124 @@
+<div 
+  class="bg-white shadow rounded-lg p-6 mb-4"
+  [class.border-b]="!isLast()"
+  [class.border-gray-200]="!isLast()">
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <div class="flex items-center mb-3">
+        <div 
+          class="progress-circle flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold mr-2.5"
+          [ngClass]="progressClass()">
+          <i class="fas" [ngClass]="statusIcon()"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
+      </div>
+
+      <p class="text-sm text-gray-500 mb-3">{{ task().description }}</p>
+
+      <div class="flex text-sm text-black">
+        <span>{{ task().category }}</span>
+        <span class="text-blue-600 font-bold mx-3">|</span>
+        <span>Deadline: {{ task().deadline }}</span>
+        <span class="text-blue-600 font-bold mx-3">|</span>
+        <div class="inline-flex items-center">
+          @if (task().assignee.avatar) {
+            <img 
+              [src]="task().assignee.avatar" 
+              [alt]="task().assignee.name"
+              class="w-5 h-5 rounded-full mr-1.5">
+          } @else {
+            <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-700 mr-1.5">
+              {{ task().assignee.initials }}
+            </div>
+          }
+          <span>{{ task().assignee.name }}</span>
+        </div>
+      </div>
+      
+      @if (task().subtasks && task().subtasks!.length > 0) {
+        <div class="border-l-2 border-gray-200 pl-4 mt-3">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">
+            Subtaken ({{ subtasksDone() }}/{{ subtasksTotal() }} voltooid)
+          </h4>
+          <div class="space-y-3">
+            @for (subtask of task().subtasks!; track $index) {
+              <div 
+                class="pl-3 py-2 rounded-r"
+                [class.border-l-4]="true"
+                [class.border-green-400]="subtask.done"
+                [class.bg-green-50]="subtask.done"
+                [class.border-gray-300]="!subtask.done"
+                [class.bg-white]="!subtask.done">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                      <span 
+                        class="text-sm font-medium"
+                        [class.text-gray-500]="subtask.done"
+                        [class.line-through]="subtask.done"
+                        [class.text-gray-900]="!subtask.done">
+                        {{ subtask.title }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span 
+                        class="text-xs font-medium"
+                        [class.text-green-600]="subtask.done"
+                        [class.text-gray-600]="!subtask.done">
+                        Deadline: {{ subtask.deadline }}
+                      </span>
+                      <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-user mr-1"></i>
+                        <span>{{ subtask.assignee }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  @if (!subtask.done) {
+                    <button 
+                      (click)="onToggleSubtask($index)"
+                      class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 ml-3">
+                      Klaar
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (taskProgress() < 100 && (!task().subtasks || task().subtasks!.length === 0)) {
+        <button 
+          (click)="onMarkComplete()"
+          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
+          {{ actionButtonText() }}
+        </button>
+      }
+
+    </div>
+
+    <!-- Three-dot Menu -->
+    <div class="ml-4 relative">
+      <button 
+        (click)="toggleMenu($event)"
+        class="text-gray-400 hover:text-gray-600 p-2 rounded-full focus:outline-none"
+        title="Acties">
+        <i class="fas fa-ellipsis-vertical"></i>
+      </button>
+      @if (showMenu()) {
+        <div class="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg z-20">
+          <button 
+            (click)="onEdit()"
+            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            Bewerken
+          </button>
+          <button 
+            (click)="onDelete()"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+            Verwijderen
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
