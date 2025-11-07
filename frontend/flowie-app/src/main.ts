@@ -1,9 +1,9 @@
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideRouter, Routes } from "@angular/router";
 import { AppComponent } from "./app/app.component";
-import { DashboardPage } from "./app/features/dashboard/dashboard-page/dashboard-page";
+import { DashboardPage } from "./app/features/dashboard/components/dashboard-page/dashboard-page";
 import { TasksPage } from "./app/features/tasks/components/tasks-page/tasks-page";
-import { SettingsPage } from "./app/features/settings/settings-page/settings-page";
+import { SettingsPage } from "./app/features/settings/components/settings-page/settings-page";
 
 const routes: Routes = [
   {

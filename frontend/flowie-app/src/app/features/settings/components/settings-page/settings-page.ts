@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
-import { TaskTypesSettingsComponent } from "../components/task-types/task-types-settings.component";
+import { TaskTypesSettingsComponent } from '../task-types/task-types-settings.component';
 
 @Component({
   selector: 'app-settings-page',

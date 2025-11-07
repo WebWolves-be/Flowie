@@ -1,0 +1,55 @@
+<div class="p-4 space-y-6">
+  <h1 class="text-xl font-semibold text-gray-900">Dashboard</h1>
+
+  @if (isLoading()) {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-pulse">
+      @for (s of skeletons; track s) {
+        <div class="rounded-xl bg-white/70 backdrop-blur p-4 border border-slate-200 flex items-center gap-4">
+          <div class="h-10 w-10 rounded-lg bg-slate-200"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3 w-24 bg-slate-200 rounded"></div>
+            <div class="h-6 w-16 bg-slate-300 rounded"></div>
+            <div class="h-3 w-32 bg-slate-200 rounded"></div>
+            <div class="h-2 w-full bg-slate-100 rounded overflow-hidden">
+              <div class="h-2 w-2/3 bg-slate-300 rounded"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading()) {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (m of metrics(); track m.key) {
+        <div class="rounded-xl bg-white/90 backdrop-blur shadow-md p-4 border border-slate-200 flex items-center gap-4 hover:shadow-lg transition-all">
+          <div class="h-10 w-10 rounded-lg flex items-center justify-center text-white"
+               [ngClass]="{
+                 'bg-emerald-500': m.status === 'good',
+                 'bg-amber-500': m.status === 'warn',
+                 'bg-rose-500': m.status === 'bad',
+                 'bg-blue-600': !m.status
+               }">
+            <span class="text-sm font-semibold">{{ (m.key[0] || 'M').toUpperCase() }}</span>
+          </div>
+          <div class="flex-1">
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">{{ m.label }}</div>
+            <div class="mt-1 text-2xl font-bold text-slate-900">{{ m.value }}</div>
+            <div class="mt-1 text-xs text-slate-400">{{ m.description }}</div>
+            @if (m.key === 'overallProgress') {
+              <div class="mt-2 h-2 w-full bg-slate-100 rounded">
+                <div class="h-2 rounded"
+                     [style.width]="m.value.toString()"
+                     [ngClass]="{
+                       'bg-emerald-500': m.status === 'good',
+                       'bg-amber-500': m.status === 'warn',
+                       'bg-rose-500': m.status === 'bad'
+                     }"></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

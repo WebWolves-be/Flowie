@@ -1,6 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardFacade } from '../facade/dashboard.facade';
+import { DashboardFacade } from '../../facade/dashboard.facade';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -13,6 +13,7 @@ export class DashboardPage {
   facade = inject(DashboardFacade);
   metrics = this.facade.metrics;
   isLoading = this.facade.isLoading;
+  skeletons = [0, 1, 2, 3, 4, 5];
 
   constructor() {
     this.facade.load();
