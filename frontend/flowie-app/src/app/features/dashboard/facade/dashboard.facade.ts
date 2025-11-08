@@ -32,7 +32,7 @@ export class DashboardFacade {
   // Metrics based purely on project aggregates (MVP) since we lack started/done timestamps.
   totalProjects = computed(() => this.allProjects().length);
   totalTasks = computed(() => this.allProjects().reduce((acc, p) => acc + p.taskCount, 0));
-  completedTasks = computed(() => this.allProjects().reduce((acc, p) => acc + p.completedTasks, 0));
+  completedTasks = computed(() => this.allProjects().reduce((acc, p) => acc + p.completedTaskCount, 0));
   // For mock delta we simulate a previous period as 90% of current values
   private previousCompletedTasks = computed(() => Math.round(this.completedTasks() * 0.9));
   overallProgressPct = computed(() => {

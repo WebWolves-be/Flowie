@@ -3,9 +3,9 @@ import { Company } from './company.enum';
 
 export interface Project {
     id: number;
-    name: string;
+    title: string; // aligns with backend Title
     taskCount: number;
-    completedTasks: number;
-    progress: number;
-    company: Company;
+    completedTaskCount: number; // aligns with backend CompletedTaskCount
+    progress: number; // derived client-side
+    company: Company; // backend sends string; mapped to enum in UI
 }

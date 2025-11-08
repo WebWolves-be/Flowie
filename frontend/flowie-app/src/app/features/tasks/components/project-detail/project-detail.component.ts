@@ -23,6 +23,8 @@ export class ProjectDetailComponent {
   taskFilterToggled = output<boolean>();
   taskClicked = output<number>();
   taskToggled = output<number>();
+  projectEditRequested = output<void>();
+  taskCreateRequested = output<void>();
 
   // Expose enum to template
   readonly Company = Company;
@@ -37,5 +39,13 @@ export class ProjectDetailComponent {
 
   onTaskToggled(id: number) {
     this.taskToggled.emit(id);
+  }
+
+  onEditProject() {
+    this.projectEditRequested.emit();
+  }
+
+  onCreateTask() {
+    this.taskCreateRequested.emit();
   }
 }

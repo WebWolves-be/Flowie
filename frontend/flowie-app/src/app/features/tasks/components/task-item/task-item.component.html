@@ -1,5 +1,6 @@
 <div 
-  class="bg-white shadow rounded-lg p-6 mb-4"
+  class="bg-white shadow rounded-lg p-6"
+  [class.mb-4]="!isLast()"
   [class.border-b]="!isLast()"
   [class.border-gray-200]="!isLast()">
   <div class="flex items-start justify-between">
@@ -17,12 +18,12 @@
 
       @if (!task().subtasks) {
         <div class="flex items-center text-sm text-black">
-          <span>{{ task().taskType }}</span>
+          <span>{{ task().typeName }}</span>
           <span class="text-blue-600 font-bold mx-3">|</span>
           <span
             [class.text-red-600]="isTaskDeadlineOverdue()"
             [class.font-semibold]="isTaskDeadlineOverdue()"
-          >Deadline: {{ task().deadline }}</span>
+          >Deadline: {{ formatDutch(task().dueDate) }}</span>
           <span class="text-blue-600 font-bold mx-3">|</span>
           <span class="inline-flex items-center">
             <span class="font-semibold mr-1">{{ task().assignee.initials }}</span> {{ task().assignee.name }}
@@ -56,7 +57,7 @@
                       </span>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
-                      <span class="text-gray-700">{{ task().taskType }}</span>
+                      <span class="text-gray-700">{{ task().typeName }}</span>
                       <span class="text-blue-600 font-bold">|</span>
                       <span
                         class="font-medium"
@@ -64,9 +65,9 @@
                         [class.text-red-600]="!subtask.done && isSubtaskOverdue(subtask)"
                         [class.font-semibold]="!subtask.done && isSubtaskOverdue(subtask)"
                         [class.text-gray-600]="!subtask.done && !isSubtaskOverdue(subtask)"
-                      >Deadline: {{ subtask.deadline }}</span>
+                      >Deadline: {{ formatDutch(subtask.dueDate) }}</span>
                       <span class="text-blue-600 font-bold">|</span>
-                      <span class="text-gray-700"><span class="font-semibold">{{ getInitials(subtask.assignee) }}</span> {{ subtask.assignee }}</span>
+                      <span class="text-gray-700"><span class="font-semibold">{{ subtask.assignee?.initials || getInitials(subtask.assignee?.name || '') }}</span> {{ subtask.assignee?.name }}</span>
                     </div>
                   </div>
                   @if (!subtask.done) {

@@ -24,7 +24,7 @@
           [class.bg-blue-50]="selectedProjectId() === project.id"
           class="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-600 hover:bg-blue-50 transition-all">
           <div class="flex items-start justify-between mb-2">
-            <h3 class="font-medium text-gray-900 text-sm">{{ project.name }}</h3>
+            <h3 class="font-medium text-gray-900 text-sm">{{ project.title }}</h3>
             <span 
               [class.bg-amber-100]="project.company === Company.Immoseed"
               [class.text-amber-800]="project.company === Company.Immoseed"
@@ -35,7 +35,7 @@
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">{{ project.completedTasks }} / {{ project.taskCount }} taken</span>
+            <span class="text-xs text-gray-500">{{ project.completedTaskCount }} / {{ project.taskCount }} taken</span>
             <span 
               class="text-xs font-medium"
               [class.text-blue-600]="project.progress < 100"

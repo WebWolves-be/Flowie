@@ -30,7 +30,10 @@ export class TaskItemComponent {
       const done = task.subtasks.filter(s => s.done).length;
       return Math.round((done / task.subtasks.length) * 100);
     }
-    return task.progress ?? (task.completed ? 100 : 0);
+    if (typeof task.subtaskCount === 'number' && typeof task.completedSubtaskCount === 'number' && task.subtaskCount > 0) {
+      return Math.round((task.completedSubtaskCount / task.subtaskCount) * 100);
+    }
+    return typeof task.progress === 'number' ? task.progress : (task.statusName === 'Done' ? 100 : 0);
   });
 
   progressClass = computed(() => {
@@ -62,7 +65,7 @@ export class TaskItemComponent {
   lastSubtaskDeadline = computed(() => {
     const task = this.task();
     if (!task.subtasks || task.subtasks.length === 0) return '';
-    return task.subtasks[task.subtasks.length - 1]?.deadline ?? '';
+    return task.subtasks[task.subtasks.length - 1]?.dueDate ?? '';
   });
 
   private monthMap: Record<string, number> = {
@@ -92,10 +95,25 @@ export class TaskItemComponent {
     return new Date(year, monthIndex, day);
   }
 
+  private parseFlexible(dateStr: string): Date | null {
+    if (!dateStr) return null;
+    const iso = new Date(dateStr);
+    if (!isNaN(iso.getTime())) return iso;
+    return this.parseDutchDate(dateStr);
+  }
+
+  formatDutch(dateStr: string | null | undefined): string {
+    if (!dateStr) return '';
+    const d = this.parseFlexible(dateStr);
+    if (!d) return dateStr; // already localized text
+    const fmt = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    return fmt.format(d);
+  }
+
   isTaskDeadlineOverdue = computed(() => {
     const task = this.task();
-    if (!task.deadline || task.completed) return false;
-    const d = this.parseDutchDate(task.deadline);
+    if (!task.dueDate || (task.statusName === 'Done' || this.taskProgress() === 100)) return false;
+    const d = this.parseFlexible(task.dueDate);
     if (!d) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -103,8 +121,8 @@ export class TaskItemComponent {
   });
 
   isSubtaskOverdue(subtask: Subtask): boolean {
-    if (!subtask.deadline || subtask.done) return false;
-    const d = this.parseDutchDate(subtask.deadline);
+    if (!subtask.dueDate || subtask.done) return false;
+    const d = this.parseFlexible(subtask.dueDate);
     if (!d) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -140,7 +158,7 @@ export class TaskItemComponent {
   onMarkComplete() {
     // Mark task and all subtasks as complete
     const task = this.task();
-    task.completed = true;
+    task.statusName = 'Done';
     task.progress = 100;
     if (task.subtasks) {
       task.subtasks.forEach(s => s.done = true);
@@ -172,9 +190,11 @@ export class TaskItemComponent {
     if (!task.subtasks) task.subtasks = [];
     task.subtasks.push({
       title: 'Nieuwe subtaak',
-      assignee: task.assignee.name,
-      deadline: this.formatTodayDutch(),
-      done: false
+      assignee: { name: task.assignee.name, initials: task.assignee.initials },
+      dueDate: this.formatTodayDutch(),
+      done: false,
+      status: task.status, // inherit status for now
+      statusName: task.statusName
     });
     // Emit toggle to trigger any parent refresh logic (reuse taskToggled)
     this.taskToggled.emit(task.id);

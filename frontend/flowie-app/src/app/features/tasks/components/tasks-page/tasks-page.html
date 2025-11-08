@@ -1,35 +1,41 @@
-<div class="flex h-full bg-white">
-  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col">
-    <div class="p-4 border-b border-gray-200">
+<div class="flex h-full bg-white overflow-hidden">
+  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+    <div class="p-4 border-b border-gray-200 flex-shrink-0">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-lg font-semibold text-gray-900">Projecten</h1>
-        <button class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+        <button (click)="onNewProject()" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
           <i class="fas fa-plus mr-1"></i>Nieuw
         </button>
       </div>
       
-      <div class="flex space-x-2 mb-4">
+      <div class="flex space-x-2">
         <button
           (click)="filterCompany('ALL')"
           [class.bg-blue-600]="companyFilter() === 'ALL'"
           [class.text-white]="companyFilter() === 'ALL'"
+          [class.hover:bg-blue-700]="companyFilter() === 'ALL'"
           [class.bg-gray-200]="companyFilter() !== 'ALL'"
           [class.text-gray-700]="companyFilter() !== 'ALL'"
-          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Alle</button>
+          [class.hover:bg-gray-300]="companyFilter() !== 'ALL'"
+          class="px-2 py-1 rounded text-xs transition-colors">Alle</button>
         <button
           (click)="filterCompany(Company.Immoseed)"
           [class.bg-blue-600]="companyFilter() === Company.Immoseed"
           [class.text-white]="companyFilter() === Company.Immoseed"
+          [class.hover:bg-blue-700]="companyFilter() === Company.Immoseed"
           [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
           [class.text-gray-700]="companyFilter() !== Company.Immoseed"
-          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Immoseed</button>
+          [class.hover:bg-gray-300]="companyFilter() !== Company.Immoseed"
+          class="px-2 py-1 rounded text-xs transition-colors">Immoseed</button>
         <button
           (click)="filterCompany(Company.NovaraRealEstate)"
           [class.bg-blue-600]="companyFilter() === Company.NovaraRealEstate"
           [class.text-white]="companyFilter() === Company.NovaraRealEstate"
+          [class.hover:bg-blue-700]="companyFilter() === Company.NovaraRealEstate"
           [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
           [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
-          class="px-2 py-1 rounded text-xs hover:bg-gray-300 transition-colors">Novara</button>
+          [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
+          class="px-2 py-1 rounded text-xs transition-colors">Novara</button>
       </div>
     </div>
     
@@ -39,15 +45,18 @@
           [projects]="projects()" 
           [selectedProjectId]="selectedProject()?.id"
           [loading]="isLoadingProjects()"
-          (projectSelected)="onProjectSelected($event)">
+          (projectSelected)="onProjectSelected($event)"
+          (projectCreateRequested)="onProjectCreate($event)"
+          (projectUpdateRequested)="onProjectUpdate($event)">
         </app-project-list>
       </div>
     </div>
   </aside>
 
-  <div class="flex-1 flex flex-col">
+  <div class="flex-1 flex flex-col overflow-hidden h-full">
     @if (selectedProject()) {
       <app-project-detail
+        class="flex-1 flex flex-col overflow-hidden h-full"
         [project]="selectedProject()!"
         [tasks]="tasks()"
         [isLoadingTasks]="isLoadingTasks()"
@@ -55,7 +64,9 @@
         [showOnlyMyTasks]="showOnlyMyTasks()"
         (taskFilterToggled)="onTaskFilterToggled($event)"
         (taskToggled)="onTaskToggled($event)"
-        (taskClicked)="onTaskClicked($event)">
+        (taskClicked)="onTaskClicked($event)"
+        (projectEditRequested)="onEditProjectRequested()"
+        (taskCreateRequested)="onCreateTaskRequested()">
       </app-project-detail>
     } @else {
       <!-- Empty State Placeholder -->

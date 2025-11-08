@@ -5,6 +5,10 @@ import { ProjectListComponent } from '../project-list/project-list.component';
 import { ProjectDetailComponent } from '../project-detail/project-detail.component';
 import { TaskFacade } from '../../facade/task.facade';
 import { Company } from '../../models/company.enum';
+import { Project } from '../../models/project.model';
+import { Dialog } from '@angular/cdk/dialog';
+import { SaveProjectDialogComponent, SaveProjectDialogData, SaveProjectDialogResult } from '../save-project-dialog/save-project-dialog.component';
+import { SaveTaskDialogComponent, SaveTaskDialogData, SaveTaskDialogResult } from '../save-task-dialog/save-task-dialog.component';
 
 @Component({
   selector: 'app-tasks-page',
@@ -18,12 +22,14 @@ export class TasksPage {
   facade = inject(TaskFacade);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  #dialog = inject(Dialog);
 
   // Expose signals from facade
   projects = this.facade.projects;
   tasks = this.facade.tasks;
   isLoadingProjects = this.facade.isLoadingProjects;
   isLoadingTasks = this.facade.isLoadingTasks;
+  companyFilter = this.facade.companyFilter;
 
   // Local state
   selectedProjectId = signal<number | null>(null);
@@ -38,15 +44,16 @@ export class TasksPage {
   // Expose enum to template
   readonly Company = Company;
 
-  // Local filter state for projects list
-  companyFilter = signal<'ALL' | Company>('ALL');
-
   // Local loading state to distinguish initial project selection vs task filter reloads
   projectDetailLoading = signal<boolean>(false);
 
+  // Track if we've done the initial load
+  private hasInitiallyLoaded = false;
+
   constructor() {
     // Initial load of projects only if not already loaded (avoid flicker on first click)
-    if (this.projects().length === 0) {
+    if (this.projects().length === 0 && !this.hasInitiallyLoaded) {
+      this.hasInitiallyLoaded = true;
       this.facade.getProjects();
     }
 
@@ -58,7 +65,9 @@ export class TasksPage {
         // Mark project detail as loading when navigating/selecting a project
         this.projectDetailLoading.set(true);
         this.selectedProjectId.set(idNum);
-        this.facade.getTasks(idNum, this.showOnlyMyTasks());
+        // Reset task visibility filter when switching projects
+        this.showOnlyMyTasks.set(false);
+        this.facade.getTasks(idNum, false);
       } else {
         this.selectedProjectId.set(null);
         this.facade.clearTasks();
@@ -84,9 +93,65 @@ export class TasksPage {
     );
   }
 
+  onProjectCreate(project: Project) {
+    // Remove temp id if present (dialog used Date.now()) and let facade assign
+    const { id: _temp, ...rest } = project;
+    this.facade.createProject(rest);
+  }
+
+  onProjectUpdate(project: Project) {
+    this.facade.updateProject(project);
+    // If updating currently selected project refresh selection reference
+    if (this.selectedProjectId() === project.id) {
+      // Trigger recompute by setting id again
+      this.selectedProjectId.set(project.id);
+    }
+  }
+
+  onNewProject() {
+    const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
+      data: { mode: 'create' } as SaveProjectDialogData,
+      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
+      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+    });
+    ref.closed.subscribe(result => {
+      if (result?.mode === 'create') {
+        const { id: _tmp, ...rest } = result.project;
+        this.facade.createProject(rest);
+      }
+    });
+  }
+
+  onEditProjectRequested() {
+    const proj = this.selectedProject();
+    if (!proj) return;
+    const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
+      data: { mode: 'update', project: proj } as SaveProjectDialogData,
+      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
+      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+    });
+    ref.closed.subscribe(result => {
+      if (result?.mode === 'update') {
+        this.facade.updateProject(result.project);
+      }
+    });
+  }
+
 
   onTaskClicked(taskId: number) {
-    console.log('Task clicked:', taskId);
+    const task = this.tasks().find(t => t.id === taskId);
+    const proj = this.selectedProject();
+    if (!task || !proj) return;
+    const ref = this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+      data: { mode: 'update', projectId: proj.id, task } as SaveTaskDialogData,
+      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
+      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+    });
+    ref.closed.subscribe(result => {
+      if (result?.mode === 'update') {
+        this.facade.updateTask(result.task);
+      }
+    });
   }
 
   onTaskFilterToggled(showOnlyMine: boolean) {
@@ -103,14 +168,25 @@ export class TasksPage {
   }
 
   filterCompany(filter: 'ALL' | Company) {
-    this.companyFilter.set(filter);
     // Clear current project selection and route when changing company filter
     this.selectedProjectId.set(null);
     this.router.navigate(['/taken']).catch(() => {});
-    if (filter === 'ALL') {
-      this.facade.getProjects();
-    } else {
-      this.facade.getProjects(filter);
-    }
+    this.facade.setCompanyFilter(filter);
+  }
+
+  onCreateTaskRequested() {
+    const proj = this.selectedProject();
+    if (!proj) return;
+    const ref = this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+      data: { mode: 'create', projectId: proj.id } as SaveTaskDialogData,
+      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
+      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+    });
+    ref.closed.subscribe(result => {
+      if (result?.mode === 'create') {
+        const { id: _tmp, ...rest } = result.task;
+        this.facade.createTask(rest);
+      }
+    });
   }
 }

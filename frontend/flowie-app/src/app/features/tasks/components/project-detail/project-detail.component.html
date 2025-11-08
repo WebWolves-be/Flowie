@@ -1,6 +1,6 @@
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full overflow-hidden">
   <!-- Header -->
-  <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-5">
+  <div class="bg-white border-b border-gray-200 p-6 flex-shrink-0">
     @if (isDetailLoading()) {
       <div class="animate-pulse">
         <div class="h-8 w-72 bg-gray-200 rounded"></div>
@@ -15,7 +15,7 @@
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <div class="flex items-center mb-2">
-            <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().name }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().title }}</h2>
             <span 
               [class.bg-amber-100]="project().company === Company.Immoseed"
               [class.text-amber-800]="project().company === Company.Immoseed"
@@ -30,10 +30,10 @@
           </p>
         </div>
         <div class="flex space-x-3">
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <button (click)="onCreateTask()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
             <i class="fas fa-plus mr-2"></i>Taak Toevoegen
           </button>
-          <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+          <button (click)="onEditProject()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
             <i class="fas fa-edit mr-2"></i>Project Bewerken
           </button>
         </div>
@@ -41,15 +41,10 @@
     }
   </div>
 
-  <!-- Content -->
-  <div class="flex-1 p-6 overflow-y-auto bg-gray-50 min-h-full">
-    @if (isDetailLoading()) {
-      <div class="mb-6 flex flex-wrap gap-2 animate-pulse">
-        <div class="h-8 w-24 bg-gray-200 rounded-full"></div>
-        <div class="h-8 w-36 bg-gray-200 rounded-full"></div>
-      </div>
-    } @else if (tasks().length > 0) {
-      <div class="mb-6 flex flex-wrap gap-2">
+  <!-- Filter Bar -->
+  @if (!isDetailLoading() && tasks().length > 0) {
+    <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex-shrink-0">
+      <div class="flex flex-wrap gap-2">
         <button 
           (click)="onToggleFilter(false)"
           [class.bg-blue-600]="!showOnlyMyTasks()"
@@ -68,6 +63,16 @@
           class="px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
           <i class="fas fa-user mr-1"></i>Alleen Mijn Taken
         </button>
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="flex-1 p-6 overflow-y-auto bg-gray-50">
+    @if (isDetailLoading()) {
+      <div class="mb-6 flex flex-wrap gap-2 animate-pulse">
+        <div class="h-8 w-24 bg-gray-200 rounded-full"></div>
+        <div class="h-8 w-36 bg-gray-200 rounded-full"></div>
       </div>
     }
 

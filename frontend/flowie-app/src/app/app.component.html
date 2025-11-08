@@ -1,12 +1,12 @@
-<div class="flex h-screen bg-gray-50">
-	<aside class="flex flex-col w-56 bg-blue-800 text-white border-r border-blue-900/40">
-		<div class="px-4 py-5">
+<div class="flex h-screen bg-gray-50 overflow-hidden">
+	<aside class="flex flex-col w-56 bg-blue-800 text-white border-r border-blue-900/40 flex-shrink-0">
+		<div class="px-4 py-5 flex-shrink-0">
 			<div class="flex items-center gap-3">
 				<div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-extrabold">F</div>
 				<span class="text-lg font-semibold">Flowie</span>
 			</div>
 		</div>
-		<nav class="flex-1 px-2 py-2 space-y-1">
+		<nav class="flex-1 px-2 py-2 space-y-1 overflow-y-auto">
 			<a
 				routerLink="/dashboard"
 				[routerLinkActive]="['bg-white/10','text-white','font-semibold','!text-white']"
@@ -31,7 +31,7 @@
 				<span class="truncate">Instellingen</span>
 			</a>
 		</nav>
-		<div class="p-4 border-t border-blue-900/40">
+		<div class="p-4 border-t border-blue-900/40 flex-shrink-0">
 			<div class="flex items-center">
 				<div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium text-white">AV</div>
 				<div class="ml-3">
@@ -40,7 +40,7 @@
 			</div>
 		</div>
 	</aside>
-	<div class="flex-1 overflow-y-auto">
+	<div class="flex-1 overflow-hidden">
 		<router-outlet></router-outlet>
 	</div>
 </div>

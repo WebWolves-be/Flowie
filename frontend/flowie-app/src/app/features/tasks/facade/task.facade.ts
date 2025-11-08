@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from "@angular/core";
 import { Task } from "../models/task.model";
 import { Project } from "../models/project.model";
 import { Company } from "../models/company.enum";
+import { TaskStatus } from "../models/task-status.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +12,13 @@ export class TaskFacade {
   #tasks = signal<Task[]>([]);
   #isLoadingProjects = signal<boolean>(false);
   #isLoadingTasks = signal<boolean>(false);
+  #companyFilter = signal<'ALL' | Company>('ALL');
 
   projects = this.#projects.asReadonly();
   tasks = this.#tasks.asReadonly();
   isLoadingProjects = this.#isLoadingProjects.asReadonly();
   isLoadingTasks = this.#isLoadingTasks.asReadonly();
+  companyFilter = this.#companyFilter.asReadonly();
 
   getProjects(company?: Company): void {
     this.#isLoadingProjects.set(true);
@@ -25,44 +28,122 @@ export class TaskFacade {
       const allMockProjects: Project[] = [
         {
           id: 1,
-          name: 'Vijfwegstraat Gedan',
+          title: 'Vijfwegstraat Gedan',
           taskCount: 4,
-          completedTasks: 2,
+          completedTaskCount: 2,
           progress: 50,
           company: Company.Immoseed
         },
         {
           id: 2,
-          name: 'Bruggestraat 31',
+          title: 'Bruggestraat 31',
           taskCount: 7,
-          completedTasks: 4,
+          completedTaskCount: 4,
           progress: 60,
           company: Company.NovaraRealEstate
         },
         {
           id: 3,
-          name: 'Residentie Baku Gedan',
+          title: 'Residentie Baku Gedan',
           taskCount: 3,
-          completedTasks: 2,
+          completedTaskCount: 2,
           progress: 80,
           company: Company.NovaraRealEstate
         },
-        // Fully completed example project
         {
           id: 4,
-          name: 'Demo: Volledig Afgerond',
+          title: 'Demo: Volledig Afgerond',
           taskCount: 3,
-          completedTasks: 3,
+          completedTaskCount: 3,
           progress: 100,
           company: Company.Immoseed
         },
-        // Zero progress example project
         {
           id: 5,
-          name: 'Demo: Nog Niet Begonnen',
+          title: 'Demo: Nog Niet Begonnen',
           taskCount: 5,
-          completedTasks: 0,
+          completedTaskCount: 0,
           progress: 0,
+          company: Company.NovaraRealEstate
+        },
+        {
+          id: 6,
+          title: 'Kerkstraat 45',
+          taskCount: 8,
+          completedTaskCount: 3,
+          progress: 37,
+          company: Company.Immoseed
+        },
+        {
+          id: 7,
+          title: 'Stationsplein 12',
+          taskCount: 6,
+          completedTaskCount: 5,
+          progress: 83,
+          company: Company.NovaraRealEstate
+        },
+        {
+          id: 8,
+          title: 'Residentie De Waterkant',
+          taskCount: 12,
+          completedTaskCount: 4,
+          progress: 33,
+          company: Company.Immoseed
+        },
+        {
+          id: 9,
+          title: 'Antwerpsesteenweg 89',
+          taskCount: 4,
+          completedTaskCount: 1,
+          progress: 25,
+          company: Company.NovaraRealEstate
+        },
+        {
+          id: 10,
+          title: 'Leopoldlaan 23',
+          taskCount: 9,
+          completedTaskCount: 6,
+          progress: 66,
+          company: Company.Immoseed
+        },
+        {
+          id: 11,
+          title: 'Groenplaats Tower',
+          taskCount: 15,
+          completedTaskCount: 8,
+          progress: 53,
+          company: Company.NovaraRealEstate
+        },
+        {
+          id: 12,
+          title: 'Meir 104-108',
+          taskCount: 7,
+          completedTaskCount: 2,
+          progress: 28,
+          company: Company.Immoseed
+        },
+        {
+          id: 13,
+          title: 'Residentie Park View',
+          taskCount: 10,
+          completedTaskCount: 9,
+          progress: 90,
+          company: Company.NovaraRealEstate
+        },
+        {
+          id: 14,
+          title: 'Lange Nieuwstraat 67',
+          taskCount: 5,
+          completedTaskCount: 0,
+          progress: 0,
+          company: Company.Immoseed
+        },
+        {
+          id: 15,
+          title: 'Scheldekaaien Loft',
+          taskCount: 11,
+          completedTaskCount: 5,
+          progress: 45,
           company: Company.NovaraRealEstate
         }
       ];
@@ -85,44 +166,65 @@ export class TaskFacade {
           projectId: 1,
           title: 'Compromis maken',
           description: 'Voltooi de verkoopovereenkomst voor het Vijfwegstraat Gedan pand',
-          completed: true,
-          taskType: 'Compromis',
-          deadline: '18 juni 2025',
+          typeId: 1,
+          typeName: 'Compromis',
+          status: TaskStatus.Done,
+          statusName: 'Done',
+          dueDate: '18 juni 2025',
           progress: 100,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 2,
           projectId: 1,
           title: 'Nieuwe 3D tekeningen?',
           description: 'Maak nieuwe 3D architecturale tekeningen voor het project',
-          completed: false,
-          taskType: 'Ontwerp',
-          deadline: '26 augustus 2025',
+          typeId: 2,
+          typeName: 'Ontwerp',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '26 augustus 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 5,
           projectId: 1,
           title: 'Klantmeeting voorbereiden',
           description: 'Agenda opstellen en documenten verzamelen voor klantmeeting',
-          completed: false,
-          taskType: 'Communicatie',
-          deadline: '15 december 2025',
+          typeId: 3,
+          typeName: 'Communicatie',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '15 december 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 6,
           projectId: 1,
           title: 'Budgetcontrole Q2',
           description: 'Controleer de kosten en budgetten voor Q2',
-          completed: false,
-          taskType: 'Financiën',
-          deadline: '31 december 2025',
+          typeId: 4,
+          typeName: 'Financiën',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '31 december 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         // Project 2 tasks
         {
@@ -130,49 +232,70 @@ export class TaskFacade {
           projectId: 2,
           title: 'Publiciteit ter plaatse',
           description: 'Opzetten van reclame en bewegwijzering op locatie',
-          completed: true,
-          taskType: 'Marketing',
-          deadline: '18 juni 2025',
+          typeId: 5,
+          typeName: 'Marketing',
+          status: TaskStatus.Done,
+          statusName: 'Done',
+          dueDate: '18 juni 2025',
           progress: 100,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 4,
           projectId: 2,
           title: 'Gewijzigde verkoopplannen L1 en L2 online zetten',
           description: 'Upload herziene verkoopplannen voor niveaus L1 en L2 naar het online platform',
-          completed: false,
-          taskType: 'Documentatie',
-          deadline: '25 juni 2025',
+          typeId: 6,
+          typeName: 'Documentatie',
+          status: TaskStatus.Ongoing,
+          statusName: 'Ongoing',
+          dueDate: '25 juni 2025',
           progress: 33,
           assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
           subtasks: [
-            { title: 'Huidige L1 plannen bekijken', assignee: 'Amalia Van Dosselaer', deadline: '20 juni 2025', done: true },
-            { title: 'L2 verkoopplannen bijwerken', assignee: 'Amalia Van Dosselaer', deadline: '23 juni 2025', done: false },
-            { title: 'Upload naar online platform', assignee: 'Amalia Van Dosselaer', deadline: '25 juni 2025', done: false }
-          ]
+            { title: 'Huidige L1 plannen bekijken', assignee: { name: 'Amalia Van Dosselaer' }, dueDate: '20 juni 2025', done: true, status: TaskStatus.Done, statusName: 'Done' },
+            { title: 'L2 verkoopplannen bijwerken', assignee: { name: 'Amalia Van Dosselaer' }, dueDate: '23 juni 2025', done: false, status: TaskStatus.Pending, statusName: 'Pending' },
+            { title: 'Upload naar online platform', assignee: { name: 'Amalia Van Dosselaer' }, dueDate: '25 juni 2025', done: false, status: TaskStatus.Pending, statusName: 'Pending' }
+          ],
+          subtaskCount: 3,
+          completedSubtaskCount: 1
         },
         {
           id: 7,
           projectId: 2,
           title: 'Contractreview aannemer',
           description: 'Controleer contractvoorwaarden en leveringsschema',
-          completed: false,
-          taskType: 'Juridisch',
-          deadline: '02 juli 2025',
+          typeId: 7,
+          typeName: 'Juridisch',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '02 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 8,
           projectId: 2,
           title: 'Website content bijwerken',
           description: 'Projectpagina updaten met nieuwe visuals en tekst',
-          completed: false,
-          taskType: 'Marketing',
-          deadline: '20 december 2025',
+          typeId: 5,
+          typeName: 'Marketing',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '20 december 2025',
           progress: 0,
-          assignee: { name: 'Jens Declerck', initials: 'JD' }
+          assignee: { name: 'Jens Declerck', initials: 'JD' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         // Project 4 fully completed
         {
@@ -180,33 +303,51 @@ export class TaskFacade {
           projectId: 4,
           title: 'Oplevering documenten',
           description: 'Alle opleverdocumenten zijn ondertekend en gearchiveerd',
-          completed: true,
-          taskType: 'Documentatie',
-          deadline: '10 juli 2025',
+          typeId: 6,
+          typeName: 'Documentatie',
+          status: TaskStatus.Done,
+          statusName: 'Done',
+          dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 10,
           projectId: 4,
           title: 'Eindinspectie afgerond',
           description: 'Laatste inspectieronde succesvol doorlopen',
-          completed: true,
-          taskType: 'Kwaliteit',
-          deadline: '10 juli 2025',
+          typeId: 8,
+          typeName: 'Kwaliteit',
+          status: TaskStatus.Done,
+          statusName: 'Done',
+          dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 11,
           projectId: 4,
           title: 'Facturatie voltooid',
           description: 'Alle facturen zijn verstuurd en betaald',
-          completed: true,
-          taskType: 'Financiën',
-          deadline: '10 juli 2025',
+          typeId: 4,
+          typeName: 'Financiën',
+          status: TaskStatus.Done,
+          statusName: 'Done',
+          dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         // Project 5 zero progress tasks
         {
@@ -214,55 +355,80 @@ export class TaskFacade {
           projectId: 5,
           title: 'Kick-off plannen',
           description: 'Kick-off meeting inplannen met alle stakeholders',
-          completed: false,
-          taskType: 'Planning',
-          deadline: '15 juli 2025',
+          typeId: 9,
+          typeName: 'Planning',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '15 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 13,
           projectId: 5,
           title: 'Scope definiëren',
           description: 'Projectscope en deliverables vastleggen',
-          completed: false,
-          taskType: 'Analyse',
-          deadline: '16 juli 2025',
+          typeId: 10,
+          typeName: 'Analyse',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '16 juli 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 14,
           projectId: 5,
           title: 'Budget opstellen',
           description: 'Initiële budgettering voorleggen voor goedkeuring',
-          completed: false,
-          taskType: 'Financiën',
-          deadline: '17 juli 2025',
+          typeId: 4,
+          typeName: 'Financiën',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '17 juli 2025',
           progress: 0,
-          assignee: { name: 'Jens Declerck', initials: 'JD' }
+          assignee: { name: 'Jens Declerck', initials: 'JD' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 15,
           projectId: 5,
           title: 'Risicoanalyse',
           description: 'Belangrijkste projectrisico’s in kaart brengen',
-          completed: false,
-          taskType: 'Risico',
-          deadline: '18 juli 2025',
+          typeId: 11,
+          typeName: 'Risico',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '18 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' }
+          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         },
         {
           id: 16,
           projectId: 5,
           title: 'Planning opstellen',
           description: 'Hoog-over planning en milestones definiëren',
-          completed: false,
-          taskType: 'Planning',
-          deadline: '19 juli 2025',
+          typeId: 9,
+          typeName: 'Planning',
+          status: TaskStatus.Pending,
+          statusName: 'Pending',
+          dueDate: '19 juli 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' }
+          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          createdAt: new Date().toISOString(),
+          subtaskCount: 0,
+          completedSubtaskCount: 0
         }
       ];
       // Filter by requested project and current user preference
@@ -277,6 +443,54 @@ export class TaskFacade {
 
   clearTasks(): void {
     this.#tasks.set([]);
+  }
+
+  setCompanyFilter(filter: 'ALL' | Company): void {
+    this.#companyFilter.set(filter);
+    this.getProjects(filter === 'ALL' ? undefined : filter);
+  }
+
+  createProject(project: Omit<Project, 'id'>): void {
+    const current = this.#projects();
+    const nextId = current.length ? Math.max(...current.map(p => p.id)) + 1 : 1;
+    const normalized: Project = {
+      ...project,
+      id: nextId,
+      taskCount: project.taskCount ?? 0,
+      completedTaskCount: (project as any).completedTaskCount ?? 0,
+      progress: typeof project.progress === 'number' ? project.progress : 0
+    } as Project;
+    this.#projects.set([...current, normalized]);
+  }
+
+  updateProject(updated: Project): void {
+    const current = this.#projects();
+    const next = current.map(p => (p.id === updated.id ? { ...p, ...updated } : p));
+    this.#projects.set(next);
+  }
+
+  createTask(task: Omit<Task, 'id'>): void {
+    const current = this.#tasks();
+    const nextId = current.length ? Math.max(...current.map(t => t.id)) + 1 : 1;
+    const normalized: Task = {
+      ...task,
+      id: nextId,
+      status: task.status ?? TaskStatus.Pending,
+      statusName: task.statusName ?? (task.status === TaskStatus.Done ? 'Done' : task.status === TaskStatus.Ongoing ? 'Ongoing' : 'Pending'),
+      progress: typeof task.progress === 'number' ? task.progress : (task.status === TaskStatus.Done ? 100 : task.status === TaskStatus.Ongoing ? 33 : 0),
+      createdAt: task.createdAt ?? new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      completedAt: task.status === TaskStatus.Done ? (task.completedAt ?? new Date().toISOString()) : null,
+      subtaskCount: task.subtaskCount ?? 0,
+      completedSubtaskCount: task.completedSubtaskCount ?? 0
+    } as Task;
+    this.#tasks.set([...current, normalized]);
+  }
+
+  updateTask(updated: Task): void {
+    const current = this.#tasks();
+    const next = current.map(t => (t.id === updated.id ? { ...t, ...updated } : t));
+    this.#tasks.set(next);
   }
 
 }
