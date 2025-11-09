@@ -1,6 +1,7 @@
 import { Injectable, signal, computed } from "@angular/core";
 import { Task } from "../models/task.model";
 import { Project } from "../models/project.model";
+import { Employee } from "../models/employee.model";
 import { Company } from "../models/company.enum";
 import { TaskStatus } from "../models/task-status.enum";
 
@@ -10,14 +11,18 @@ import { TaskStatus } from "../models/task-status.enum";
 export class TaskFacade {
   #projects = signal<Project[]>([]);
   #tasks = signal<Task[]>([]);
+  #employees = signal<Employee[]>([]);
   #isLoadingProjects = signal<boolean>(false);
   #isLoadingTasks = signal<boolean>(false);
+  #isLoadingEmployees = signal<boolean>(false);
   #companyFilter = signal<'ALL' | Company>('ALL');
 
   projects = this.#projects.asReadonly();
   tasks = this.#tasks.asReadonly();
+  employees = this.#employees.asReadonly();
   isLoadingProjects = this.#isLoadingProjects.asReadonly();
   isLoadingTasks = this.#isLoadingTasks.asReadonly();
+  isLoadingEmployees = this.#isLoadingEmployees.asReadonly();
   companyFilter = this.#companyFilter.asReadonly();
 
   getProjects(company?: Company): void {
@@ -29,6 +34,7 @@ export class TaskFacade {
         {
           id: 1,
           title: 'Vijfwegstraat Gedan',
+          description: 'Renovatie van historisch pand in centrum van Gedan',
           taskCount: 4,
           completedTaskCount: 2,
           progress: 50,
@@ -37,6 +43,7 @@ export class TaskFacade {
         {
           id: 2,
           title: 'Bruggestraat 31',
+          description: 'Nieuwbouw appartementen met commerciële ruimte op de begane grond',
           taskCount: 7,
           completedTaskCount: 4,
           progress: 60,
@@ -45,6 +52,7 @@ export class TaskFacade {
         {
           id: 3,
           title: 'Residentie Baku Gedan',
+          description: 'Luxe appartementscomplex met 24 wooneenheden en ondergrondse parking',
           taskCount: 3,
           completedTaskCount: 2,
           progress: 80,
@@ -53,6 +61,7 @@ export class TaskFacade {
         {
           id: 4,
           title: 'Demo: Volledig Afgerond',
+          description: 'Test project om volledig afgeronde projecten te tonen',
           taskCount: 3,
           completedTaskCount: 3,
           progress: 100,
@@ -61,6 +70,7 @@ export class TaskFacade {
         {
           id: 5,
           title: 'Demo: Nog Niet Begonnen',
+          description: 'Test project in initiële fase zonder vooruitgang',
           taskCount: 5,
           completedTaskCount: 0,
           progress: 0,
@@ -69,6 +79,7 @@ export class TaskFacade {
         {
           id: 6,
           title: 'Kerkstraat 45',
+          description: 'Verbouwing van voormalige kerk tot woonruimtes',
           taskCount: 8,
           completedTaskCount: 3,
           progress: 37,
@@ -77,6 +88,7 @@ export class TaskFacade {
         {
           id: 7,
           title: 'Stationsplein 12',
+          description: 'Mixed-use development met retail en kantoorruimte',
           taskCount: 6,
           completedTaskCount: 5,
           progress: 83,
@@ -85,6 +97,7 @@ export class TaskFacade {
         {
           id: 8,
           title: 'Residentie De Waterkant',
+          description: 'Exclusieve penthouse appartementen met uitzicht op de rivier',
           taskCount: 12,
           completedTaskCount: 4,
           progress: 33,
@@ -93,6 +106,7 @@ export class TaskFacade {
         {
           id: 9,
           title: 'Antwerpsesteenweg 89',
+          description: 'Herbestemming van industrieel pand naar lofts',
           taskCount: 4,
           completedTaskCount: 1,
           progress: 25,
@@ -101,6 +115,7 @@ export class TaskFacade {
         {
           id: 10,
           title: 'Leopoldlaan 23',
+          description: 'Nieuwe residentie met duurzame energieoplossingen',
           taskCount: 9,
           completedTaskCount: 6,
           progress: 66,
@@ -109,6 +124,7 @@ export class TaskFacade {
         {
           id: 11,
           title: 'Groenplaats Tower',
+          description: 'Hoogbouwproject met 120 appartementen verdeeld over 18 verdiepingen',
           taskCount: 15,
           completedTaskCount: 8,
           progress: 53,
@@ -117,6 +133,7 @@ export class TaskFacade {
         {
           id: 12,
           title: 'Meir 104-108',
+          description: 'Restauratie van Art Deco gevels met moderne interieurinrichting',
           taskCount: 7,
           completedTaskCount: 2,
           progress: 28,
@@ -125,6 +142,7 @@ export class TaskFacade {
         {
           id: 13,
           title: 'Residentie Park View',
+          description: 'Groene woonwijk met gezamenlijke tuinen en speelruimte',
           taskCount: 10,
           completedTaskCount: 9,
           progress: 90,
@@ -133,6 +151,7 @@ export class TaskFacade {
         {
           id: 14,
           title: 'Lange Nieuwstraat 67',
+          description: 'Transformatie van kantoorgebouw naar studentenhuisvesting',
           taskCount: 5,
           completedTaskCount: 0,
           progress: 0,
@@ -141,6 +160,7 @@ export class TaskFacade {
         {
           id: 15,
           title: 'Scheldekaaien Loft',
+          description: 'Waterfront ontwikkeling met eigentijdse architectuur en terras',
           taskCount: 11,
           completedTaskCount: 5,
           progress: 45,
@@ -172,7 +192,7 @@ export class TaskFacade {
           statusName: 'Done',
           dueDate: '18 juni 2025',
           progress: 100,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
           subtaskCount: 0,
@@ -189,7 +209,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '26 augustus 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -205,7 +225,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '15 december 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -221,7 +241,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '31 december 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -238,7 +258,7 @@ export class TaskFacade {
           statusName: 'Done',
           dueDate: '18 juni 2025',
           progress: 100,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
           subtaskCount: 0,
@@ -255,7 +275,7 @@ export class TaskFacade {
           statusName: 'Ongoing',
           dueDate: '25 juni 2025',
           progress: 33,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           subtasks: [
             { title: 'Huidige L1 plannen bekijken', assignee: { name: 'Amalia Van Dosselaer' }, dueDate: '20 juni 2025', done: true, status: TaskStatus.Done, statusName: 'Done' },
@@ -276,7 +296,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '02 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -292,7 +312,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '20 december 2025',
           progress: 0,
-          assignee: { name: 'Jens Declerck', initials: 'JD' },
+          assignee: { name: 'Jens Declerck' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -309,7 +329,7 @@ export class TaskFacade {
           statusName: 'Done',
           dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
           subtaskCount: 0,
@@ -326,7 +346,7 @@ export class TaskFacade {
           statusName: 'Done',
           dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
           subtaskCount: 0,
@@ -343,7 +363,7 @@ export class TaskFacade {
           statusName: 'Done',
           dueDate: '10 juli 2025',
           progress: 100,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
           subtaskCount: 0,
@@ -361,7 +381,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '15 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -377,7 +397,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '16 juli 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -393,7 +413,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '17 juli 2025',
           progress: 0,
-          assignee: { name: 'Jens Declerck', initials: 'JD' },
+          assignee: { name: 'Jens Declerck' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -409,7 +429,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '18 juli 2025',
           progress: 0,
-          assignee: { name: 'Amalia Van Dosselaer', initials: 'AV' },
+          assignee: { name: 'Amalia Van Dosselaer' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -425,7 +445,7 @@ export class TaskFacade {
           statusName: 'Pending',
           dueDate: '19 juli 2025',
           progress: 0,
-          assignee: { name: 'Peter Carrein', initials: 'PC' },
+          assignee: { name: 'Peter Carrein' },
           createdAt: new Date().toISOString(),
           subtaskCount: 0,
           completedSubtaskCount: 0
@@ -491,6 +511,27 @@ export class TaskFacade {
     const current = this.#tasks();
     const next = current.map(t => (t.id === updated.id ? { ...t, ...updated } : t));
     this.#tasks.set(next);
+  }
+
+  getEmployees(): void {
+    this.#isLoadingEmployees.set(true);
+    
+    // Simulate API delay
+    setTimeout(() => {
+      const mockEmployees: Employee[] = [
+        { id: 1, name: 'Amalia Van Dosselaer' },
+        { id: 2, name: 'Peter Carrein' },
+        { id: 3, name: 'Jens Declerck' },
+        { id: 4, name: 'Sophie Vermeulen' },
+        { id: 5, name: 'Tom Janssens' },
+        { id: 6, name: 'Lisa Peeters' },
+        { id: 7, name: 'Marc De Vos' },
+        { id: 8, name: 'Emma Claes' }
+      ];
+      
+      this.#employees.set(mockEmployees);
+      this.#isLoadingEmployees.set(false);
+    }, 300);
   }
 
 }

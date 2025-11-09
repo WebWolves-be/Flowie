@@ -12,8 +12,6 @@ export interface Subtask {
     assignee: {
         id?: number | null;
         name: string; // required (always assigned now)
-        initials?: string;
-        avatar?: string;
     };
     createdAt?: string; // ISO DateTimeOffset
     updatedAt?: string | null;

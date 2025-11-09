@@ -23,6 +23,7 @@ export class ProjectDetailComponent {
   taskFilterToggled = output<boolean>();
   taskClicked = output<number>();
   taskToggled = output<number>();
+  taskEditRequested = output<number>();
   projectEditRequested = output<void>();
   taskCreateRequested = output<void>();
 
@@ -39,6 +40,10 @@ export class ProjectDetailComponent {
 
   onTaskToggled(id: number) {
     this.taskToggled.emit(id);
+  }
+
+  onTaskEdit(id: number) {
+    this.taskEditRequested.emit(id);
   }
 
   onEditProject() {

@@ -25,9 +25,11 @@
               {{ project().company === Company.NovaraRealEstate ? 'Novara' : project().company }}
             </span>
           </div>
-          <p class="text-sm text-gray-500 mb-3 max-w-2xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </p>
+          @if (project().description) {
+            <p class="text-sm text-gray-500 mb-3 max-w-2xl">
+              {{ project().description }}
+            </p>
+          }
         </div>
         <div class="flex space-x-3">
           <button (click)="onCreateTask()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
@@ -107,7 +109,8 @@
             [task]="task"
             [isLast]="$last"
             (taskToggled)="onTaskToggled(task.id)"
-            (taskClicked)="onTaskClicked(task.id)">
+            (taskClicked)="onTaskClicked(task.id)"
+            (taskEditRequested)="onTaskEdit(task.id)">
           </app-task-item>
         }
       </div>

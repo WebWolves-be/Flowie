@@ -28,6 +28,7 @@ export class SaveProjectDialogComponent {
   readonly Company = Company;
 
   title = signal(this.data.project?.title ?? '');
+  description = signal(this.data.project?.description ?? '');
   company = signal<Company>(this.data.project?.company ?? Company.Immoseed);
 
   readonly isUpdate = this.data.mode === 'update';
@@ -49,6 +50,7 @@ export class SaveProjectDialogComponent {
     const base: Project = {
       id: this.data.project?.id ?? Date.now(), // temp id generation for mock
       title: this.title(),
+      description: this.description() || null,
       company: this.company(),
       taskCount: this.data.project?.taskCount ?? 0,
       completedTaskCount: this.data.project?.completedTaskCount ?? 0,
@@ -64,6 +66,10 @@ export class SaveProjectDialogComponent {
 
   onNameInput(event: Event): void {
     this.title.set((event.target as HTMLInputElement).value);
+  }
+
+  onDescriptionInput(event: Event): void {
+    this.description.set((event.target as HTMLTextAreaElement).value);
   }
 
   onCompanyChange(event: Event): void {

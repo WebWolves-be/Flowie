@@ -15,8 +15,6 @@ export interface Task {
   assignee: {
     id?: number | null; // employeeId backend
     name: string; // required in UI/back-end for now
-    initials?: string; // UI convenience
-    avatar?: string;
   };
   createdAt?: string; // ISO DateTimeOffset
   updatedAt?: string | null;

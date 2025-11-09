@@ -18,6 +18,7 @@ export class TaskItemComponent {
   // Outputs as signal-based outputs
   taskToggled = output<number>();
   taskClicked = output<number>();
+  taskEditRequested = output<number>();
 
   // Local state as signals
   showSubtasks = signal<boolean>(false);
@@ -129,15 +130,6 @@ export class TaskItemComponent {
     return d.getTime() < today.getTime();
   }
 
-  getInitials(name: string): string {
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    const first = parts[0].charAt(0).toUpperCase();
-    const last = parts[parts.length - 1].charAt(0).toUpperCase();
-    return `${first}${last}`;
-  }
-
   toggleSubtasks() {
     this.showSubtasks.update(value => !value);
   }
@@ -176,7 +168,7 @@ export class TaskItemComponent {
 
   onEdit() {
     this.showMenu.set(false);
-    // TODO: Implement edit functionality
+    this.taskEditRequested.emit(this.task().id);
   }
 
   onDelete() {
@@ -190,7 +182,7 @@ export class TaskItemComponent {
     if (!task.subtasks) task.subtasks = [];
     task.subtasks.push({
       title: 'Nieuwe subtaak',
-      assignee: { name: task.assignee.name, initials: task.assignee.initials },
+      assignee: { name: task.assignee.name },
       dueDate: this.formatTodayDutch(),
       done: false,
       status: task.status, // inherit status for now

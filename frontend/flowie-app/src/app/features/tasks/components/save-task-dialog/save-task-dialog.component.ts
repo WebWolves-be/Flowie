@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { Task } from '../../models/task.model';
 import { TaskStatus } from '../../models/task-status.enum';
+import { TaskTypeFacade } from '../../../settings/facade/task-type.facade';
+import { TaskFacade } from '../../facade/task.facade';
 
 export interface SaveTaskDialogData {
   mode: 'create' | 'update';
@@ -25,17 +27,48 @@ export interface SaveTaskDialogResult {
 export class SaveTaskDialogComponent {
   private ref = inject<DialogRef<SaveTaskDialogResult>>(DialogRef);
   private data = inject<SaveTaskDialogData>(DIALOG_DATA);
+  private taskTypeFacade = inject(TaskTypeFacade);
+  private taskFacade = inject(TaskFacade);
 
   // Signals for form fields
   title = signal(this.data.task?.title ?? '');
   description = signal(this.data.task?.description ?? '');
-  typeName = signal(this.data.task?.typeName ?? '');
-  status = signal<TaskStatus>(this.data.task?.status ?? TaskStatus.Pending);
+  typeId = signal<number | undefined>(this.data.task?.typeId);
   dueDate = signal<string>(this.normalizeDate(this.data.task?.dueDate));
-  assigneeName = signal(this.data.task?.assignee?.name ?? '');
+  assigneeId = signal<number | undefined>(this.data.task?.assignee?.id ?? undefined);
+
+  // Exposed data from facades
+  taskTypes = this.taskTypeFacade.taskTypes;
+  employees = this.taskFacade.employees;
+
+  constructor() {
+    // Load data on init
+    this.taskTypeFacade.getTaskTypes();
+    this.taskFacade.getEmployees();
+    
+    // When editing and assignee doesn't have an ID, find it by name once employees load
+    if (this.isUpdate && this.data.task?.assignee && !this.assigneeId()) {
+      effect(() => {
+        const employees = this.employees();
+        const taskAssigneeName = this.data.task?.assignee?.name;
+        if (employees.length > 0 && taskAssigneeName) {
+          const employee = employees.find(e => e.name === taskAssigneeName);
+          if (employee) {
+            this.assigneeId.set(employee.id);
+          }
+        }
+      });
+    }
+  }
 
   readonly isUpdate = this.data.mode === 'update';
   readonly TaskStatus = TaskStatus;
+
+  // Check if task has subtasks (when editing, only allow title and description)
+  hasSubtasks = computed(() => {
+    const task = this.data.task;
+    return this.isUpdate && task && ((task.subtasks && task.subtasks.length > 0) || (task.subtaskCount && task.subtaskCount > 0));
+  });
 
   titleLabel = computed(() => (this.isUpdate ? 'Taak bewerken' : 'Nieuwe taak aanmaken'));
   actionLabel = computed(() => (this.isUpdate ? 'Bewerken' : 'Aanmaken'));
@@ -50,29 +83,41 @@ export class SaveTaskDialogComponent {
   }
 
   onSave(): void {
+    // If task has subtasks, preserve existing values for type, deadline, and assignee
+    const hasSubtasksValue = this.hasSubtasks();
+    
+    const selectedType = hasSubtasksValue 
+      ? this.taskTypes().find(t => t.id === this.data.task?.typeId)
+      : this.taskTypes().find(t => t.id === this.typeId());
+    
+    const selectedEmployee = hasSubtasksValue
+      ? this.employees().find(e => e.id === this.data.task?.assignee?.id || e.name === this.data.task?.assignee?.name)
+      : this.employees().find(e => e.id === this.assigneeId());
+    
+    // Use existing status when updating, default to Pending when creating
+    const status = this.data.task?.status ?? TaskStatus.Pending;
+    
     const base: Task = {
       id: this.data.task?.id ?? Date.now(), // temp id for mock
       projectId: this.data.projectId,
       parentTaskId: this.data.task?.parentTaskId ?? null,
       title: this.title(),
       description: this.description() || null,
-      typeId: this.data.task?.typeId ?? undefined,
-      typeName: this.typeName() || undefined,
-      status: this.status(),
-      statusName: this.statusToName(this.status()),
-      dueDate: this.dueDate() || null,
+      typeId: hasSubtasksValue ? this.data.task?.typeId : this.typeId(),
+      typeName: selectedType?.name,
+      status: status,
+      statusName: this.statusToName(status),
+      dueDate: hasSubtasksValue ? this.data.task?.dueDate : (this.dueDate() || null),
       assignee: {
-        id: this.data.task?.assignee?.id ?? null,
-        name: this.assigneeName() || 'Onbekend',
-        initials: this.getInitials(this.assigneeName() || 'Onbekend'),
-        avatar: this.data.task?.assignee?.avatar
+        id: selectedEmployee?.id ?? null,
+        name: selectedEmployee?.name ?? 'Onbekend'
       },
       createdAt: this.data.task?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      completedAt: this.status() === TaskStatus.Done ? new Date().toISOString() : null,
+      completedAt: status === TaskStatus.Done ? new Date().toISOString() : null,
       subtaskCount: this.data.task?.subtaskCount ?? 0,
       completedSubtaskCount: this.data.task?.completedSubtaskCount ?? 0,
-      progress: this.deriveProgress(this.status()),
+      progress: this.deriveProgress(status),
       subtasks: this.data.task?.subtasks
     };
     this.ref.close({ task: base, mode: this.data.mode });
@@ -80,10 +125,9 @@ export class SaveTaskDialogComponent {
 
   onTitleInput(e: Event) { this.title.set((e.target as HTMLInputElement).value); }
   onDescriptionInput(e: Event) { this.description.set((e.target as HTMLTextAreaElement).value); }
-  onTypeNameInput(e: Event) { this.typeName.set((e.target as HTMLInputElement).value); }
-  onAssigneeInput(e: Event) { this.assigneeName.set((e.target as HTMLInputElement).value); }
+  onTypeChange(e: Event) { this.typeId.set(Number((e.target as HTMLSelectElement).value) || undefined); }
+  onAssigneeChange(e: Event) { this.assigneeId.set(Number((e.target as HTMLSelectElement).value) || undefined); }
   onDueDateChange(e: Event) { this.dueDate.set((e.target as HTMLInputElement).value); }
-  onStatusChange(e: Event) { this.status.set(Number((e.target as HTMLSelectElement).value) as TaskStatus); }
 
   private statusToName(status: TaskStatus): string {
     switch (status) {
@@ -98,13 +142,6 @@ export class SaveTaskDialogComponent {
     if (status === TaskStatus.Done) return 100;
     if (status === TaskStatus.Ongoing) return 33;
     return 0;
-  }
-
-  private getInitials(name: string): string {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 0) return '';
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return `${parts[0].charAt(0).toUpperCase()}${parts[parts.length - 1].charAt(0).toUpperCase()}`;
   }
 
   // Accepts ISO date, localized string, or undefined; returns yyyy-MM-dd or '' for <input type="date">
