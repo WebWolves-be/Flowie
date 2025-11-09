@@ -9,16 +9,16 @@ internal class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCo
         RuleFor(x => x.Title)
             .MinimumLength(3)
             .MaximumLength(200)
-            .When(x => !string.IsNullOrEmpty(x.Title))
-            .WithMessage("Title must be between 3 and 200 characters");
+            .When(x => !string.IsNullOrWhiteSpace(x.Title))
+            .WithMessage("Titel moet tussen 3 en 200 tekens zijn.");
 
         RuleFor(x => x.Description)
             .MaximumLength(4000)
             .When(x => !string.IsNullOrEmpty(x.Description))
-            .WithMessage("Description cannot exceed 4000 characters");
+            .WithMessage("Beschrijving mag niet langer dan 4000 tekens zijn.");
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .WithMessage("Company must be Immoseed or NovaraRealEstate");
+            .WithMessage("Bedrijf moet 'Immoseed' of 'Novara' zijn.");
     }
 }

@@ -25,9 +25,7 @@ internal class GetProjectByIdQueryHandler(IDatabaseContext databaseContext) : IR
             project.Id,
             project.Title,
             project.Description,
-            project.Company.ToString(),
-            project.Tasks.Count,
-            project.Tasks.Count(t => t.Status == TaskStatus.Done)
+            project.Company
         );
     }
 }

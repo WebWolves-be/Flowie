@@ -7,17 +7,18 @@ internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCo
     public CreateProjectCommandValidator()
     {
         RuleFor(x => x.Title)
-            .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(200)
-            .WithMessage("Title must be between 3 and 200 characters");
+            .When(x => !string.IsNullOrWhiteSpace(x.Title))
+            .WithMessage("Titel moet tussen 3 en 200 tekens zijn.");
 
         RuleFor(x => x.Description)
             .MaximumLength(4000)
-            .When(x => x.Description != null);
+            .When(x => !string.IsNullOrWhiteSpace(x.Description))
+            .WithMessage("Beschrijving mag niet langer dan 4000 tekens zijn.");
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .WithMessage("Company must be Immoseed or Novara Real Estate");
+            .WithMessage("Bedrijf moet 'Immoseed' of 'Novara' zijn.");
     }
 }

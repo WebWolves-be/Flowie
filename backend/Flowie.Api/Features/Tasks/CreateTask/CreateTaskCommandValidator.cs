@@ -12,9 +12,9 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
         _dbContext = dbContext;
         
         RuleFor(x => x.Title)
-            .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(200)
+            .When(x => !string.IsNullOrEmpty(x.Title))
             .WithMessage("Title must be between 3 and 200 characters");
 
         RuleFor(x => x.Description)

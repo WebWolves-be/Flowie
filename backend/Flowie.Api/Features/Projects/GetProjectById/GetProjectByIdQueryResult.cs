@@ -1,9 +1,9 @@
+using Flowie.Api.Shared.Domain.Enums;
+
 namespace Flowie.Api.Features.Projects.GetProjectById;
 
 internal record GetProjectByIdQueryResult(
-    int Id,
+    int ProjectId,
     string Title, 
     string? Description,
-    string Company,
-    int TaskCount,
-    int CompletedTaskCount);
+    Company Company);

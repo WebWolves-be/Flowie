@@ -1,4 +1,3 @@
-using Flowie.Api.Shared.Infrastructure.Auth;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +28,7 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
                 new ProjectDto(
                     p.Id,
                     p.Title,
-                    p.Company.ToString(),
+                    p.Company,
                     p.Tasks.Count,
                     p.Tasks.Count(t => t.Status == TaskStatus.Done)
                 ))

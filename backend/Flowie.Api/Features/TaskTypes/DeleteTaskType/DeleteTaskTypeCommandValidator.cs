@@ -14,7 +14,7 @@ internal class DeleteTaskTypeCommandValidator : AbstractValidator<DeleteTaskType
 
         RuleFor(x => x.Id)
             .MustAsync(NotHaveRelatedTasks)
-            .WithMessage(x => $"Task Type with ID {x.Id} is in use by existing tasks and cannot be deleted");
+            .WithMessage("Dit type wordt al gebruikt door bestaande taken en kan niet worden verwijderd.");
     }
 
     private async Task<bool> NotHaveRelatedTasks(int id, CancellationToken cancellationToken)

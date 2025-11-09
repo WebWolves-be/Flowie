@@ -5,11 +5,11 @@ namespace Flowie.Api.Shared.Infrastructure.Middleware;
 
 internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
-    private static readonly Action<ILogger, Exception> _logError =
+    private static readonly Action<ILogger, Exception> LogError =
         LoggerMessage.Define(LogLevel.Error, new EventId(1, nameof(InvokeAsync)),
             "An unhandled exception occurred");
 
-    private static readonly Action<ILogger, string, object, Exception?> _logEntityNotFound =
+    private static readonly Action<ILogger, string, object, Exception?> LogEntityNotFound =
         LoggerMessage.Define<string, object>(LogLevel.Warning, new EventId(2, nameof(InvokeAsync)),
             "Entity {EntityName} with ID {EntityId} not found");
 
@@ -25,13 +25,13 @@ internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Excepti
         }
         catch (EntityNotFoundException ex)
         {
-            _logEntityNotFound(logger, ex.EntityName, ex.EntityId, ex);
+            LogEntityNotFound(logger, ex.EntityName, ex.EntityId, ex);
 
             await HandleExceptionAsync(httpContext, ex);
         }
         catch (Exception ex)
         {
-            _logError(logger, ex);
+            LogError(logger, ex);
 
             await HandleExceptionAsync(httpContext, ex);
         }
@@ -50,30 +50,21 @@ internal class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Excepti
 
         context.Response.StatusCode = statusCode;
 
-        object response;
-
-        if (exception is ValidationException validationException)
+        object response = exception switch
         {
-            response = new
+            ValidationException validationException => new
             {
-                Status = statusCode,
-                Errors = validationException.Errors.Select(e => new { e.ErrorMessage })
-            };
-        }
-        else if (exception is EntityNotFoundException)
-        {
-            response = new
+                Status = statusCode, Errors = validationException.Errors.Select(e => new { e.ErrorMessage })
+            },
+            EntityNotFoundException => new
             {
                 Status = statusCode
-            };
-        }
-        else
-        {
-            response = new
+            },
+            _ => new
             {
                 Status = statusCode,
-            };
-        }
+            }
+        };
 
         await context.Response.WriteAsJsonAsync(response);
     }

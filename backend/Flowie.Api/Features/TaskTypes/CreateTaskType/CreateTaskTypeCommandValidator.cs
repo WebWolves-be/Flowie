@@ -13,14 +13,14 @@ public class CreateTaskTypeCommandValidator : AbstractValidator<CreateTaskTypeCo
         _dbContext = dbContext;
 
         RuleFor(x => x.Name)
-            .NotEmpty()
             .MinimumLength(2)
             .MaximumLength(50)
-            .WithMessage("Name must be between 2 and 50 characters");
+            .When(x => !string.IsNullOrWhiteSpace(x.Name))
+            .WithMessage("Naam moet tussen 2 en 50 tekens zijn.");
 
         RuleFor(x => x.Name)
             .MustAsync(NameIsUnique())
-            .WithMessage(x => $"Task type with name '{x.Name}' already exists");
+            .WithMessage(x => $"Type met naam '{x.Name}' bestaat al.");
     }
 
     private Func<string, CancellationToken, Task<bool>> NameIsUnique()
