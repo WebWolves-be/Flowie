@@ -1,7 +1,7 @@
 import { Component, input, output, inject } from "@angular/core";
 import { Dialog } from '@angular/cdk/dialog';
 import { SaveProjectDialogComponent, SaveProjectDialogData, SaveProjectDialogResult } from '../save-project-dialog/save-project-dialog.component';
-import { Project } from "../../models/project.model";
+import { ProjectDto } from "../../../../core/services/project-api.service";
 import { Company } from "../../models/company.enum";
 
 @Component({
@@ -12,12 +12,12 @@ import { Company } from "../../models/company.enum";
   styleUrl: "./project-list.component.scss"
 })
 export class ProjectListComponent {
-  projects = input<Project[]>([]);
+  projects = input<ProjectDto[]>([]);
   selectedProjectId = input<number>();
   loading = input<boolean>(false);
   projectSelected = output<number>();
-  projectCreateRequested = output<Project>();
-  projectUpdateRequested = output<Project>();
+  projectCreateRequested = output<ProjectDto>();
+  projectUpdateRequested = output<ProjectDto>();
 
   // Expose enum to template
   readonly Company = Company;
@@ -37,7 +37,7 @@ export class ProjectListComponent {
     });
   }
 
-  openEditProjectDialog(project: Project) {
+  openEditProjectDialog(project: ProjectDto) {
     const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
       data: { mode: 'update', project } as SaveProjectDialogData,
       backdropClass: ['fixed', 'inset-0', 'bg-black/40'],

@@ -2,15 +2,15 @@ import { Component, inject, signal } from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import { Company } from '../../models/company.enum';
-import { Project } from '../../models/project.model';
+import { ProjectDto } from '../../../../core/services/project-api.service';
 
 export interface SaveProjectDialogData {
   mode: 'create' | 'update';
-  project?: Project; // present when updating
+  project?: ProjectDto; // present when updating
 }
 
 export interface SaveProjectDialogResult {
-  project: Project;
+  project: ProjectDto;
   mode: 'create' | 'update';
 }
 
@@ -47,7 +47,7 @@ export class SaveProjectDialogComponent {
 
   onSave(): void {
     // Preserve existing metrics when updating; initialize to zero on create.
-    const base: Project = {
+    const base: ProjectDto = {
       id: this.data.project?.id ?? Date.now(), // temp id generation for mock
       title: this.title(),
       description: this.description() || null,

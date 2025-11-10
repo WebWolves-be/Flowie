@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { Task } from '../../models/task.model';
+import { TaskDto } from '../../../../core/services/task-api.service';
 import { TaskStatus } from '../../models/task-status.enum';
 import { TaskTypeFacade } from '../../../settings/facade/task-type.facade';
 import { TaskFacade } from '../../facade/task.facade';
@@ -9,11 +9,11 @@ import { TaskFacade } from '../../facade/task.facade';
 export interface SaveTaskDialogData {
   mode: 'create' | 'update';
   projectId: number;
-  task?: Task; // present when updating
+  task?: TaskDto; // present when updating
 }
 
 export interface SaveTaskDialogResult {
-  task: Task;
+  task: TaskDto;
   mode: 'create' | 'update';
 }
 
@@ -97,7 +97,7 @@ export class SaveTaskDialogComponent {
     // Use existing status when updating, default to Pending when creating
     const status = this.data.task?.status ?? TaskStatus.Pending;
     
-    const base: Task = {
+    const base: TaskDto = {
       id: this.data.task?.id ?? Date.now(), // temp id for mock
       projectId: this.data.projectId,
       parentTaskId: this.data.task?.parentTaskId ?? null,
