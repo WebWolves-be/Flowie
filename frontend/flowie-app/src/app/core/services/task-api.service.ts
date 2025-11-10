@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { TaskStatus } from '../../features/tasks/models/task-status.enum';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
+import { TaskStatus } from "../../features/tasks/models/task-status.enum";
 
 export interface SubtaskDto {
   title: string;
@@ -63,17 +63,20 @@ export interface UpdateTaskStatusRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TaskApiService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/api/tasks`;
 
-  getTasks(projectId: number, onlyShowMyTasks: boolean = false): Observable<GetTasksResponse> {
+  getTasks(
+    projectId: number,
+    onlyShowMyTasks: boolean = false,
+  ): Observable<GetTasksResponse> {
     let params = new HttpParams()
-      .set('projectId', projectId.toString())
-      .set('onlyShowMyTasks', onlyShowMyTasks.toString());
-    
+      .set("projectId", projectId.toString())
+      .set("onlyShowMyTasks", onlyShowMyTasks.toString());
+
     return this.http.get<GetTasksResponse>(this.apiUrl, { params });
   }
 
@@ -89,7 +92,10 @@ export class TaskApiService {
     return this.http.put<void>(this.apiUrl, request);
   }
 
-  updateTaskStatus(taskId: number, request: UpdateTaskStatusRequest): Observable<void> {
+  updateTaskStatus(
+    taskId: number,
+    request: UpdateTaskStatusRequest,
+  ): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${taskId}/status`, request);
   }
 

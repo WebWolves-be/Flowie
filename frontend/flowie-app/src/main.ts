@@ -1,6 +1,9 @@
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideRouter, Routes } from "@angular/router";
-import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { AppComponent } from "./app/app.component";
 import { DashboardPage } from "./app/features/dashboard/components/dashboard-page/dashboard-page";
 import { TasksPage } from "./app/features/tasks/components/tasks-page/tasks-page";
@@ -10,34 +13,33 @@ const routes: Routes = [
   {
     path: "",
     pathMatch: "full",
-    redirectTo: "dashboard"
+    redirectTo: "dashboard",
   },
   {
     path: "dashboard",
-    component: DashboardPage
+    component: DashboardPage,
   },
   {
     path: "taken",
-    component: TasksPage
+    component: TasksPage,
   },
   {
     path: "taken/project/:id",
-    component: TasksPage
+    component: TasksPage,
   },
   {
     path: "instellingen",
-    component: SettingsPage
+    component: SettingsPage,
   },
   {
     path: "**",
-    redirectTo: "dashboard"
-  }
+    redirectTo: "dashboard",
+  },
 ];
-
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi())
-  ]
-}).catch(err => console.error(err));
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+}).catch((err) => console.error(err));

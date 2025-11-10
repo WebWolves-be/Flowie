@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 
 export interface TaskTypeDto {
   id: number;
@@ -17,7 +17,7 @@ export interface CreateTaskTypeRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TaskTypeApiService {
   private http = inject(HttpClient);

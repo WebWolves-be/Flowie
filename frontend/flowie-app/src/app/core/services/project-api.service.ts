@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { Company } from '../../features/tasks/models/company.enum';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
+import { Company } from "../../features/tasks/models/company.enum";
 
 export interface ProjectDto {
   projectId: number;
@@ -30,7 +30,7 @@ export interface UpdateProjectRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class ProjectApiService {
   private http = inject(HttpClient);
@@ -39,7 +39,7 @@ export class ProjectApiService {
   getProjects(company?: Company): Observable<GetProjectsResponse> {
     let params = new HttpParams();
     if (company) {
-      params = params.set('company', company.toString());
+      params = params.set("company", company.toString());
     }
     return this.http.get<GetProjectsResponse>(this.apiUrl, { params });
   }

@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 
 export interface EmployeeDto {
   id: number;
@@ -14,7 +14,7 @@ export interface GetEmployeesResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class EmployeeApiService {
   private http = inject(HttpClient);
@@ -23,7 +23,7 @@ export class EmployeeApiService {
   // Note: Backend does not currently have an employees endpoint
   // This service is a placeholder for future implementation
   // For now, employee data comes from task assignees or auth endpoints
-  
+
   getEmployees(): Observable<GetEmployeesResponse> {
     return this.http.get<GetEmployeesResponse>(this.apiUrl);
   }
