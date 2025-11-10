@@ -1,6 +1,6 @@
 import { Component, input, output } from "@angular/core";
-import { ProjectDto } from "../../../../core/services/project-api.service";
-import { TaskDto } from "../../../../core/services/task-api.service";
+import { Project } from "../../models/project.model";
+import { Task } from "../../models/task.model";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
 
@@ -13,8 +13,8 @@ import { TaskItemComponent } from "../task-item/task-item.component";
 })
 export class ProjectDetailComponent {
   // Inputs as signals
-  project = input.required<ProjectDto>();
-  tasks = input<TaskDto[]>([]);
+  project = input.required<Project>();
+  tasks = input<Task[]>([]);
   isLoadingTasks = input<boolean>(false);
   isDetailLoading = input<boolean>(false);
   showOnlyMyTasks = input<boolean>(false);

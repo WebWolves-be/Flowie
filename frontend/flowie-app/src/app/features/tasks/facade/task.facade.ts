@@ -1,9 +1,12 @@
 import { Injectable, signal, computed, inject } from "@angular/core";
+import { Task } from "../models/task.model";
+import { Project } from "../models/project.model";
+import { Employee } from "../models/employee.model";
 import { Company } from "../models/company.enum";
 import { TaskStatus } from "../models/task-status.enum";
-import { ProjectApiService, ProjectDto } from "../../../core/services/project-api.service";
-import { TaskApiService, TaskDto } from "../../../core/services/task-api.service";
-import { EmployeeApiService, EmployeeDto } from "../../../core/services/employee-api.service";
+import { ProjectApiService } from "../../../core/services/project-api.service";
+import { TaskApiService } from "../../../core/services/task-api.service";
+import { EmployeeApiService } from "../../../core/services/employee-api.service";
 
 @Injectable({
   providedIn: "root",
@@ -13,9 +16,9 @@ export class TaskFacade {
   private taskApi = inject(TaskApiService);
   private employeeApi = inject(EmployeeApiService);
 
-  #projects = signal<ProjectDto[]>([]);
-  #tasks = signal<TaskDto[]>([]);
-  #employees = signal<EmployeeDto[]>([]);
+  #projects = signal<Project[]>([]);
+  #tasks = signal<Task[]>([]);
+  #employees = signal<Employee[]>([]);
   #isLoadingProjects = signal<boolean>(false);
   #isLoadingTasks = signal<boolean>(false);
   #isLoadingEmployees = signal<boolean>(false);
@@ -34,13 +37,18 @@ export class TaskFacade {
 
     this.projectApi.getProjects(company).subscribe({
       next: (response) => {
-        // Calculate progress for each project
-        const projects = response.projects.map((dto) => ({
-          ...dto,
+        // Map backend DTOs to frontend Project model
+        const projects: Project[] = response.projects.map((dto) => ({
+          id: dto.projectId,
+          title: dto.title,
+          description: undefined, // Backend doesn't return description in list
+          taskCount: dto.taskCount,
+          completedTaskCount: dto.completedTaskCount,
           progress:
             dto.taskCount > 0
               ? Math.round((dto.completedTaskCount / dto.taskCount) * 100)
               : 0,
+          company: dto.company,
         }));
 
         this.#projects.set(projects);
@@ -59,7 +67,28 @@ export class TaskFacade {
 
     this.taskApi.getTasks(projectId, showOnlyMyTasks).subscribe({
       next: (response) => {
-        this.#tasks.set(response.tasks);
+        // Map backend DTOs to frontend Task model
+        const tasks: Task[] = response.tasks.map((dto) => ({
+          id: dto.id,
+          projectId: dto.projectId,
+          title: dto.title,
+          description: dto.description,
+          typeId: dto.typeId,
+          typeName: dto.typeName,
+          status: dto.status,
+          statusName: dto.statusName,
+          dueDate: dto.dueDate,
+          progress: dto.progress,
+          assignee: dto.assignee,
+          createdAt: dto.createdAt,
+          updatedAt: dto.updatedAt,
+          completedAt: dto.completedAt,
+          subtasks: dto.subtasks,
+          subtaskCount: dto.subtaskCount,
+          completedSubtaskCount: dto.completedSubtaskCount,
+        }));
+
+        this.#tasks.set(tasks);
         this.#isLoadingTasks.set(false);
       },
       error: (error) => {
@@ -79,7 +108,7 @@ export class TaskFacade {
     this.getProjects(filter === "ALL" ? undefined : filter);
   }
 
-  createProject(project: Omit<ProjectDto, "id">): void {
+  createProject(project: Omit<Project, "id">): void {
     // Call API to create project
     this.projectApi
       .createProject({
@@ -99,11 +128,11 @@ export class TaskFacade {
       });
   }
 
-  updateProject(updated: ProjectDto): void {
+  updateProject(updated: Project): void {
     // Call API to update project
     this.projectApi
       .updateProject({
-        id: updated.id,
+        projectId: updated.id,
         title: updated.title,
         description: updated.description || undefined,
         company: updated.company,
@@ -123,7 +152,7 @@ export class TaskFacade {
       });
   }
 
-  createTask(task: Omit<TaskDto, "id">): void {
+  createTask(task: Omit<Task, "id">): void {
     // Call API to create task
     if (!task.typeId || !task.dueDate || !task.assignee.id) {
       console.error("Missing required task fields");
@@ -151,7 +180,7 @@ export class TaskFacade {
       });
   }
 
-  updateTask(updated: TaskDto): void {
+  updateTask(updated: Task): void {
     // Call API to update task
     if (
       !updated.typeId ||
@@ -165,7 +194,7 @@ export class TaskFacade {
 
     this.taskApi
       .updateTask({
-        id: updated.id,
+        taskId: updated.id,
         title: updated.title,
         description: updated.description || undefined,
         typeId: updated.typeId,
@@ -196,7 +225,12 @@ export class TaskFacade {
     // Consider keeping mock data or implementing backend endpoint
     this.employeeApi.getEmployees().subscribe({
       next: (response) => {
-        this.#employees.set(response.employees);
+        const employees: Employee[] = response.employees.map((dto) => ({
+          id: dto.id,
+          name: dto.name,
+        }));
+
+        this.#employees.set(employees);
         this.#isLoadingEmployees.set(false);
       },
       error: (error) => {
@@ -205,7 +239,7 @@ export class TaskFacade {
           error,
         );
         // Fallback to mock data for now
-        const mockEmployees: EmployeeDto[] = [
+        const mockEmployees: Employee[] = [
           { id: 1, name: "Amalia Van Dosselaer" },
           { id: 2, name: "Peter Carrein" },
           { id: 3, name: "Jens Declerck" },

@@ -5,13 +5,11 @@ import { environment } from "../../../environments/environment";
 import { Company } from "../../features/tasks/models/company.enum";
 
 export interface ProjectDto {
-  id: number;
+  projectId: number;
   title: string;
-  description?: string | null;
   company: Company;
   taskCount: number;
   completedTaskCount: number;
-  progress: number;
 }
 
 export interface GetProjectsResponse {
@@ -25,7 +23,7 @@ export interface CreateProjectRequest {
 }
 
 export interface UpdateProjectRequest {
-  id: number;
+  projectId: number;
   title: string;
   description?: string;
   company: Company;

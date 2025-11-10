@@ -5,39 +5,32 @@ import { environment } from "../../../environments/environment";
 import { TaskStatus } from "../../features/tasks/models/task-status.enum";
 
 export interface SubtaskDto {
-  id?: number;
-  parentTaskId?: number | null;
   title: string;
-  description?: string | null;
-  dueDate?: string | null;
-  status?: TaskStatus;
-  statusName?: string;
-  assignee: { id?: number | null; name: string };
-  createdAt?: string;
-  updatedAt?: string | null;
-  completedAt?: string | null;
-  done?: boolean;
+  assignee: { name: string };
+  dueDate: string;
+  done: boolean;
+  status: TaskStatus;
+  statusName: string;
 }
 
 export interface TaskDto {
   id: number;
   projectId: number;
-  parentTaskId?: number | null;
   title: string;
-  description?: string | null;
-  typeId?: number;
-  typeName?: string;
-  status?: TaskStatus;
-  statusName?: string;
-  dueDate?: string | null;
-  progress?: number;
-  assignee: { id?: number | null; name: string };
-  createdAt?: string;
-  updatedAt?: string | null;
+  description?: string;
+  typeId: number;
+  typeName: string;
+  status: TaskStatus;
+  statusName: string;
+  dueDate: string;
+  progress: number;
+  assignee: { name: string };
+  createdAt: string;
+  updatedAt?: string;
   completedAt?: string | null;
   subtasks?: SubtaskDto[];
-  subtaskCount?: number;
-  completedSubtaskCount?: number;
+  subtaskCount: number;
+  completedSubtaskCount: number;
 }
 
 export interface GetTasksResponse {
@@ -55,7 +48,7 @@ export interface CreateTaskRequest {
 }
 
 export interface UpdateTaskRequest {
-  id: number;
+  taskId: number;
   title: string;
   description?: string;
   typeId: number;

@@ -1,11 +1,16 @@
 import { Injectable, signal, inject } from "@angular/core";
-import { TaskTypeApiService, TaskTypeDto } from "../../../core/services/task-type-api.service";
+import { TaskTypeApiService } from "../../../core/services/task-type-api.service";
+
+export interface TaskType {
+  id: number;
+  name: string;
+}
 
 @Injectable({ providedIn: "root" })
 export class TaskTypeFacade {
   private taskTypeApi = inject(TaskTypeApiService);
 
-  #taskTypes = signal<TaskTypeDto[]>([]);
+  #taskTypes = signal<TaskType[]>([]);
   #isLoading = signal<boolean>(false);
 
   taskTypes = this.#taskTypes.asReadonly();
@@ -16,7 +21,12 @@ export class TaskTypeFacade {
 
     this.taskTypeApi.getTaskTypes().subscribe({
       next: (response) => {
-        this.#taskTypes.set(response.taskTypes);
+        const taskTypes: TaskType[] = response.taskTypes.map((dto) => ({
+          id: dto.id,
+          name: dto.name,
+        }));
+
+        this.#taskTypes.set(taskTypes);
         this.#isLoading.set(false);
       },
       error: (error) => {

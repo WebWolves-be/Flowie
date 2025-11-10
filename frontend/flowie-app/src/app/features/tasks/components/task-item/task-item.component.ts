@@ -1,6 +1,7 @@
 import { Component, input, output, signal, computed } from "@angular/core";
 import { NgClass } from "@angular/common";
-import { TaskDto, SubtaskDto } from "../../../../core/services/task-api.service";
+import { Task } from "../../models/task.model";
+import { Subtask } from "../../models/subtask.model";
 
 @Component({
   selector: "app-task-item",
@@ -11,7 +12,7 @@ import { TaskDto, SubtaskDto } from "../../../../core/services/task-api.service"
 })
 export class TaskItemComponent {
   // Inputs as signals
-  task = input.required<TaskDto>();
+  task = input.required<Task>();
   isLast = input<boolean>(false);
   
   // Outputs as signal-based outputs
@@ -120,7 +121,7 @@ export class TaskItemComponent {
     return d.getTime() < today.getTime();
   });
 
-  isSubtaskOverdue(subtask: SubtaskDto): boolean {
+  isSubtaskOverdue(subtask: Subtask): boolean {
     if (!subtask.dueDate || subtask.done) return false;
     const d = this.parseFlexible(subtask.dueDate);
     if (!d) return false;

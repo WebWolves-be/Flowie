@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from "@angular/core";
 import { TaskFacade } from "../../tasks/facade/task.facade";
-import { ProjectDto } from "../../../core/services/project-api.service";
-import { TaskDto } from "../../../core/services/task-api.service";
+import { Project } from "../../tasks/models/project.model";
+import { Task } from "../../tasks/models/task.model";
 import { DashboardMetric } from "../models/dashboard-metric.model";
 
 @Injectable({ providedIn: "root" })
@@ -27,7 +27,7 @@ export class DashboardFacade {
 
   // Helper to aggregate tasks across all projects by requesting tasks per project sequentially (MVP mock)
   // For now we approximate with project counts only (task list loading per project would add latency).
-  private allProjects = computed<ProjectDto[]>(() => this.projects());
+  private allProjects = computed<Project[]>(() => this.projects());
 
   // Metrics based purely on project aggregates (MVP) since we lack started/done timestamps.
   totalProjects = computed(() => this.allProjects().length);

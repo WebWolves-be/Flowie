@@ -5,7 +5,7 @@ import { ProjectListComponent } from '../project-list/project-list.component';
 import { ProjectDetailComponent } from '../project-detail/project-detail.component';
 import { TaskFacade } from '../../facade/task.facade';
 import { Company } from '../../models/company.enum';
-import { ProjectDto } from '../../../../core/services/project-api.service';
+import { Project } from '../../models/project.model';
 import { Dialog } from '@angular/cdk/dialog';
 import { SaveProjectDialogComponent, SaveProjectDialogData, SaveProjectDialogResult } from '../save-project-dialog/save-project-dialog.component';
 import { SaveTaskDialogComponent, SaveTaskDialogData, SaveTaskDialogResult } from '../save-task-dialog/save-task-dialog.component';
@@ -93,13 +93,13 @@ export class TasksPage {
     );
   }
 
-  onProjectCreate(project: ProjectDto) {
+  onProjectCreate(project: Project) {
     // Remove temp id if present (dialog used Date.now()) and let facade assign
     const { id: _temp, ...rest } = project;
     this.facade.createProject(rest);
   }
 
-  onProjectUpdate(project: ProjectDto) {
+  onProjectUpdate(project: Project) {
     this.facade.updateProject(project);
     // If updating currently selected project refresh selection reference
     if (this.selectedProjectId() === project.id) {
