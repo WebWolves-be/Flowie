@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProjectListComponent } from "../project-list/project-list.component";
@@ -52,9 +52,6 @@ export class TasksPage {
   // Expose enum to template
   readonly Company = Company;
 
-  // Local loading state to distinguish initial project selection vs task filter reloads
-  projectDetailLoading = signal<boolean>(false);
-
   // Track if we've done the initial load
   private hasInitiallyLoaded = false;
 
@@ -70,8 +67,6 @@ export class TasksPage {
       const projectId = params.get("id");
       if (projectId) {
         const idNum = Number(projectId);
-        // Mark project detail as loading when navigating/selecting a project
-        this.projectDetailLoading.set(true);
         this.selectedProjectId.set(idNum);
         // Reset task visibility filter when switching projects
         this.showOnlyMyTasks.set(false);
@@ -79,15 +74,6 @@ export class TasksPage {
       } else {
         this.selectedProjectId.set(null);
         this.facade.clearTasks();
-        this.projectDetailLoading.set(false);
-      }
-    });
-
-    // When tasks finish loading, clear the project detail loading state
-    effect(() => {
-      const loading = this.isLoadingTasks();
-      if (!loading) {
-        this.projectDetailLoading.set(false);
       }
     });
   }
