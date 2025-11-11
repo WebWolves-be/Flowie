@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from "@angular/core";
+import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProjectListComponent } from "../project-list/project-list.component";
@@ -47,7 +47,6 @@ export class TasksPage {
 
   selectedProjectId = signal<number | null>(null);
   showOnlyMyTasks = signal<boolean>(false);
-  projectDetailLoading = signal<boolean>(false);
 
   selectedProject = computed(() => {
     const id = this.selectedProjectId();
@@ -65,7 +64,6 @@ export class TasksPage {
       if (projectId) {
         const idNum = Number(projectId);
 
-        this.projectDetailLoading.set(true);
         this.selectedProjectId.set(idNum);
         this.showOnlyMyTasks.set(false);
 
@@ -74,14 +72,6 @@ export class TasksPage {
         this.#facade.clearTasks();
 
         this.selectedProjectId.set(null);
-        this.projectDetailLoading.set(false);
-      }
-    });
-
-    effect(() => {
-      const loading = this.isLoadingTasks();
-      if (!loading) {
-        this.projectDetailLoading.set(false);
       }
     });
   }
