@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from "@angular/core";
+import { Component, computed, input, output, signal } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Task } from "../../models/task.model";
 import { Subtask } from "../../models/subtask.model";
@@ -14,7 +14,7 @@ export class TaskItemComponent {
   // Inputs as signals
   task = input.required<Task>();
   isLast = input<boolean>(false);
-  
+
   // Outputs as signal-based outputs
   taskToggled = output<number>();
   taskClicked = output<number>();
@@ -24,39 +24,44 @@ export class TaskItemComponent {
   showSubtasks = signal<boolean>(false);
   showMenu = signal<boolean>(false);
 
+  // Helper method to check if subtask is done (public for template use)
+  isSubtaskDone(subtask: Subtask): boolean {
+    return subtask.completedAt != null;
+  }
+
   // Computed signals
   taskProgress = computed(() => {
     const task = this.task();
     if (task.subtasks && task.subtasks.length > 0) {
-      const done = task.subtasks.filter(s => s.done).length;
+      const done = task.subtasks.filter(s => this.isSubtaskDone(s)).length;
       return Math.round((done / task.subtasks.length) * 100);
     }
-    if (typeof task.subtaskCount === 'number' && typeof task.completedSubtaskCount === 'number' && task.subtaskCount > 0) {
+    if (typeof task.subtaskCount === "number" && typeof task.completedSubtaskCount === "number" && task.subtaskCount > 0) {
       return Math.round((task.completedSubtaskCount / task.subtaskCount) * 100);
     }
-    return typeof task.progress === 'number' ? task.progress : (task.statusName === 'Done' ? 100 : 0);
+    return task.completedAt != null ? 100 : 0;
   });
 
   progressClass = computed(() => {
     const pct = this.taskProgress();
-    if (pct === 100) return 'progress-100';
-    if (pct === 0) return 'progress-0';
-    return 'progress-default';
+    if (pct === 100) return "progress-100";
+    if (pct === 0) return "progress-0";
+    return "progress-default";
   });
 
   statusIcon = computed(() => {
     const pct = this.taskProgress();
-    if (pct === 100) return 'fa-check';
-    if (pct === 0) return 'fa-times';
-    return 'fa-question';
+    if (pct === 100) return "fa-check";
+    if (pct === 0) return "fa-times";
+    return "fa-question";
   });
 
   actionButtonText = computed(() => {
-    return this.taskProgress() === 0 ? 'Ik ben er mee bezig' : 'Klaar';
+    return this.taskProgress() === 0 ? "Ik ben er mee bezig" : "Klaar";
   });
 
   subtasksDone = computed(() => {
-    return this.task().subtasks?.filter(s => s.done).length ?? 0;
+    return this.task().subtasks?.filter(s => this.isSubtaskDone(s)).length ?? 0;
   });
 
   subtasksTotal = computed(() => {
@@ -65,23 +70,23 @@ export class TaskItemComponent {
 
   lastSubtaskDeadline = computed(() => {
     const task = this.task();
-    if (!task.subtasks || task.subtasks.length === 0) return '';
-    return task.subtasks[task.subtasks.length - 1]?.dueDate ?? '';
+    if (!task.subtasks || task.subtasks.length === 0) return "";
+    return task.subtasks[task.subtasks.length - 1]?.dueDate ?? "";
   });
 
   private monthMap: Record<string, number> = {
-    'januari': 0,
-    'februari': 1,
-    'maart': 2,
-    'april': 3,
-    'mei': 4,
-    'juni': 5,
-    'juli': 6,
-    'augustus': 7,
-    'september': 8,
-    'oktober': 9,
-    'november': 10,
-    'december': 11
+    "januari": 0,
+    "februari": 1,
+    "maart": 2,
+    "april": 3,
+    "mei": 4,
+    "juni": 5,
+    "juli": 6,
+    "augustus": 7,
+    "september": 8,
+    "oktober": 9,
+    "november": 10,
+    "december": 11
   };
 
   private parseDutchDate(dateStr: string): Date | null {
@@ -104,16 +109,16 @@ export class TaskItemComponent {
   }
 
   formatDutch(dateStr: string | null | undefined): string {
-    if (!dateStr) return '';
+    if (!dateStr) return "";
     const d = this.parseFlexible(dateStr);
     if (!d) return dateStr; // already localized text
-    const fmt = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const fmt = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" });
     return fmt.format(d);
   }
 
   isTaskDeadlineOverdue = computed(() => {
     const task = this.task();
-    if (!task.dueDate || (task.statusName === 'Done' || this.taskProgress() === 100)) return false;
+    if (!task.dueDate || task.completedAt != null) return false;
     const d = this.parseFlexible(task.dueDate);
     if (!d) return false;
     const today = new Date();
@@ -122,7 +127,7 @@ export class TaskItemComponent {
   });
 
   isSubtaskOverdue(subtask: Subtask): boolean {
-    if (!subtask.dueDate || subtask.done) return false;
+    if (!subtask.dueDate || subtask.completedAt != null) return false;
     const d = this.parseFlexible(subtask.dueDate);
     if (!d) return false;
     const today = new Date();
@@ -140,35 +145,26 @@ export class TaskItemComponent {
   }
 
   onToggleTask() {
-    this.taskToggled.emit(this.task().id);
+    this.taskToggled.emit(this.task().taskId);
   }
 
   onClickTask() {
-    this.taskClicked.emit(this.task().id);
+    this.taskClicked.emit(this.task().taskId);
   }
 
   onMarkComplete() {
-    // Mark task and all subtasks as complete
-    const task = this.task();
-    task.statusName = 'Done';
-    task.progress = 100;
-    if (task.subtasks) {
-      task.subtasks.forEach(s => s.done = true);
-    }
-    this.taskToggled.emit(task.id);
+    // Emit toggle to trigger status update via facade
+    this.taskToggled.emit(this.task().taskId);
   }
 
   onToggleSubtask(index: number) {
-    const task = this.task();
-    if (task.subtasks) {
-      task.subtasks[index].done = !task.subtasks[index].done;
-      this.taskToggled.emit(task.id);
-    }
+    // Emit toggle to trigger subtask update via facade
+    this.taskToggled.emit(this.task().taskId);
   }
 
   onEdit() {
     this.showMenu.set(false);
-    this.taskEditRequested.emit(this.task().id);
+    this.taskEditRequested.emit(this.task().taskId);
   }
 
   onDelete() {
@@ -178,22 +174,12 @@ export class TaskItemComponent {
 
   onAddSubtask() {
     this.showMenu.set(false);
-    const task = this.task();
-    if (!task.subtasks) task.subtasks = [];
-    task.subtasks.push({
-      title: 'Nieuwe subtaak',
-      assignee: { name: task.assignee.name },
-      dueDate: this.formatTodayDutch(),
-      done: false,
-      status: task.status, // inherit status for now
-      statusName: task.statusName
-    });
-    // Emit toggle to trigger any parent refresh logic (reuse taskToggled)
-    this.taskToggled.emit(task.id);
+    // TODO: Implement add subtask via facade
+    this.taskToggled.emit(this.task().taskId);
   }
 
   private formatTodayDutch(): string {
-    const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+    const months = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
     const d = new Date();
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }

@@ -35,7 +35,6 @@ internal class GetTasksQueryHandler(
                     new TaskDto(
                         TaskId: t.Id,
                         ProjectId: t.ProjectId,
-                        ParentTaskId: t.ParentTaskId,
                         Title: t.Title,
                         Description: t.Description,
                         TypeId: t.TaskTypeId,
@@ -56,6 +55,8 @@ internal class GetTasksQueryHandler(
                                 ParentTaskId: st.ParentTaskId,
                                 Title: st.Title,
                                 Description: st.Description,
+                                TypeId: st.TaskTypeId,
+                                TypeName: st.TaskType.Name,
                                 DueDate: st.DueDate,
                                 Status: st.Status,
                                 EmployeeId: st.EmployeeId,

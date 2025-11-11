@@ -94,7 +94,7 @@ echo "----------------------"
 
 # Test 6: Create a new project
 PROJECT_DATA='{
-  "title": "E2E Test Project",
+  "title": "E2E Test ProjectModel",
   "description": "Created by automated e2e test",
   "company": 0
 }'

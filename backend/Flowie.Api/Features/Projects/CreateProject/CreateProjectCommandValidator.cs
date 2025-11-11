@@ -7,6 +7,10 @@ internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCo
     public CreateProjectCommandValidator()
     {
         RuleFor(x => x.Title)
+            .Must(title => !string.IsNullOrWhiteSpace(title))
+            .WithMessage("Titel is verplicht.");
+
+        RuleFor(x => x.Title)
             .MinimumLength(3)
             .MaximumLength(200)
             .When(x => !string.IsNullOrWhiteSpace(x.Title))

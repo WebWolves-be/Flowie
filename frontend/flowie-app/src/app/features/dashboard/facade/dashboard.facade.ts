@@ -1,8 +1,7 @@
-import { Injectable, computed, signal, inject } from "@angular/core";
-import { TaskFacade } from "../../tasks/facade/task.facade";
-import { Project } from "../../tasks/models/project.model";
-import { Task } from "../../tasks/models/task.model";
+import { computed, inject, Injectable, signal } from "@angular/core";
+import { TaskFacade } from "../../tasks/task.facade";
 import { DashboardMetric } from "../models/dashboard-metric.model";
+import { Project } from "../../tasks/models/project.model";
 
 @Injectable({ providedIn: "root" })
 export class DashboardFacade {
@@ -32,44 +31,55 @@ export class DashboardFacade {
   // Metrics based purely on project aggregates (MVP) since we lack started/done timestamps.
   totalProjects = computed(() => this.allProjects().length);
   totalTasks = computed(() =>
-    this.allProjects().reduce((acc, p) => acc + p.taskCount, 0),
+    this.allProjects().reduce((acc, p) => acc + p.taskCount, 0)
   );
   completedTasks = computed(() =>
-    this.allProjects().reduce((acc, p) => acc + p.completedTaskCount, 0),
+    this.allProjects().reduce((acc, p) => acc + p.completedTaskCount, 0)
   );
   // For mock delta we simulate a previous period as 90% of current values
   private previousCompletedTasks = computed(() =>
-    Math.round(this.completedTasks() * 0.9),
+    Math.round(this.completedTasks() * 0.9)
   );
   overallProgressPct = computed(() => {
     const projects = this.allProjects();
     if (!projects.length) return 0;
-    // Average project progress
-    const sum = projects.reduce((acc, p) => acc + p.progress, 0);
+    // Average project progress - calculate from taskCount and completedTaskCount
+    const sum = projects.reduce((acc, p) => {
+      const progress = p.taskCount > 0 ? Math.round((p.completedTaskCount / p.taskCount) * 100) : 0;
+      return acc + progress;
+    }, 0);
     return Math.round(sum / projects.length);
   });
   private previousProgressPct = computed(() =>
-    Math.max(0, this.overallProgressPct() - 5),
+    Math.max(0, this.overallProgressPct() - 5)
   );
   activeProjects = computed(
     () =>
-      this.allProjects().filter((p) => p.progress > 0 && p.progress < 100)
-        .length,
+      this.allProjects().filter((p) => {
+        const progress = p.taskCount > 0 ? Math.round((p.completedTaskCount / p.taskCount) * 100) : 0;
+        return progress > 0 && progress < 100;
+      }).length
   );
   private previousActiveProjects = computed(() =>
-    Math.max(0, this.activeProjects() - 1),
+    Math.max(0, this.activeProjects() - 1)
   );
   completedProjects = computed(
-    () => this.allProjects().filter((p) => p.progress === 100).length,
+    () => this.allProjects().filter((p) => {
+      const progress = p.taskCount > 0 ? Math.round((p.completedTaskCount / p.taskCount) * 100) : 0;
+      return progress === 100;
+    }).length
   );
   private previousCompletedProjects = computed(() =>
-    Math.max(0, this.completedProjects() - 1),
+    Math.max(0, this.completedProjects() - 1)
   );
   notStartedProjects = computed(
-    () => this.allProjects().filter((p) => p.progress === 0).length,
+    () => this.allProjects().filter((p) => {
+      const progress = p.taskCount > 0 ? Math.round((p.completedTaskCount / p.taskCount) * 100) : 0;
+      return progress === 0;
+    }).length
   );
   private previousNotStartedProjects = computed(() =>
-    this.notStartedProjects(),
+    this.notStartedProjects()
   );
 
   private progressStatus = computed<"good" | "warn" | "bad">(() => {
@@ -84,7 +94,7 @@ export class DashboardFacade {
       key: "totalTasks",
       label: "Totaal aantal taken",
       value: this.totalTasks(),
-      description: "Alle taken over alle projecten",
+      description: "Alle taken over alle projecten"
     },
     {
       key: "completedTasks",
@@ -97,7 +107,7 @@ export class DashboardFacade {
           ? "flat"
           : this.completedTasks() > this.previousCompletedTasks()
             ? "up"
-            : "down",
+            : "down"
     },
     {
       key: "overallProgress",
@@ -111,7 +121,7 @@ export class DashboardFacade {
           ? "flat"
           : this.overallProgressPct() > this.previousProgressPct()
             ? "up"
-            : "down",
+            : "down"
     },
     {
       key: "activeProjects",
@@ -124,7 +134,7 @@ export class DashboardFacade {
           ? "flat"
           : this.activeProjects() > this.previousActiveProjects()
             ? "up"
-            : "down",
+            : "down"
     },
     {
       key: "completedProjects",
@@ -137,7 +147,7 @@ export class DashboardFacade {
           ? "flat"
           : this.completedProjects() > this.previousCompletedProjects()
             ? "up"
-            : "down",
+            : "down"
     },
     {
       key: "notStartedProjects",
@@ -150,7 +160,7 @@ export class DashboardFacade {
           ? "flat"
           : this.notStartedProjects() > this.previousNotStartedProjects()
             ? "up"
-            : "down",
-    },
+            : "down"
+    }
   ]);
 }

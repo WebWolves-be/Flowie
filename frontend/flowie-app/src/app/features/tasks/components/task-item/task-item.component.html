@@ -26,7 +26,7 @@
           >Deadline: {{ formatDutch(task().dueDate) }}</span>
           <span class="text-blue-600 font-bold mx-3">|</span>
           <span class="inline-flex items-center">
-            {{ task().assignee.name }}
+            {{ task().employeeName }}
           </span>
         </div>
       }
@@ -41,26 +41,26 @@
               <div 
                 class="pl-3 py-2 rounded-r"
                 [class.border-l-4]="true"
-                [class.border-green-400]="subtask.done"
-                [class.bg-green-50]="subtask.done"
-                [class.border-gray-300]="!subtask.done"
-                [class.bg-white]="!subtask.done">
+                [class.border-green-400]="isSubtaskDone(subtask)"
+                [class.bg-green-50]="isSubtaskDone(subtask)"
+                [class.border-gray-300]="!isSubtaskDone(subtask)"
+                [class.bg-white]="!isSubtaskDone(subtask)">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center justify-between mb-1">
                       <span 
                         class="text-sm font-medium"
-                        [class.text-gray-500]="subtask.done"
-                        [class.line-through]="subtask.done"
-                        [class.text-gray-900]="!subtask.done">
+                        [class.text-gray-500]="isSubtaskDone(subtask)"
+                        [class.line-through]="isSubtaskDone(subtask)"
+                        [class.text-gray-900]="!isSubtaskDone(subtask)">
                         {{ subtask.title }}
                       </span>
                     </div>
                     @if (subtask.description) {
                       <p 
                         class="text-xs text-gray-500 mb-1"
-                        [class.line-through]="subtask.done"
-                        [class.text-gray-400]="subtask.done">
+                        [class.line-through]="isSubtaskDone(subtask)"
+                        [class.text-gray-400]="isSubtaskDone(subtask)">
                         {{ subtask.description }}
                       </p>
                     }
@@ -69,16 +69,16 @@
                       <span class="text-blue-600 font-bold">|</span>
                       <span
                         class="font-medium"
-                        [class.text-green-600]="subtask.done"
-                        [class.text-red-600]="!subtask.done && isSubtaskOverdue(subtask)"
-                        [class.font-semibold]="!subtask.done && isSubtaskOverdue(subtask)"
-                        [class.text-gray-600]="!subtask.done && !isSubtaskOverdue(subtask)"
+                        [class.text-green-600]="isSubtaskDone(subtask)"
+                        [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
+                        [class.font-semibold]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
+                        [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
                       >Deadline: {{ formatDutch(subtask.dueDate) }}</span>
                       <span class="text-blue-600 font-bold">|</span>
-                      <span class="text-gray-700">{{ subtask.assignee?.name }}</span>
+                      <span class="text-gray-700">{{ subtask.employeeName }}</span>
                     </div>
                   </div>
-                  @if (!subtask.done) {
+                  @if (!isSubtaskDone(subtask)) {
                     <button 
                       (click)="onToggleSubtask($index)"
                       class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 ml-3">
@@ -135,3 +135,4 @@
     </div>
   </div>
 </div>
+

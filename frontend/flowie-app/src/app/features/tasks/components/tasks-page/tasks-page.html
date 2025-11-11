@@ -43,7 +43,7 @@
       <div class="p-4">
         <app-project-list 
           [projects]="projects()" 
-          [selectedProjectId]="selectedProject()?.id"
+          [selectedProjectId]="selectedProject()?.projectId"
           [loading]="isLoadingProjects()"
           (projectSelected)="onProjectSelected($event)"
           (projectCreateRequested)="onProjectCreate($event)"

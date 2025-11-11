@@ -1,15 +1,15 @@
 import { Component, input, output } from "@angular/core";
-import { Project } from "../../models/project.model";
-import { Task } from "../../models/task.model";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
+import { Project } from "../../models/project.model";
+import { Task } from "../../models/task.model";
 
 @Component({
-  selector: 'app-project-detail',
+  selector: "app-project-detail",
   standalone: true,
   imports: [TaskItemComponent],
-  templateUrl: './project-detail.component.html',
-  styleUrl: './project-detail.component.scss'
+  templateUrl: "./project-detail.component.html",
+  styleUrl: "./project-detail.component.scss"
 })
 export class ProjectDetailComponent {
   // Inputs as signals

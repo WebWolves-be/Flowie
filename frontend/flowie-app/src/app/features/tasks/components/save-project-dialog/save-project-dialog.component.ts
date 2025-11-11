@@ -1,25 +1,25 @@
-import { Component, inject, signal } from '@angular/core';
-import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { CommonModule } from '@angular/common';
-import { Company } from '../../models/company.enum';
-import { Project } from '../../models/project.model';
+import { Component, inject, signal } from "@angular/core";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { CommonModule } from "@angular/common";
+import { Company } from "../../models/company.enum";
+import { Project } from "../../models/project.model";
 
 export interface SaveProjectDialogData {
-  mode: 'create' | 'update';
+  mode: "create" | "update";
   project?: Project; // present when updating
 }
 
 export interface SaveProjectDialogResult {
   project: Project;
-  mode: 'create' | 'update';
+  mode: "create" | "update";
 }
 
 @Component({
-  selector: 'app-save-project-dialog',
+  selector: "app-save-project-dialog",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './save-project-dialog.component.html',
-  styleUrl: './save-project-dialog.component.scss'
+  templateUrl: "./save-project-dialog.component.html",
+  styleUrl: "./save-project-dialog.component.scss"
 })
 export class SaveProjectDialogComponent {
   private ref = inject<DialogRef<SaveProjectDialogResult>>(DialogRef);
@@ -27,18 +27,18 @@ export class SaveProjectDialogComponent {
 
   readonly Company = Company;
 
-  title = signal(this.data.project?.title ?? '');
-  description = signal(this.data.project?.description ?? '');
+  title = signal(this.data.project?.title ?? "");
+  description = signal(this.data.project?.description ?? "");
   company = signal<Company>(this.data.project?.company ?? Company.Immoseed);
 
-  readonly isUpdate = this.data.mode === 'update';
+  readonly isUpdate = this.data.mode === "update";
 
   get titleLabel(): string {
-    return this.isUpdate ? 'Project bewerken' : 'Nieuw project aanmaken';
+    return this.isUpdate ? "ProjectModel bewerken" : "Nieuw project aanmaken";
   }
 
   get actionLabel(): string {
-    return this.isUpdate ? 'Bewerken' : 'Aanmaken';
+    return this.isUpdate ? "Bewerken" : "Aanmaken";
   }
 
   onCancel(): void {
@@ -48,13 +48,12 @@ export class SaveProjectDialogComponent {
   onSave(): void {
     // Preserve existing metrics when updating; initialize to zero on create.
     const base: Project = {
-      id: this.data.project?.id ?? Date.now(), // temp id generation for mock
+      projectId: this.data.project?.projectId ?? Date.now(), // temp id generation for mock
       title: this.title(),
-      description: this.description() || null,
+      description: this.description(),
       company: this.company(),
       taskCount: this.data.project?.taskCount ?? 0,
-      completedTaskCount: this.data.project?.completedTaskCount ?? 0,
-      progress: this.data.project?.progress ?? 0
+      completedTaskCount: this.data.project?.completedTaskCount ?? 0
     };
     this.ref.close({ project: base, mode: this.data.mode });
   }

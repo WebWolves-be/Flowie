@@ -7,7 +7,6 @@ public record GetTasksQueryResult(IReadOnlyCollection<TaskDto> Tasks);
 public record TaskDto(
     int TaskId,
     int ProjectId,
-    int? ParentTaskId,
     string Title,
     string? Description,
     int TypeId,
@@ -28,6 +27,8 @@ public record SubtaskDto(
     int? ParentTaskId,
     string Title,
     string? Description,
+    int TypeId,
+    string TypeName,
     DateOnly? DueDate,
     TaskStatus Status,
     int? EmployeeId,

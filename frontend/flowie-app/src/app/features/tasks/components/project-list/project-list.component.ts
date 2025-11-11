@@ -1,6 +1,10 @@
-import { Component, input, output, inject } from "@angular/core";
-import { Dialog } from '@angular/cdk/dialog';
-import { SaveProjectDialogComponent, SaveProjectDialogData, SaveProjectDialogResult } from '../save-project-dialog/save-project-dialog.component';
+import { Component, inject, input, output } from "@angular/core";
+import { Dialog } from "@angular/cdk/dialog";
+import {
+  SaveProjectDialogComponent,
+  SaveProjectDialogData,
+  SaveProjectDialogResult
+} from "../save-project-dialog/save-project-dialog.component";
 import { Project } from "../../models/project.model";
 import { Company } from "../../models/company.enum";
 
@@ -26,12 +30,12 @@ export class ProjectListComponent {
 
   openCreateProjectDialog() {
     const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
-      data: { mode: 'create' } as SaveProjectDialogData,
-      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
-      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+      data: { mode: "create" } as SaveProjectDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
     ref.closed.subscribe(result => {
-      if (result?.mode === 'create') {
+      if (result?.mode === "create") {
         this.projectCreateRequested.emit(result.project);
       }
     });
@@ -39,12 +43,12 @@ export class ProjectListComponent {
 
   openEditProjectDialog(project: Project) {
     const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
-      data: { mode: 'update', project } as SaveProjectDialogData,
-      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
-      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+      data: { mode: "update", project } as SaveProjectDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
     ref.closed.subscribe(result => {
-      if (result?.mode === 'update') {
+      if (result?.mode === "update") {
         this.projectUpdateRequested.emit(result.project);
       }
     });

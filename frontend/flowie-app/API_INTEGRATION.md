@@ -4,7 +4,8 @@ This document describes the API integration between the Angular frontend and the
 
 ## Overview
 
-The frontend now uses Angular's `HttpClient` to make API calls to the backend instead of using mock data. All API communication is handled through dedicated service classes.
+The frontend now uses Angular's `HttpClient` to make API calls to the backend instead of using mock data. All API
+communication is handled through dedicated service classes.
 
 ## Architecture
 
@@ -59,8 +60,9 @@ Handles all task type API calls:
 
 ### EmployeeApiService (`src/app/core/services/employee-api.service.ts`)
 
-**Note**: This service is a placeholder. The backend does not currently have an employees endpoint. 
-Employee data is currently handled through:
+**Note**: This service is a placeholder. The backend does not currently have an employees endpoint.
+EmployeeModel data is currently handled through:
+
 - Task assignees (embedded in task data)
 - Auth endpoints (when registering/authenticating users)
 
@@ -71,6 +73,7 @@ The `TaskFacade.getEmployees()` method falls back to mock data when the API call
 ### TaskFacade
 
 Updated to use API services for:
+
 - Loading projects (with company filtering)
 - Loading tasks (with "my tasks" filtering)
 - Creating and updating projects
@@ -80,6 +83,7 @@ Updated to use API services for:
 ### TaskTypeFacade
 
 Updated to use API services for:
+
 - Loading task types
 - Creating task types
 - Deleting task types
@@ -92,13 +96,14 @@ No changes needed - it depends on `TaskFacade` which now uses real API calls.
 
 The API DTOs from the backend are mapped to frontend models in the facade services:
 
-- `ProjectDto` → `Project` model
-- `TaskDto` → `Task` model
+- `ProjectDto` → `ProjectModel` model
+- `TaskModel` → `Task` model
 - `TaskTypeDto` → `TaskType` model
 
 The progress field for projects is calculated on the frontend:
+
 ```typescript
-progress: dto.taskCount > 0 
+progress: dto.taskCount > 0
   ? Math.round((dto.completedTaskCount / dto.taskCount) * 100)
   : 0
 ```
@@ -106,12 +111,14 @@ progress: dto.taskCount > 0
 ## Error Handling
 
 All API calls include error handlers that:
+
 1. Log errors to the console
 2. Set appropriate loading states
 3. Clear/reset data on error
 4. For employees, fall back to mock data if the API fails
 
 Example:
+
 ```typescript
 this.projectApi.getProjects(company).subscribe({
   next: (response) => {
@@ -159,9 +166,9 @@ The app will be available at `http://localhost:4200`
 ### Missing Backend Endpoints
 
 1. **Employees Endpoint**: There's no dedicated endpoint to fetch all employees. Currently:
-   - Employee data comes from task assignees
-   - The frontend falls back to mock data
-   - **Recommendation**: Create `/api/employees` endpoint in the backend
+    - EmployeeModel data comes from task assignees
+    - The frontend falls back to mock data
+    - **Recommendation**: Create `/api/employees` endpoint in the backend
 
 ### Potential Improvements
 
@@ -170,9 +177,9 @@ The app will be available at `http://localhost:4200`
 3. **Optimistic Updates**: Update UI immediately before API confirmation
 4. **Caching**: Implement caching strategy for frequently accessed data
 5. **Interceptors**: Add HTTP interceptor for:
-   - Authentication token handling
-   - Global error handling
-   - Request/response logging
+    - Authentication token handling
+    - Global error handling
+    - Request/response logging
 6. **Retry Logic**: Add retry logic for failed requests
 7. **Response Types**: Ensure backend response types match exactly (currently some assumptions)
 
@@ -204,6 +211,7 @@ The backend uses minimal API pattern with the following structure:
 ## CORS Configuration
 
 The backend is configured to accept requests from:
+
 - `http://localhost:4200`
 - `https://localhost:4200`
 
@@ -214,6 +222,7 @@ If you're running on a different port or domain, update the CORS configuration i
 ### CORS Errors
 
 If you see CORS errors in the browser console:
+
 1. Check that the backend is running
 2. Verify the backend CORS configuration includes your frontend URL
 3. Check that the frontend environment file has the correct backend URL
@@ -221,6 +230,7 @@ If you see CORS errors in the browser console:
 ### 404 Errors
 
 If API calls return 404:
+
 1. Verify the backend is running
 2. Check the API URL in environment files
 3. Verify the endpoint exists in the backend
@@ -228,11 +238,13 @@ If API calls return 404:
 ### Data Not Loading
 
 If data doesn't load:
+
 1. Open browser DevTools Network tab
 2. Check if API requests are being made
 3. Check request/response for errors
 4. Verify backend database has data
 
-### Employee Data Not Loading
+### EmployeeModel Data Not Loading
 
-This is expected - the backend doesn't have an employees endpoint yet. The frontend falls back to mock data for employees.
+This is expected - the backend doesn't have an employees endpoint yet. The frontend falls back to mock data for
+employees.

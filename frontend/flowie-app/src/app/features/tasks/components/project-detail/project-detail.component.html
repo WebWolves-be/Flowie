@@ -16,7 +16,7 @@
         <div class="flex-1">
           <div class="flex items-center mb-2">
             <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().title }}</h2>
-            <span 
+            <span
               [class.bg-amber-100]="project().company === Company.Immoseed"
               [class.text-amber-800]="project().company === Company.Immoseed"
               [class.bg-purple-100]="project().company === Company.NovaraRealEstate"
@@ -32,11 +32,13 @@
           }
         </div>
         <div class="flex space-x-3">
-          <button (click)="onCreateTask()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <button (click)="onCreateTask()"
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
             <i class="fas fa-plus mr-2"></i>Taak Toevoegen
           </button>
-          <button (click)="onEditProject()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-            <i class="fas fa-edit mr-2"></i>Project Bewerken
+          <button (click)="onEditProject()"
+                  class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+            <i class="fas fa-edit mr-2"></i>ProjectModel Bewerken
           </button>
         </div>
       </div>
@@ -47,7 +49,7 @@
   @if (!isDetailLoading() && tasks().length > 0) {
     <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex-shrink-0">
       <div class="flex flex-wrap gap-2">
-        <button 
+        <button
           (click)="onToggleFilter(false)"
           [class.bg-blue-600]="!showOnlyMyTasks()"
           [class.text-white]="!showOnlyMyTasks()"
@@ -56,7 +58,7 @@
           class="task-filter px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
           Alle Taken
         </button>
-        <button 
+        <button
           (click)="onToggleFilter(true)"
           [class.bg-blue-600]="showOnlyMyTasks()"
           [class.text-white]="showOnlyMyTasks()"
@@ -89,14 +91,18 @@
         <div class="text-center max-w-md px-6">
           <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-blue-100 mb-6">
             <svg class="h-12 w-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-gray-900 mb-2">Geen taken gevonden</h3>
-          <p class="text-sm text-gray-500 mb-6">Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een nieuwe taak aan te maken.</p>
+          <p class="text-sm text-gray-500 mb-6">Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een
+            nieuwe taak aan te maken.</p>
           <div class="flex items-center justify-center space-x-2 text-gray-400">
             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clip-rule="evenodd" />
             </svg>
             <span class="text-xs font-medium">Voeg je eerste taak toe</span>
           </div>
@@ -104,13 +110,13 @@
       </div>
     } @else {
       <div class="space-y-4">
-        @for (task of tasks(); track task.id) {
-          <app-task-item 
+        @for (task of tasks(); track task.taskId) {
+          <app-task-item
             [task]="task"
             [isLast]="$last"
-            (taskToggled)="onTaskToggled(task.id)"
-            (taskClicked)="onTaskClicked(task.id)"
-            (taskEditRequested)="onTaskEdit(task.id)">
+            (taskToggled)="onTaskToggled(task.taskId)"
+            (taskClicked)="onTaskClicked(task.taskId)"
+            (taskEditRequested)="onTaskEdit(task.taskId)">
           </app-task-item>
         }
       </div>
