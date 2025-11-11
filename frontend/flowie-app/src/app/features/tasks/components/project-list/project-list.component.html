@@ -1,7 +1,6 @@
 <div class="space-y-3">
-  <!-- Loading skeletons -->
   @if (loading()) {
-    @for (_ of [1,2,3,4]; track $index) {
+    @for (_ of [1, 2, 3, 4]; track $index) {
       <div class="p-3 rounded-lg border border-gray-200 animate-pulse">
         <div class="flex items-start justify-between mb-2">
           <div class="h-4 w-40 bg-gray-200 rounded"></div>
@@ -15,17 +14,16 @@
       </div>
     }
   } @else {
-    <!-- Actual project list -->
     @if (projects().length > 0) {
       @for (project of projects(); track project.projectId) {
-        <div 
+        <div
           (click)="onSelectProject(project.projectId)"
           [class.border-blue-600]="selectedProjectId() === project.projectId"
           [class.bg-blue-50]="selectedProjectId() === project.projectId"
           class="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-600 hover:bg-blue-50 transition-all">
           <div class="flex items-start justify-between mb-2">
             <h3 class="font-medium text-gray-900 text-sm">{{ project.title }}</h3>
-            <span 
+            <span
               [class.bg-amber-100]="project.company === Company.Immoseed"
               [class.text-amber-800]="project.company === Company.Immoseed"
               [class.bg-purple-100]="project.company === Company.NovaraRealEstate"
@@ -36,16 +34,17 @@
           </div>
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-500">{{ project.completedTaskCount }} / {{ project.taskCount }} taken</span>
-            <span 
+            <span
               class="text-xs font-medium"
               [class.text-blue-600]="project.taskCount === 0 || project.completedTaskCount < project.taskCount"
               [class.text-emerald-500]="project.taskCount > 0 && project.completedTaskCount === project.taskCount"
             >
-              {{ project.taskCount > 0 ? ((project.completedTaskCount / project.taskCount) * 100 | number:'1.0-0') : 0 }}%
+              {{ project.taskCount > 0 ? ((project.completedTaskCount / project.taskCount) * 100 | number:'1.0-0') : 0 }}
+              %
             </span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
-            <div 
+            <div
               class="h-1 rounded-full"
               [class.bg-blue-600]="project.taskCount === 0 || project.completedTaskCount < project.taskCount"
               [class.bg-emerald-500]="project.taskCount > 0 && project.completedTaskCount === project.taskCount"
@@ -55,12 +54,12 @@
         </div>
       }
     } @else {
-      <!-- No projects placeholder -->
       <div class="flex items-center justify-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
         <div class="text-center">
           <div class="mx-auto mb-3 h-10 w-10 text-gray-400">
             <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8M8 17h5" />
             </svg>
           </div>

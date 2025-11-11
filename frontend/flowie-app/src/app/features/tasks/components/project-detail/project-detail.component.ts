@@ -12,7 +12,6 @@ import { Task } from "../../models/task.model";
   styleUrl: "./project-detail.component.scss"
 })
 export class ProjectDetailComponent {
-  // Inputs as signals
   project = input.required<Project>();
   tasks = input<Task[]>([]);
   isLoadingTasks = input<boolean>(false);

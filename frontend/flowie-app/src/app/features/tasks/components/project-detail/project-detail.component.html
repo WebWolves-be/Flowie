@@ -1,5 +1,4 @@
 <div class="flex flex-col h-full overflow-hidden">
-  <!-- Header -->
   <div class="bg-white border-b border-gray-200 p-6 flex-shrink-0">
     @if (isDetailLoading()) {
       <div class="animate-pulse">
@@ -44,8 +43,6 @@
       </div>
     }
   </div>
-
-  <!-- Filter Bar -->
   @if (!isDetailLoading() && tasks().length > 0) {
     <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex-shrink-0">
       <div class="flex flex-wrap gap-2">
@@ -70,8 +67,6 @@
       </div>
     </div>
   }
-
-  <!-- Content -->
   <div class="flex-1 p-6 overflow-y-auto bg-gray-50">
     @if (isDetailLoading()) {
       <div class="mb-6 flex flex-wrap gap-2 animate-pulse">
@@ -79,7 +74,6 @@
         <div class="h-8 w-36 bg-gray-200 rounded-full"></div>
       </div>
     }
-
     @if (isLoadingTasks()) {
       <div class="space-y-4 animate-pulse">
         <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -96,8 +90,9 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-gray-900 mb-2">Geen taken gevonden</h3>
-          <p class="text-sm text-gray-500 mb-6">Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een
-            nieuwe taak aan te maken.</p>
+          <p class="text-sm text-gray-500 mb-6">
+            Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een nieuwe taak aan te maken.
+          </p>
           <div class="flex items-center justify-center space-x-2 text-gray-400">
             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd"
