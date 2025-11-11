@@ -3,11 +3,12 @@
     <div class="p-4 border-b border-gray-200 flex-shrink-0">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-lg font-semibold text-gray-900">Projecten</h1>
-        <button (click)="onNewProject()" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+        <button (click)="onOpenCreateProjectDialog()"
+                class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
           <i class="fas fa-plus mr-1"></i>Nieuw
         </button>
       </div>
-      
+
       <div class="flex space-x-2">
         <button
           (click)="filterCompany('ALL')"
@@ -17,7 +18,8 @@
           [class.bg-gray-200]="companyFilter() !== 'ALL'"
           [class.text-gray-700]="companyFilter() !== 'ALL'"
           [class.hover:bg-gray-300]="companyFilter() !== 'ALL'"
-          class="px-2 py-1 rounded text-xs transition-colors">Alle</button>
+          class="px-2 py-1 rounded text-xs transition-colors">Alle
+        </button>
         <button
           (click)="filterCompany(Company.Immoseed)"
           [class.bg-blue-600]="companyFilter() === Company.Immoseed"
@@ -26,7 +28,8 @@
           [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
           [class.text-gray-700]="companyFilter() !== Company.Immoseed"
           [class.hover:bg-gray-300]="companyFilter() !== Company.Immoseed"
-          class="px-2 py-1 rounded text-xs transition-colors">Immoseed</button>
+          class="px-2 py-1 rounded text-xs transition-colors">Immoseed
+        </button>
         <button
           (click)="filterCompany(Company.NovaraRealEstate)"
           [class.bg-blue-600]="companyFilter() === Company.NovaraRealEstate"
@@ -35,14 +38,15 @@
           [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
           [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
           [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
-          class="px-2 py-1 rounded text-xs transition-colors">Novara</button>
+          class="px-2 py-1 rounded text-xs transition-colors">Novara
+        </button>
       </div>
     </div>
-    
+
     <div class="flex-1 overflow-y-auto">
       <div class="p-4">
-        <app-project-list 
-          [projects]="projects()" 
+        <app-project-list
+          [projects]="projects()"
           [selectedProjectId]="selectedProject()?.projectId"
           [loading]="isLoadingProjects()"
           (projectSelected)="onProjectSelected($event)"
@@ -66,7 +70,7 @@
         (taskToggled)="onTaskToggled($event)"
         (taskClicked)="onTaskClicked($event)"
         (taskEditRequested)="onTaskClicked($event)"
-        (projectEditRequested)="onEditProjectRequested()"
+        (projectEditRequested)="onOpenUpdateProjectDialog()"
         (taskCreateRequested)="onCreateTaskRequested()">
       </app-project-detail>
     } @else {
@@ -76,24 +80,27 @@
           <!-- Icon -->
           <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-blue-100 mb-6">
             <svg class="h-12 w-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          
+
           <!-- Title -->
           <h3 class="text-xl font-semibold text-gray-900 mb-2">
             Geen project geselecteerd
           </h3>
-          
+
           <!-- Description -->
           <p class="text-sm text-gray-500 mb-6">
             Selecteer een project uit de lijst aan de linkerkant om de taken te bekijken en te beheren.
           </p>
-          
+
           <!-- Decorative Element -->
           <div class="flex items-center justify-center space-x-2 text-gray-400">
             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd" />
             </svg>
             <span class="text-xs font-medium">Kies een project om te starten</span>
           </div>
