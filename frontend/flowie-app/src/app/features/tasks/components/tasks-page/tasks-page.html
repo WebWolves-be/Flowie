@@ -64,7 +64,7 @@
         [project]="selectedProject()!"
         [tasks]="tasks()"
         [isLoadingTasks]="isLoadingTasks()"
-        [isDetailLoading]="projectDetailLoading()"
+        [isDetailLoading]="isLoadingTasks()"
         [showOnlyMyTasks]="showOnlyMyTasks()"
         (taskFilterToggled)="onTaskFilterToggled($event)"
         (taskToggled)="onTaskToggled($event)"
