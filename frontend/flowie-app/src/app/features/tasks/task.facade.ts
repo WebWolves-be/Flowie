@@ -212,8 +212,7 @@ export class TaskFacade {
       .get<{ employees: Employee[] }>(`${this.apiUrl}/api/employees`)
       .pipe(
         catchError((error) => {
-          console.error("Error loading employees (endpoint may not exist):", error);
-          // Fallback to mock data for now
+          console.error("Error loading employees:", error);
           const mockEmployees: Employee[] = [
             { id: 1, name: "Amalia Van Dosselaer" },
             { id: 2, name: "Peter Carrein" },

@@ -5,6 +5,6 @@ export interface DashboardMetric {
     value: number | string;
     description?: string;
     status?: 'good' | 'warn' | 'bad';
-    delta?: number; // positive -> up, negative -> down
+    delta?: number;
     trend?: 'up' | 'down' | 'flat';
 }

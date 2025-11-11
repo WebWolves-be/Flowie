@@ -10,7 +10,7 @@ import { TaskFacade } from "../../task.facade";
 export interface SaveTaskDialogData {
   mode: "create" | "update";
   projectId: number;
-  task?: Task; // present when updating
+  task?: Task;
 }
 
 export interface SaveTaskDialogResult {

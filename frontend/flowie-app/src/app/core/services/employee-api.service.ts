@@ -20,10 +20,6 @@ export class EmployeeApiService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/api/employees`;
 
-  // Note: Backend does not currently have an employees endpoint
-  // This service is a placeholder for future implementation
-  // For now, employee data comes from task assignees or auth endpoints
-
   getEmployees(): Observable<GetEmployeesResponse> {
     return this.http.get<GetEmployeesResponse>(this.apiUrl);
   }

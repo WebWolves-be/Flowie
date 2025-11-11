@@ -7,7 +7,7 @@ import { Project } from "../../models/project.model";
 
 export interface SaveProjectDialogData {
   mode: "create" | "update";
-  project?: Project; // present when updating
+  project?: Project;
 }
 
 export interface SaveProjectDialogResult {

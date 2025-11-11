@@ -18,7 +18,6 @@ export class ProjectDetailComponent {
   isDetailLoading = input<boolean>(false);
   showOnlyMyTasks = input<boolean>(false);
 
-  // Outputs as signals
   taskFilterToggled = output<boolean>();
   taskClicked = output<number>();
   taskToggled = output<number>();
@@ -26,7 +25,6 @@ export class ProjectDetailComponent {
   projectEditRequested = output<void>();
   taskCreateRequested = output<void>();
 
-  // Expose enum to template
   readonly Company = Company;
 
   onToggleFilter(val: boolean) {

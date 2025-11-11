@@ -47,7 +47,6 @@ export class TaskTypeFacade {
 
     this.taskTypeApi.createTaskType({ name: trimmed }).subscribe({
       next: () => {
-        // Refresh task types list after creation
         this.getTaskTypes();
       },
       error: (error) => {
@@ -59,7 +58,6 @@ export class TaskTypeFacade {
   remove(id: number): void {
     this.taskTypeApi.deleteTaskType(id).subscribe({
       next: () => {
-        // Update local state after deletion
         this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
       },
       error: (error) => {
