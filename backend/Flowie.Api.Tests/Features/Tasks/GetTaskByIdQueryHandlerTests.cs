@@ -1,45 +1,62 @@
 using Flowie.Api.Features.Tasks.GetTaskById;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
+using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using Flowie.Api.Tests.Helpers;
 using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Tasks;
 
-public class GetTaskByIdQueryHandlerTests
+public class GetTaskByIdQueryHandlerTests : IDisposable
 {
+    private readonly DatabaseContext _context;
+    private readonly GetTaskByIdQueryHandler _sut;
+    private readonly Project _project;
+    private readonly TaskType _taskType;
+    private readonly Employee _employee;
+
+    public GetTaskByIdQueryHandlerTests()
+    {
+        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
+        _sut = new GetTaskByIdQueryHandler(_context);
+
+        // Setup common test data
+        _project = new Project { Title = "Test Project", Company = Company.Immoseed };
+        _taskType = new TaskType { Name = "Bug", Active = true };
+        _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
+        _context.Projects.Add(_project);
+        _context.TaskTypes.Add(_taskType);
+        _context.Employees.Add(_employee);
+        _context.SaveChanges();
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnTask_WhenTaskExists()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnTask_WhenTaskExists));
-        var project = new Project { Title = "Test Project", Company = Company.Immoseed };
-        var taskType = new TaskType { Name = "Bug", Active = true };
-        var employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
-        context.Projects.Add(project);
-        context.TaskTypes.Add(taskType);
-        context.Employees.Add(employee);
-        await context.SaveChangesAsync();
-
         var task = new Shared.Domain.Entities.Task
         {
             Title = "Test Task",
             Description = "Test Description",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = project.Id,
-            TaskTypeId = taskType.Id,
-            EmployeeId = employee.Id
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id
         };
-        context.Tasks.Add(task);
-        await context.SaveChangesAsync();
+        _context.Tasks.Add(task);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetTaskByIdQueryHandler(context);
         var query = new GetTaskByIdQuery(task.Id);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -53,13 +70,11 @@ public class GetTaskByIdQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldThrowEntityNotFoundException_WhenTaskDoesNotExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldThrowEntityNotFoundException_WhenTaskDoesNotExist));
-        var handler = new GetTaskByIdQueryHandler(context);
         var query = new GetTaskByIdQuery(999);
 
         // Act & Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(
-            async () => await handler.Handle(query, CancellationToken.None)
+            async () => await _sut.Handle(query, CancellationToken.None)
         );
     }
 
@@ -67,33 +82,23 @@ public class GetTaskByIdQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldReturnTaskWithNullDescription()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnTaskWithNullDescription));
-        var project = new Project { Title = "Test Project", Company = Company.Immoseed };
-        var taskType = new TaskType { Name = "Feature", Active = true };
-        var employee = new Employee { Name = "Jane Doe", Email = "jane@test.com", UserId = "test-user-id" };
-        context.Projects.Add(project);
-        context.TaskTypes.Add(taskType);
-        context.Employees.Add(employee);
-        await context.SaveChangesAsync();
-
         var task = new Shared.Domain.Entities.Task
         {
             Title = "Test Task",
             Description = null,
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Ongoing,
-            ProjectId = project.Id,
-            TaskTypeId = taskType.Id,
-            EmployeeId = employee.Id
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id
         };
-        context.Tasks.Add(task);
-        await context.SaveChangesAsync();
+        _context.Tasks.Add(task);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetTaskByIdQueryHandler(context);
         var query = new GetTaskByIdQuery(task.Id);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);

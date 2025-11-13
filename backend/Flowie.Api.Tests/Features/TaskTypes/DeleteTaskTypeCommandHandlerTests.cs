@@ -1,30 +1,43 @@
 using Flowie.Api.Features.TaskTypes.DeleteTaskType;
 using Flowie.Api.Shared.Domain.Entities;
+using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using Flowie.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Tests.Features.TaskTypes;
 
-public class DeleteTaskTypeCommandHandlerTests
+public class DeleteTaskTypeCommandHandlerTests : IDisposable
 {
+    private readonly DatabaseContext _context;
+    private readonly DeleteTaskTypeCommandHandler _sut;
+
+    public DeleteTaskTypeCommandHandlerTests()
+    {
+        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
+        _sut = new DeleteTaskTypeCommandHandler(_context);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldDeleteTaskType_WhenTaskTypeExists()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldDeleteTaskType_WhenTaskTypeExists));
         var taskType = new TaskType { Name = "Bug", Active = true };
-        context.TaskTypes.Add(taskType);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.Add(taskType);
+        await _context.SaveChangesAsync();
 
-        var handler = new DeleteTaskTypeCommandHandler(context);
         var command = new DeleteTaskTypeCommand(taskType.Id);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedTaskType = await context.TaskTypes.FindAsync(taskType.Id);
+        var deletedTaskType = await _context.TaskTypes.FindAsync(taskType.Id);
         Assert.Null(deletedTaskType);
     }
 
@@ -32,13 +45,11 @@ public class DeleteTaskTypeCommandHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldThrowEntityNotFoundException_WhenTaskTypeDoesNotExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldThrowEntityNotFoundException_WhenTaskTypeDoesNotExist));
-        var handler = new DeleteTaskTypeCommandHandler(context);
         var command = new DeleteTaskTypeCommand(999);
 
         // Act & Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(
-            async () => await handler.Handle(command, CancellationToken.None)
+            async () => await _sut.Handle(command, CancellationToken.None)
         );
     }
 
@@ -46,21 +57,19 @@ public class DeleteTaskTypeCommandHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldOnlyDeleteSpecifiedTaskType()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldOnlyDeleteSpecifiedTaskType));
         var taskType1 = new TaskType { Name = "Bug", Active = true };
         var taskType2 = new TaskType { Name = "Feature", Active = true };
         var taskType3 = new TaskType { Name = "Refactor", Active = true };
-        context.TaskTypes.AddRange(taskType1, taskType2, taskType3);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.AddRange(taskType1, taskType2, taskType3);
+        await _context.SaveChangesAsync();
 
-        var handler = new DeleteTaskTypeCommandHandler(context);
         var command = new DeleteTaskTypeCommand(taskType2.Id);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var remainingTaskTypes = await context.TaskTypes.ToListAsync();
+        var remainingTaskTypes = await _context.TaskTypes.ToListAsync();
         Assert.Equal(2, remainingTaskTypes.Count);
         Assert.Contains(remainingTaskTypes, t => t.Name == "Bug");
         Assert.Contains(remainingTaskTypes, t => t.Name == "Refactor");
@@ -71,19 +80,17 @@ public class DeleteTaskTypeCommandHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldDeleteInactiveTaskType()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldDeleteInactiveTaskType));
         var taskType = new TaskType { Name = "Deprecated", Active = false };
-        context.TaskTypes.Add(taskType);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.Add(taskType);
+        await _context.SaveChangesAsync();
 
-        var handler = new DeleteTaskTypeCommandHandler(context);
         var command = new DeleteTaskTypeCommand(taskType.Id);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedTaskType = await context.TaskTypes.FindAsync(taskType.Id);
+        var deletedTaskType = await _context.TaskTypes.FindAsync(taskType.Id);
         Assert.Null(deletedTaskType);
     }
 }

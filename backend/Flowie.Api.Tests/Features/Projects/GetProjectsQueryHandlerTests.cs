@@ -1,31 +1,44 @@
 using Flowie.Api.Features.Projects.GetProjects;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
+using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 
 namespace Flowie.Api.Tests.Features.Projects;
 
-public class GetProjectsQueryHandlerTests
+public class GetProjectsQueryHandlerTests : IDisposable
 {
+    private readonly DatabaseContext _context;
+    private readonly GetProjectsQueryHandler _sut;
+
+    public GetProjectsQueryHandlerTests()
+    {
+        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
+        _sut = new GetProjectsQueryHandler(_context);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllProjects_WhenProjectsExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnAllProjects_WhenProjectsExist));
         var projects = new[]
         {
             new Project { Title = "Project 1", Description = "Description 1", Company = Company.Immoseed },
             new Project { Title = "Project 2", Description = "Description 2", Company = Company.NovaraRealEstate },
             new Project { Title = "Project 3", Description = null, Company = Company.Immoseed }
         };
-        context.Projects.AddRange(projects);
-        await context.SaveChangesAsync();
+        _context.Projects.AddRange(projects);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetProjectsQueryHandler(context);
         var query = new GetProjectsQuery(null);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -36,12 +49,10 @@ public class GetProjectsQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldReturnEmptyList_WhenNoProjectsExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnEmptyList_WhenNoProjectsExist));
-        var handler = new GetProjectsQueryHandler(context);
         var query = new GetProjectsQuery(null);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -52,21 +63,19 @@ public class GetProjectsQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldFilterByCompany_WhenCompanySpecified()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldFilterByCompany_WhenCompanySpecified));
         var projects = new[]
         {
             new Project { Title = "Project 1", Company = Company.Immoseed },
             new Project { Title = "Project 2", Company = Company.NovaraRealEstate },
             new Project { Title = "Project 3", Company = Company.Immoseed }
         };
-        context.Projects.AddRange(projects);
-        await context.SaveChangesAsync();
+        _context.Projects.AddRange(projects);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetProjectsQueryHandler(context);
         var query = new GetProjectsQuery(Company.Immoseed);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -78,20 +87,18 @@ public class GetProjectsQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllProjects_IncludingDeleted()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnAllProjects_IncludingDeleted));
         var projects = new[]
         {
             new Project { Title = "Active Project", Company = Company.Immoseed, IsDeleted = false },
             new Project { Title = "Deleted Project", Company = Company.Immoseed, IsDeleted = true }
         };
-        context.Projects.AddRange(projects);
-        await context.SaveChangesAsync();
+        _context.Projects.AddRange(projects);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetProjectsQueryHandler(context);
         var query = new GetProjectsQuery(null);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);

@@ -1,30 +1,43 @@
 using Flowie.Api.Features.TaskTypes.GetTaskTypes;
 using Flowie.Api.Shared.Domain.Entities;
+using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 
 namespace Flowie.Api.Tests.Features.TaskTypes;
 
-public class GetTaskTypesQueryHandlerTests
+public class GetTaskTypesQueryHandlerTests : IDisposable
 {
+    private readonly DatabaseContext _context;
+    private readonly GetTaskTypesQueryHandler _sut;
+
+    public GetTaskTypesQueryHandlerTests()
+    {
+        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
+        _sut = new GetTaskTypesQueryHandler(_context);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllTaskTypes_WhenTaskTypesExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnAllTaskTypes_WhenTaskTypesExist));
         var taskTypes = new[]
         {
             new TaskType { Name = "Bug", Active = true },
             new TaskType { Name = "Feature", Active = true },
             new TaskType { Name = "Refactor", Active = false }
         };
-        context.TaskTypes.AddRange(taskTypes);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.AddRange(taskTypes);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetTaskTypesQueryHandler(context);
         var query = new GetTaskTypesQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -35,12 +48,10 @@ public class GetTaskTypesQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldReturnEmptyList_WhenNoTaskTypesExist()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnEmptyList_WhenNoTaskTypesExist));
-        var handler = new GetTaskTypesQueryHandler(context);
         var query = new GetTaskTypesQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -51,20 +62,18 @@ public class GetTaskTypesQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldReturnBothActiveAndInactiveTaskTypes()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldReturnBothActiveAndInactiveTaskTypes));
         var taskTypes = new[]
         {
             new TaskType { Name = "Active Type", Active = true },
             new TaskType { Name = "Inactive Type", Active = false }
         };
-        context.TaskTypes.AddRange(taskTypes);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.AddRange(taskTypes);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetTaskTypesQueryHandler(context);
         var query = new GetTaskTypesQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -77,21 +86,19 @@ public class GetTaskTypesQueryHandlerTests
     public async System.Threading.Tasks.Task Handle_ShouldOrderTaskTypesByName()
     {
         // Arrange
-        var context = DatabaseContextFactory.CreateInMemoryContext(nameof(Handle_ShouldOrderTaskTypesByName));
         var taskTypes = new[]
         {
             new TaskType { Name = "Zebra", Active = true },
             new TaskType { Name = "Alpha", Active = true },
             new TaskType { Name = "Middle", Active = true }
         };
-        context.TaskTypes.AddRange(taskTypes);
-        await context.SaveChangesAsync();
+        _context.TaskTypes.AddRange(taskTypes);
+        await _context.SaveChangesAsync();
 
-        var handler = new GetTaskTypesQueryHandler(context);
         var query = new GetTaskTypesQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
