@@ -88,7 +88,6 @@ export class TaskItemComponent {
 
   onDelete() {
     this.showMenu.set(false);
-    // TODO: Implement delete functionality
   }
 
   onAddSubtask() {

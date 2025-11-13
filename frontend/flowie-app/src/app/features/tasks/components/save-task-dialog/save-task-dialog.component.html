@@ -1,22 +1,22 @@
 <div class="w-[32rem] bg-white rounded-xl shadow-xl p-6" role="dialog" aria-modal="true">
   <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ titleLabel() }}</h2>
-  <form class="space-y-4" (submit)="onSubmit($event)">
+  <form [formGroup]="taskForm" class="space-y-4" (ngSubmit)="onSubmit()">
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
-      <input id="title" type="text" [value]="title()" (input)="onTitleInput($event)"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+      <input id="title" type="text" formControlName="title"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
     </div>
     <div>
       <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Omschrijving *</label>
-      <textarea id="description" rows="3" [value]="description()" (input)="onDescriptionInput($event)"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
+      <textarea id="description" rows="3" formControlName="description"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
     </div>
     @if (!hasSubtasks()) {
       <div>
         <label for="typeId" class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-        <select id="typeId" [value]="typeId() ?? ''" (change)="onTypeChange($event)"
-          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-          <option value="">-- Selecteer type --</option>
+        <select id="typeId" formControlName="typeId"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option [value]="null">-- Selecteer type --</option>
           @for (type of taskTypes(); track type.id) {
             <option [value]="type.id">{{ type.name }}</option>
           }
@@ -25,14 +25,14 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-1">Deadline *</label>
-          <input id="dueDate" type="date" [value]="dueDate()" (change)="onDueDateChange($event)"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+          <input id="dueDate" type="date" formControlName="dueDate"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <div>
           <label for="assigneeId" class="block text-sm font-medium text-gray-700 mb-1">Verantwoordelijke *</label>
-          <select id="assigneeId" [value]="assigneeId() ?? ''" (change)="onAssigneeChange($event)"
-            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-            <option value="">-- Selecteer verantwoordelijke --</option>
+          <select id="assigneeId" formControlName="assigneeId"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option [value]="null">-- Selecteer verantwoordelijke --</option>
             @for (employee of employees(); track employee.id) {
               <option [value]="employee.id">{{ employee.name }}</option>
             }
@@ -49,7 +49,7 @@
       <button type="button" (click)="onCancel()" class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         <i class="fas fa-times mr-2"></i>Annuleren
       </button>
-      <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50" [disabled]="!title() || !description() || (!hasSubtasks() && (!typeId() || !dueDate() || !assigneeId()))">
+      <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50" [disabled]="taskForm.invalid">
         @if (isUpdate) { <i class="fas fa-save mr-2"></i> } @else { <i class="fas fa-plus mr-2"></i> }
         {{ actionLabel() }}
       </button>

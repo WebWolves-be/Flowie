@@ -7,28 +7,21 @@ import { Project } from "../../tasks/models/project.model";
 export class DashboardFacade {
   private taskFacade = inject(TaskFacade);
 
-  // Local loading state for initial dashboard metrics (reuse project loading)
   #isLoading = signal<boolean>(false);
   isLoading = this.#isLoading.asReadonly();
 
-  // Expose underlying data (projects) in case dashboard needs them
   projects = this.taskFacade.projects;
 
-  // Trigger data load (projects are sufficient for now)
   load(): void {
     if (this.projects().length === 0) {
       this.#isLoading.set(true);
       this.taskFacade.getProjects();
-      // Simulate completion when projects finish loading
       setTimeout(() => this.#isLoading.set(false), 350);
     }
   }
 
-  // Helper to aggregate tasks across all projects by requesting tasks per project sequentially (MVP mock)
-  // For now we approximate with project counts only (task list loading per project would add latency).
   private allProjects = computed<Project[]>(() => this.projects());
 
-  // Metrics based purely on project aggregates (MVP) since we lack started/done timestamps.
   totalProjects = computed(() => this.allProjects().length);
   totalTasks = computed(() =>
     this.allProjects().reduce((acc, p) => acc + p.taskCount, 0)
@@ -36,14 +29,12 @@ export class DashboardFacade {
   completedTasks = computed(() =>
     this.allProjects().reduce((acc, p) => acc + p.completedTaskCount, 0)
   );
-  // For mock delta we simulate a previous period as 90% of current values
   private previousCompletedTasks = computed(() =>
     Math.round(this.completedTasks() * 0.9)
   );
   overallProgressPct = computed(() => {
     const projects = this.allProjects();
     if (!projects.length) return 0;
-    // Average project progress - calculate from taskCount and completedTaskCount
     const sum = projects.reduce((acc, p) => {
       const progress = p.taskCount > 0 ? Math.round((p.completedTaskCount / p.taskCount) * 100) : 0;
       return acc + progress;
