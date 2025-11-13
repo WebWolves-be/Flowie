@@ -1,25 +1,18 @@
 using Flowie.Api.Features.TaskTypes.GetTaskTypes;
 using Flowie.Api.Shared.Domain.Entities;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 
 namespace Flowie.Api.Tests.Features.TaskTypes;
 
-public class GetTaskTypesQueryHandlerTests : IDisposable
+public class GetTaskTypesQueryHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly GetTaskTypesQueryHandler _sut;
 
     public GetTaskTypesQueryHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new GetTaskTypesQueryHandler(_context);
+        _sut = new GetTaskTypesQueryHandler(DatabaseContext);
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllTaskTypes_WhenTaskTypesExist()
@@ -31,8 +24,8 @@ public class GetTaskTypesQueryHandlerTests : IDisposable
             new TaskType { Name = "Feature", Active = true },
             new TaskType { Name = "Refactor", Active = false }
         };
-        _context.TaskTypes.AddRange(taskTypes);
-        await _context.SaveChangesAsync();
+        DatabaseContext.TaskTypes.AddRange(taskTypes);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTaskTypesQuery();
 
@@ -67,8 +60,8 @@ public class GetTaskTypesQueryHandlerTests : IDisposable
             new TaskType { Name = "Active Type", Active = true },
             new TaskType { Name = "Inactive Type", Active = false }
         };
-        _context.TaskTypes.AddRange(taskTypes);
-        await _context.SaveChangesAsync();
+        DatabaseContext.TaskTypes.AddRange(taskTypes);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTaskTypesQuery();
 
@@ -92,8 +85,8 @@ public class GetTaskTypesQueryHandlerTests : IDisposable
             new TaskType { Name = "Alpha", Active = true },
             new TaskType { Name = "Middle", Active = true }
         };
-        _context.TaskTypes.AddRange(taskTypes);
-        await _context.SaveChangesAsync();
+        DatabaseContext.TaskTypes.AddRange(taskTypes);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTaskTypesQuery();
 

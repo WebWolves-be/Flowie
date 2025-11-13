@@ -1,7 +1,6 @@
 using Flowie.Api.Features.Tasks.DeleteTask;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using Flowie.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +8,8 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Tasks;
 
-public class DeleteTaskCommandHandlerTests : IDisposable
+public class DeleteTaskCommandHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly DeleteTaskCommandHandler _sut;
     private readonly Project _project;
     private readonly TaskType _taskType;
@@ -19,23 +17,18 @@ public class DeleteTaskCommandHandlerTests : IDisposable
 
     public DeleteTaskCommandHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new DeleteTaskCommandHandler(_context);
+        _sut = new DeleteTaskCommandHandler(DatabaseContext);
 
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
         _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
-        _context.Projects.Add(_project);
-        _context.TaskTypes.Add(_taskType);
-        _context.Employees.Add(_employee);
-        _context.SaveChanges();
+        DatabaseContext.Projects.Add(_project);
+        DatabaseContext.TaskTypes.Add(_taskType);
+        DatabaseContext.Employees.Add(_employee);
+        DatabaseContext.SaveChanges();
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldDeleteTask_WhenTaskExists()
@@ -50,8 +43,8 @@ public class DeleteTaskCommandHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
 
         var command = new DeleteTaskCommand(task.Id);
 
@@ -59,7 +52,7 @@ public class DeleteTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedTask = await _context.Tasks.FindAsync(task.Id);
+        var deletedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
         Assert.Null(deletedTask);
     }
 
@@ -76,8 +69,8 @@ public class DeleteTaskCommandHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.Add(parentTask);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.Add(parentTask);
+        await DatabaseContext.SaveChangesAsync();
 
         var subTask1 = new Shared.Domain.Entities.Task
         {
@@ -99,8 +92,8 @@ public class DeleteTaskCommandHandlerTests : IDisposable
             EmployeeId = _employee.Id,
             ParentTaskId = parentTask.Id
         };
-        _context.Tasks.AddRange(subTask1, subTask2);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.AddRange(subTask1, subTask2);
+        await DatabaseContext.SaveChangesAsync();
 
         var command = new DeleteTaskCommand(parentTask.Id);
 
@@ -108,7 +101,7 @@ public class DeleteTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var remainingTasks = await _context.Tasks.ToListAsync();
+        var remainingTasks = await DatabaseContext.Tasks.ToListAsync();
         Assert.Empty(remainingTasks);
     }
 
@@ -146,8 +139,8 @@ public class DeleteTaskCommandHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.AddRange(task1, task2);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.AddRange(task1, task2);
+        await DatabaseContext.SaveChangesAsync();
 
         var command = new DeleteTaskCommand(task1.Id);
 
@@ -155,7 +148,7 @@ public class DeleteTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var remainingTasks = await _context.Tasks.ToListAsync();
+        var remainingTasks = await DatabaseContext.Tasks.ToListAsync();
         Assert.Single(remainingTasks);
         Assert.Equal("Task 2", remainingTasks[0].Title);
     }

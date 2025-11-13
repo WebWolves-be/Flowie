@@ -1,26 +1,19 @@
 using Flowie.Api.Features.Projects.GetProjects;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 
 namespace Flowie.Api.Tests.Features.Projects;
 
-public class GetProjectsQueryHandlerTests : IDisposable
+public class GetProjectsQueryHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly GetProjectsQueryHandler _sut;
 
     public GetProjectsQueryHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new GetProjectsQueryHandler(_context);
+        _sut = new GetProjectsQueryHandler(DatabaseContext);
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllProjects_WhenProjectsExist()
@@ -32,8 +25,8 @@ public class GetProjectsQueryHandlerTests : IDisposable
             new Project { Title = "Project 2", Description = "Description 2", Company = Company.NovaraRealEstate },
             new Project { Title = "Project 3", Description = null, Company = Company.Immoseed }
         };
-        _context.Projects.AddRange(projects);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.AddRange(projects);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetProjectsQuery(null);
 
@@ -69,8 +62,8 @@ public class GetProjectsQueryHandlerTests : IDisposable
             new Project { Title = "Project 2", Company = Company.NovaraRealEstate },
             new Project { Title = "Project 3", Company = Company.Immoseed }
         };
-        _context.Projects.AddRange(projects);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.AddRange(projects);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetProjectsQuery(Company.Immoseed);
 
@@ -92,8 +85,8 @@ public class GetProjectsQueryHandlerTests : IDisposable
             new Project { Title = "Active Project", Company = Company.Immoseed, IsDeleted = false },
             new Project { Title = "Deleted Project", Company = Company.Immoseed, IsDeleted = true }
         };
-        _context.Projects.AddRange(projects);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.AddRange(projects);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetProjectsQuery(null);
 

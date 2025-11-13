@@ -3,15 +3,13 @@ using Flowie.Api.Features.Tasks.GetTasks;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
 using Flowie.Api.Shared.Infrastructure.Auth;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Tasks;
 
-public class GetTasksQueryHandlerTests : IDisposable
+public class GetTasksQueryHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly GetTasksQueryHandler _sut;
     private readonly Project _project;
@@ -20,24 +18,19 @@ public class GetTasksQueryHandlerTests : IDisposable
 
     public GetTasksQueryHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
         _currentUserService = A.Fake<ICurrentUserService>();
-        _sut = new GetTasksQueryHandler(_context, _currentUserService);
+        _sut = new GetTasksQueryHandler(DatabaseContext, _currentUserService);
 
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
         _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
-        _context.Projects.Add(_project);
-        _context.TaskTypes.Add(_taskType);
-        _context.Employees.Add(_employee);
-        _context.SaveChanges();
+        DatabaseContext.Projects.Add(_project);
+        DatabaseContext.TaskTypes.Add(_taskType);
+        DatabaseContext.Employees.Add(_employee);
+        DatabaseContext.SaveChanges();
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnAllTasks_WhenTasksExist()
@@ -61,8 +54,8 @@ public class GetTasksQueryHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.AddRange(task1, task2);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.AddRange(task1, task2);
+        await DatabaseContext.SaveChangesAsync();
 
         A.CallTo(() => _currentUserService.UserId).Returns("test-user-id");
         
@@ -95,8 +88,8 @@ public class GetTasksQueryHandlerTests : IDisposable
     {
         // Arrange
         var project2 = new Project { Title = "Project 2", Company = Company.NovaraRealEstate };
-        _context.Projects.Add(project2);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.Add(project2);
+        await DatabaseContext.SaveChangesAsync();
 
         var taskInProject1 = new Shared.Domain.Entities.Task
         {
@@ -116,8 +109,8 @@ public class GetTasksQueryHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.AddRange(taskInProject1, taskInProject2);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.AddRange(taskInProject1, taskInProject2);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTasksQuery(_project.Id, false);
 

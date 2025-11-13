@@ -1,16 +1,14 @@
 using Flowie.Api.Features.Tasks.GetTaskById;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using Flowie.Api.Tests.Helpers;
 using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Tasks;
 
-public class GetTaskByIdQueryHandlerTests : IDisposable
+public class GetTaskByIdQueryHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly GetTaskByIdQueryHandler _sut;
     private readonly Project _project;
     private readonly TaskType _taskType;
@@ -18,23 +16,18 @@ public class GetTaskByIdQueryHandlerTests : IDisposable
 
     public GetTaskByIdQueryHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new GetTaskByIdQueryHandler(_context);
+        _sut = new GetTaskByIdQueryHandler(DatabaseContext);
 
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
         _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
-        _context.Projects.Add(_project);
-        _context.TaskTypes.Add(_taskType);
-        _context.Employees.Add(_employee);
-        _context.SaveChanges();
+        DatabaseContext.Projects.Add(_project);
+        DatabaseContext.TaskTypes.Add(_taskType);
+        DatabaseContext.Employees.Add(_employee);
+        DatabaseContext.SaveChanges();
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnTask_WhenTaskExists()
@@ -50,8 +43,8 @@ public class GetTaskByIdQueryHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTaskByIdQuery(task.Id);
 
@@ -92,8 +85,8 @@ public class GetTaskByIdQueryHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetTaskByIdQuery(task.Id);
 

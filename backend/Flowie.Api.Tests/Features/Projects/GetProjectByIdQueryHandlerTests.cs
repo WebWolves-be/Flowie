@@ -1,27 +1,20 @@
 using Flowie.Api.Features.Projects.GetProjectById;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
 using Flowie.Api.Tests.Helpers;
 
 namespace Flowie.Api.Tests.Features.Projects;
 
-public class GetProjectByIdQueryHandlerTests : IDisposable
+public class GetProjectByIdQueryHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly GetProjectByIdQueryHandler _sut;
 
     public GetProjectByIdQueryHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new GetProjectByIdQueryHandler(_context);
+        _sut = new GetProjectByIdQueryHandler(DatabaseContext);
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldReturnProject_WhenProjectExists()
@@ -33,8 +26,8 @@ public class GetProjectByIdQueryHandlerTests : IDisposable
             Description = "Test Description",
             Company = Company.Immoseed
         };
-        _context.Projects.Add(project);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.Add(project);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetProjectByIdQuery(project.Id);
 
@@ -71,8 +64,8 @@ public class GetProjectByIdQueryHandlerTests : IDisposable
             Description = null,
             Company = Company.NovaraRealEstate
         };
-        _context.Projects.Add(project);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Projects.Add(project);
+        await DatabaseContext.SaveChangesAsync();
 
         var query = new GetProjectByIdQuery(project.Id);
 

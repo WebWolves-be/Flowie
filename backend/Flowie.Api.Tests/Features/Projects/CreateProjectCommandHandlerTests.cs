@@ -1,25 +1,17 @@
 using Flowie.Api.Features.Projects.CreateProject;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Tests.Features.Projects;
 
-public class CreateProjectCommandHandlerTests : IDisposable
+public class CreateProjectCommandHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly CreateProjectCommandHandler _sut;
 
     public CreateProjectCommandHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new CreateProjectCommandHandler(_context);
-    }
-
-    public void Dispose()
-    {
-        _context.Dispose();
+        _sut = new CreateProjectCommandHandler(DatabaseContext);
     }
 
     [Fact]
@@ -32,7 +24,7 @@ public class CreateProjectCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var project = await _context.Projects.FirstOrDefaultAsync();
+        var project = await DatabaseContext.Projects.FirstOrDefaultAsync();
         Assert.NotNull(project);
         Assert.Equal("Test Project", project.Title);
         Assert.Equal("Test Description", project.Description);
@@ -50,7 +42,7 @@ public class CreateProjectCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var project = await _context.Projects.FirstOrDefaultAsync();
+        var project = await DatabaseContext.Projects.FirstOrDefaultAsync();
         Assert.NotNull(project);
         Assert.Equal("Test Project", project.Title);
         Assert.Null(project.Description);
@@ -69,7 +61,7 @@ public class CreateProjectCommandHandlerTests : IDisposable
         await _sut.Handle(command2, CancellationToken.None);
 
         // Assert
-        var projects = await _context.Projects.ToListAsync();
+        var projects = await DatabaseContext.Projects.ToListAsync();
         Assert.Equal(2, projects.Count);
         Assert.Contains(projects, p => p.Title == "Project 1");
         Assert.Contains(projects, p => p.Title == "Project 2");

@@ -1,25 +1,18 @@
 using Flowie.Api.Features.TaskTypes.CreateTaskType;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Tests.Features.TaskTypes;
 
-public class CreateTaskTypeCommandHandlerTests : IDisposable
+public class CreateTaskTypeCommandHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly CreateTaskTypeCommandHandler _sut;
 
     public CreateTaskTypeCommandHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new CreateTaskTypeCommandHandler(_context);
+        _sut = new CreateTaskTypeCommandHandler(DatabaseContext);
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldCreateTaskType_WhenValidCommandProvided()
@@ -31,7 +24,7 @@ public class CreateTaskTypeCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var taskType = await _context.TaskTypes.FirstOrDefaultAsync();
+        var taskType = await DatabaseContext.TaskTypes.FirstOrDefaultAsync();
         Assert.NotNull(taskType);
         Assert.Equal("Bug", taskType.Name);
         Assert.True(taskType.Active);
@@ -51,7 +44,7 @@ public class CreateTaskTypeCommandHandlerTests : IDisposable
         await _sut.Handle(command3, CancellationToken.None);
 
         // Assert
-        var taskTypes = await _context.TaskTypes.ToListAsync();
+        var taskTypes = await DatabaseContext.TaskTypes.ToListAsync();
         Assert.Equal(3, taskTypes.Count);
         Assert.Contains(taskTypes, t => t.Name == "Bug");
         Assert.Contains(taskTypes, t => t.Name == "Feature");
@@ -69,7 +62,7 @@ public class CreateTaskTypeCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var taskType = await _context.TaskTypes.FirstOrDefaultAsync();
+        var taskType = await DatabaseContext.TaskTypes.FirstOrDefaultAsync();
         Assert.NotNull(taskType);
         Assert.True(taskType.Active);
     }

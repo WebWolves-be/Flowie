@@ -1,16 +1,14 @@
 using Flowie.Api.Features.Tasks.CreateTask;
 using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
-using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Tasks;
 
-public class CreateTaskCommandHandlerTests : IDisposable
+public class CreateTaskCommandHandlerTests : BaseTestClass
 {
-    private readonly DatabaseContext _context;
     private readonly CreateTaskCommandHandler _sut;
     private readonly Project _project;
     private readonly TaskType _taskType;
@@ -18,23 +16,18 @@ public class CreateTaskCommandHandlerTests : IDisposable
 
     public CreateTaskCommandHandlerTests()
     {
-        _context = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
-        _sut = new CreateTaskCommandHandler(_context);
+        _sut = new CreateTaskCommandHandler(DatabaseContext);
 
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
         _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
-        _context.Projects.Add(_project);
-        _context.TaskTypes.Add(_taskType);
-        _context.Employees.Add(_employee);
-        _context.SaveChanges();
+        DatabaseContext.Projects.Add(_project);
+        DatabaseContext.TaskTypes.Add(_taskType);
+        DatabaseContext.Employees.Add(_employee);
+        DatabaseContext.SaveChanges();
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldCreateTask_WhenValidCommandProvided()
@@ -54,7 +47,7 @@ public class CreateTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var task = await _context.Tasks.FirstOrDefaultAsync();
+        var task = await DatabaseContext.Tasks.FirstOrDefaultAsync();
         Assert.NotNull(task);
         Assert.Equal("Test Task", task.Title);
         Assert.Equal("Test Description", task.Description);
@@ -83,7 +76,7 @@ public class CreateTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var task = await _context.Tasks.FirstOrDefaultAsync();
+        var task = await DatabaseContext.Tasks.FirstOrDefaultAsync();
         Assert.NotNull(task);
         Assert.Equal("Test Task", task.Title);
         Assert.Null(task.Description);
@@ -102,8 +95,8 @@ public class CreateTaskCommandHandlerTests : IDisposable
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
-        _context.Tasks.Add(parentTask);
-        await _context.SaveChangesAsync();
+        DatabaseContext.Tasks.Add(parentTask);
+        await DatabaseContext.SaveChangesAsync();
 
         var command = new CreateTaskCommand(
             _project.Id,
@@ -119,7 +112,7 @@ public class CreateTaskCommandHandlerTests : IDisposable
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        var tasks = await _context.Tasks.ToListAsync();
+        var tasks = await DatabaseContext.Tasks.ToListAsync();
         Assert.Equal(2, tasks.Count);
         var subTask = tasks.FirstOrDefault(t => t.Title == "Sub Task");
         Assert.NotNull(subTask);
