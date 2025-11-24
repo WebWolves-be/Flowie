@@ -1,5 +1,5 @@
-import { Injectable, signal, inject } from "@angular/core";
-import { TaskTypeApiService } from "../../../core/services/task-type-api.service";
+import { Injectable, signal, inject, effect } from "@angular/core";
+import { TaskFacade } from "../../tasks/task.facade";
 
 export interface TaskType {
   id: number;
@@ -8,7 +8,7 @@ export interface TaskType {
 
 @Injectable({ providedIn: "root" })
 export class TaskTypeFacade {
-  private taskTypeApi = inject(TaskTypeApiService);
+  private taskFacade = inject(TaskFacade);
 
   #taskTypes = signal<TaskType[]>([]);
   #isLoading = signal<boolean>(false);
@@ -16,25 +16,23 @@ export class TaskTypeFacade {
   taskTypes = this.#taskTypes.asReadonly();
   isLoading = this.#isLoading.asReadonly();
 
-  getTaskTypes(): void {
-    this.#isLoading.set(true);
-
-    this.taskTypeApi.getTaskTypes().subscribe({
-      next: (response) => {
-        const taskTypes: TaskType[] = response.taskTypes.map((dto) => ({
-          id: dto.id,
-          name: dto.name,
-        }));
-
-        this.#taskTypes.set(taskTypes);
-        this.#isLoading.set(false);
-      },
-      error: (error) => {
-        console.error("Error loading task types:", error);
-        this.#taskTypes.set([]);
-        this.#isLoading.set(false);
-      },
+  constructor() {
+    // Sync with TaskFacade state
+    effect(() => {
+      const taskTypes = this.taskFacade.taskTypes();
+      this.#taskTypes.set(taskTypes.map((dto) => ({
+        id: dto.id,
+        name: dto.name,
+      })));
     });
+
+    effect(() => {
+      this.#isLoading.set(this.taskFacade.isLoadingTaskTypes());
+    });
+  }
+
+  getTaskTypes(): void {
+    this.taskFacade.getTaskTypes();
   }
 
   add(name: string): void {
@@ -45,24 +43,10 @@ export class TaskTypeFacade {
     );
     if (exists) return;
 
-    this.taskTypeApi.createTaskType({ name: trimmed }).subscribe({
-      next: () => {
-        this.getTaskTypes();
-      },
-      error: (error) => {
-        console.error("Error creating task type:", error);
-      },
-    });
+    this.taskFacade.createTaskType({ name: trimmed });
   }
 
   remove(id: number): void {
-    this.taskTypeApi.deleteTaskType(id).subscribe({
-      next: () => {
-        this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
-      },
-      error: (error) => {
-        console.error("Error deleting task type:", error);
-      },
-    });
+    this.taskFacade.deleteTaskType(id);
   }
 }
