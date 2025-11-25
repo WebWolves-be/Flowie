@@ -12,6 +12,10 @@ export interface ConfirmDeleteDialogResult {
   deleted: boolean;
 }
 
+interface ValidationError {
+  errorMessage: string;
+}
+
 @Component({
   selector: "app-confirm-delete-dialog",
   standalone: true,
@@ -55,9 +59,9 @@ export class ConfirmDeleteDialogComponent {
   private extractErrorMessage(error: HttpErrorResponse): string {
     if (error.status === 400 && error.error?.errors) {
       // FluentValidation error format
-      const errors = error.error.errors;
+      const errors = error.error.errors as ValidationError[];
       if (Array.isArray(errors) && errors.length > 0) {
-        return errors.map((e: any) => e.errorMessage).join(" ");
+        return errors.map((e) => e.errorMessage).join(" ");
       }
     }
     if (error.error?.title) {
