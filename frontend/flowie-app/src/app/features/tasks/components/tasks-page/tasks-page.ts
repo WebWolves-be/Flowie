@@ -86,17 +86,7 @@ export class TasksPage {
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
 
-    ref.closed
-      .pipe(takeUntilDestroyed(this.#destroy))
-      .subscribe(result => {
-        if (result?.mode === "create") {
-          this.#facade.createProject({
-            title: result.project.title,
-            description: result.project.description,
-            company: result.project.company
-          });
-        }
-      });
+    // Dialog handles save via facade
   }
 
   onOpenUpdateProjectDialog() {
@@ -112,17 +102,7 @@ export class TasksPage {
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
 
-    ref.closed
-      .pipe(takeUntilDestroyed(this.#destroy))
-      .subscribe(result => {
-        if (result?.mode === "update") {
-          this.#facade.updateProject(result.project.projectId, {
-            title: result.project.title,
-            description: result.project.description,
-            company: result.project.company
-          });
-        }
-      });
+    // Dialog handles save via facade
   }
 
   onOpenCreateTaskDialog() {

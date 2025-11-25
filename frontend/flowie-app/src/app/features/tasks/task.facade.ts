@@ -116,40 +116,32 @@ export class TaskFacade {
     this.getProjects(filter === "ALL" ? undefined : filter);
   }
 
-  createProject(request: CreateProjectRequest): void {
+  createProject(request: CreateProjectRequest) {
     this.#isSavingProject.set(true);
 
-    this.http
+    return this.http
       .post<void>(`${this.apiUrl}/api/projects`, request)
       .pipe(
-        catchError((error) => {
-          console.error("Error creating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
-      });
+        finalize(() => {
+          this.#isSavingProject.set(false);
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        })
+      );
   }
 
-  updateProject(projectId: number, request: UpdateProjectRequest): void {
+  updateProject(projectId: number, request: UpdateProjectRequest) {
     this.#isSavingProject.set(true);
 
-    this.http
+    return this.http
       .put<void>(`${this.apiUrl}/api/projects/${projectId}`, request)
       .pipe(
-        catchError((error) => {
-          console.error("Error updating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
-      });
+        finalize(() => {
+          this.#isSavingProject.set(false);
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        })
+      );
   }
 
   createTask(request: CreateTaskRequest): void {

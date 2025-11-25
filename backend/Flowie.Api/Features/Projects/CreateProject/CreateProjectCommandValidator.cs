@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Flowie.Api.Features.Projects.CreateProject;
 
-internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
+public class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
     public CreateProjectCommandValidator()
     {

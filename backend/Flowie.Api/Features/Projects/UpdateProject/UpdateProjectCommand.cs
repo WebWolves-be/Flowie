@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Flowie.Api.Features.Projects.UpdateProject;
 
-internal record UpdateProjectCommand(
+public record UpdateProjectCommand(
     int ProjectId, 
     string Title, 
     string Description, 

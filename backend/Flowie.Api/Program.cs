@@ -8,7 +8,6 @@ using Flowie.Api.Shared.Infrastructure.Database;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Middleware;
 using FluentValidation;
-using MediatR;
 using Flowie.Api.Shared.Infrastructure.Database.Seeding;
 using Flowie.Api.Shared.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,6 +17,7 @@ using Serilog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -245,6 +245,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Configure JSON options for minimal APIs
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
 // Add TimeProvider
 builder.Services.AddSingleton(TimeProvider.System);
 
@@ -329,7 +335,8 @@ builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Add MediatR Behaviors
-builder.Services.AddMediatorBehaviors();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 var app = builder.Build();
 
@@ -340,7 +347,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Exception handling can be added later if needed
+// Use exception handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Security headers can be added later if needed for public apps
 

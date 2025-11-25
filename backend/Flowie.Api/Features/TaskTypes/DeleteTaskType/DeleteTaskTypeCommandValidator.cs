@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Features.TaskTypes.DeleteTaskType;
 
-internal class DeleteTaskTypeCommandValidator : AbstractValidator<DeleteTaskTypeCommand>
+public class DeleteTaskTypeCommandValidator : AbstractValidator<DeleteTaskTypeCommand>
 {
     private readonly DatabaseContext _dbContext;
 
