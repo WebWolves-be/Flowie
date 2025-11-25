@@ -14,6 +14,19 @@ import { CreateTaskRequest } from "./models/create-task-request.model";
 import { UpdateTaskRequest } from "./models/update-task-request.model";
 import { UpdateTaskStatusRequest } from "./models/update-task-status-request.model";
 
+export interface TaskTypeDto {
+  id: number;
+  name: string;
+}
+
+export interface GetTaskTypesResponse {
+  taskTypes: TaskTypeDto[];
+}
+
+export interface CreateTaskTypeRequest {
+  name: string;
+}
+
 @Injectable({
   providedIn: "root"
 })
@@ -34,6 +47,9 @@ export class TaskFacade {
   #employees = signal<Employee[]>([]);
   #isLoadingEmployees = signal<boolean>(false);
 
+  #taskTypes = signal<TaskTypeDto[]>([]);
+  #isLoadingTaskTypes = signal<boolean>(false);
+
   projects = this.#projects.asReadonly();
   isLoadingProjects = this.#isLoadingProjects.asReadonly();
   isSavingProject = this.#isSavingProject.asReadonly();
@@ -45,6 +61,9 @@ export class TaskFacade {
   isSavingTask = this.#isSavingTask.asReadonly();
 
   employees = this.#employees.asReadonly();
+
+  taskTypes = this.#taskTypes.asReadonly();
+  isLoadingTaskTypes = this.#isLoadingTaskTypes.asReadonly();
 
   getProjects(company?: Company): void {
     this.#isLoadingProjects.set(true);
@@ -230,6 +249,52 @@ export class TaskFacade {
       )
       .subscribe((response) => {
         this.#employees.set(response.employees);
+      });
+  }
+
+  getTaskTypes(): void {
+    this.#isLoadingTaskTypes.set(true);
+
+    this.http
+      .get<GetTaskTypesResponse>(`${this.apiUrl}/api/task-types`)
+      .pipe(
+        catchError((error) => {
+          console.error("Error loading task types:", error);
+          this.#taskTypes.set([]);
+          return EMPTY;
+        }),
+        finalize(() => this.#isLoadingTaskTypes.set(false))
+      )
+      .subscribe((response) => {
+        this.#taskTypes.set(response.taskTypes);
+      });
+  }
+
+  createTaskType(request: CreateTaskTypeRequest): void {
+    this.http
+      .post<void>(`${this.apiUrl}/api/task-types`, request)
+      .pipe(
+        catchError((error) => {
+          console.error("Error creating task type:", error);
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.getTaskTypes();
+      });
+  }
+
+  deleteTaskType(id: number): void {
+    this.http
+      .delete<void>(`${this.apiUrl}/api/task-types/${id}`)
+      .pipe(
+        catchError((error) => {
+          console.error("Error deleting task type:", error);
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
       });
   }
 }
