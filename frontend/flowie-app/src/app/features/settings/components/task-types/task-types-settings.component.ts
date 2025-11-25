@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import { TaskTypeFacade } from '../../facade/task-type.facade';
+import { Dialog } from '@angular/cdk/dialog';
+import { TaskTypeFacade, TaskType } from '../../facade/task-type.facade';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteDialogData, ConfirmDeleteDialogResult } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-task-types-settings',
@@ -11,6 +13,8 @@ import { TaskTypeFacade } from '../../facade/task-type.facade';
 })
 export class TaskTypesSettingsComponent {
   #service = inject(TaskTypeFacade);
+  #dialog = inject(Dialog);
+
   taskTypes = this.#service.taskTypes;
   isLoading = this.#service.isLoading;
 
@@ -26,7 +30,11 @@ export class TaskTypesSettingsComponent {
     this.newName.set('');
   }
 
-  remove(id: number): void {
-    this.#service.remove(id);
+  remove(taskType: TaskType): void {
+    this.#dialog.open<ConfirmDeleteDialogResult>(ConfirmDeleteDialogComponent, {
+      data: { taskType } as ConfirmDeleteDialogData,
+      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
+      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+    });
   }
 }

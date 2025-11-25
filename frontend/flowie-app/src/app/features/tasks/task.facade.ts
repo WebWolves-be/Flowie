@@ -276,17 +276,13 @@ export class TaskFacade {
       });
   }
 
-  deleteTaskType(id: number): void {
-    this.http
+  deleteTaskType(id: number) {
+    return this.http
       .delete<void>(`${this.apiUrl}/api/task-types/${id}`)
       .pipe(
-        catchError((error) => {
-          console.error("Error deleting task type:", error);
-          return EMPTY;
+        finalize(() => {
+          this.getTaskTypes();
         })
-      )
-      .subscribe(() => {
-        this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
-      });
+      );
   }
 }
