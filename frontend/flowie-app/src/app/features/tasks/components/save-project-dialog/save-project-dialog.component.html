@@ -1,10 +1,23 @@
 <div class="w-[30rem] bg-white rounded-xl shadow-xl p-6" role="dialog" aria-modal="true">
   <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ titleLabel }}</h2>
+  @if (errorMessage()) {
+    <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+      <div class="flex items-start">
+        <i class="fas fa-exclamation-circle text-red-600 mt-0.5 mr-2"></i>
+        <p class="text-sm text-red-800">{{ errorMessage() }}</p>
+      </div>
+    </div>
+  }
   <form [formGroup]="projectForm" class="space-y-4" (ngSubmit)="onSubmit()">
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1" for="title">Naam</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="title">
+        Naam <span class="text-red-600">*</span>
+      </label>
       <input id="title" type="text" formControlName="title"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        [class]="'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ' + 
+                 (projectForm.get('title')?.invalid && projectForm.get('title')?.touched 
+                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')" />
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1" for="description">Omschrijving</label>
@@ -12,9 +25,14 @@
         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
     </div>
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1" for="company">Bedrijf</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="company">
+        Bedrijf <span class="text-red-600">*</span>
+      </label>
       <select id="company" formControlName="company"
-        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        [class]="'w-full rounded-lg border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 ' + 
+                 (projectForm.get('company')?.invalid && projectForm.get('company')?.touched 
+                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
         <option *ngFor="let c of [Company.Immoseed, Company.NovaraRealEstate]" [value]="c">{{ c === Company.NovaraRealEstate ? 'Novara' : c }}</option>
       </select>
     </div>
@@ -22,9 +40,13 @@
       <button type="button" (click)="onCancel()" class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         <i class="fas fa-times mr-2"></i>Annuleren
       </button>
-      <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50" [disabled]="projectForm.invalid">
-        @if (isUpdate) { <i class="fas fa-save mr-2"></i> } @else { <i class="fas fa-plus mr-2"></i> }
-        {{ actionLabel }}
+      <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50" [disabled]="projectForm.invalid || isSaving()">
+        @if (isSaving()) {
+          <i class="fas fa-spinner fa-spin mr-2"></i>Bezig...
+        } @else {
+          @if (isUpdate) { <i class="fas fa-save mr-2"></i> } @else { <i class="fas fa-plus mr-2"></i> }
+          {{ actionLabel }}
+        }
       </button>
     </div>
   </form>

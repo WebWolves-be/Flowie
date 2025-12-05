@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Flowie.Api.Features.Projects.UpdateProject;
 
-internal class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCommand>
+public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCommand>
 {
     public UpdateProjectCommandValidator()
     {

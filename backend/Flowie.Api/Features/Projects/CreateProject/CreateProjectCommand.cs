@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Flowie.Api.Features.Projects.CreateProject;
 
-internal record CreateProjectCommand(
+public record CreateProjectCommand(
     string Title,
     string? Description,
     Company Company) : IRequest<Unit>;

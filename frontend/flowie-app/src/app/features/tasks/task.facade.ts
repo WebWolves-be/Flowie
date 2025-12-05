@@ -116,40 +116,32 @@ export class TaskFacade {
     this.getProjects(filter === "ALL" ? undefined : filter);
   }
 
-  createProject(request: CreateProjectRequest): void {
+  createProject(request: CreateProjectRequest) {
     this.#isSavingProject.set(true);
 
-    this.http
+    return this.http
       .post<void>(`${this.apiUrl}/api/projects`, request)
       .pipe(
-        catchError((error) => {
-          console.error("Error creating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
-      });
+        finalize(() => {
+          this.#isSavingProject.set(false);
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        })
+      );
   }
 
-  updateProject(projectId: number, request: UpdateProjectRequest): void {
+  updateProject(projectId: number, request: UpdateProjectRequest) {
     this.#isSavingProject.set(true);
 
-    this.http
+    return this.http
       .put<void>(`${this.apiUrl}/api/projects/${projectId}`, request)
       .pipe(
-        catchError((error) => {
-          console.error("Error updating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
-      });
+        finalize(() => {
+          this.#isSavingProject.set(false);
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        })
+      );
   }
 
   createTask(request: CreateTaskRequest): void {
@@ -284,17 +276,13 @@ export class TaskFacade {
       });
   }
 
-  deleteTaskType(id: number): void {
-    this.http
+  deleteTaskType(id: number) {
+    return this.http
       .delete<void>(`${this.apiUrl}/api/task-types/${id}`)
       .pipe(
-        catchError((error) => {
-          console.error("Error deleting task type:", error);
-          return EMPTY;
+        finalize(() => {
+          this.getTaskTypes();
         })
-      )
-      .subscribe(() => {
-        this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
-      });
+      );
   }
 }

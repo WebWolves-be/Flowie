@@ -46,7 +46,7 @@ export class TaskTypeFacade {
     this.taskFacade.createTaskType({ name: trimmed });
   }
 
-  remove(id: number): void {
-    this.taskFacade.deleteTaskType(id);
+  remove(id: number) {
+    return this.taskFacade.deleteTaskType(id);
   }
 }
