@@ -32,9 +32,9 @@ internal class UpdateTaskStatusCommandHandler(
             task.StartedAt = timeProvider.GetUtcNow();
             task.CompletedAt = null;
         }
-
-        if (request.Status is TaskStatus.Done)
+        else if (request.Status is TaskStatus.Done)
         {
+            task.StartedAt ??= timeProvider.GetUtcNow();
             task.CompletedAt = timeProvider.GetUtcNow();
         }
 

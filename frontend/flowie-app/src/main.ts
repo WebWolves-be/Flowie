@@ -2,12 +2,10 @@ import { bootstrapApplication } from "@angular/platform-browser";
 import { provideRouter, Routes } from "@angular/router";
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
+  withInterceptors,
 } from "@angular/common/http";
 import { AppComponent } from "./app/app.component";
-import { DashboardPage } from "./app/features/dashboard/components/dashboard-page/dashboard-page";
-import { TasksPage } from "./app/features/tasks/components/tasks-page/tasks-page";
-import { SettingsPage } from "./app/features/settings/components/settings-page/settings-page";
+import { errorInterceptor } from "./app/core/interceptors/error.interceptor";
 
 const routes: Routes = [
   {
@@ -17,19 +15,31 @@ const routes: Routes = [
   },
   {
     path: "dashboard",
-    component: DashboardPage,
+    loadComponent: () =>
+      import("./app/features/dashboard/components/dashboard-page/dashboard-page").then(
+        (m) => m.DashboardPage
+      ),
   },
   {
     path: "taken",
-    component: TasksPage,
+    loadComponent: () =>
+      import("./app/features/tasks/components/tasks-page/tasks-page").then(
+        (m) => m.TasksPage
+      ),
   },
   {
     path: "taken/project/:id",
-    component: TasksPage,
+    loadComponent: () =>
+      import("./app/features/tasks/components/tasks-page/tasks-page").then(
+        (m) => m.TasksPage
+      ),
   },
   {
     path: "instellingen",
-    component: SettingsPage,
+    loadComponent: () =>
+      import("./app/features/settings/components/settings-page/settings-page").then(
+        (m) => m.SettingsPage
+      ),
   },
   {
     path: "**",
@@ -40,6 +50,6 @@ const routes: Routes = [
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([errorInterceptor])),
   ],
 }).catch((err) => console.error(err));

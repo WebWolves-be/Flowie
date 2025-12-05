@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "../../../environments/environment";
 import { Company } from "./models/company.enum";
-import { catchError, EMPTY, finalize } from "rxjs";
+import { finalize } from "rxjs";
 import { Project } from "./models/project.model";
 import { Employee } from "./models/employee.model";
 import { Task } from "./models/task.model";
@@ -76,14 +76,14 @@ export class TaskFacade {
 
     this.http
       .get<GetProjectsResponse>(`${this.apiUrl}/api/projects`, { params })
-      .pipe(
-        catchError((error) => {
-          return EMPTY;
-        }),
-        finalize(() => this.#isLoadingProjects.set(false))
-      )
-      .subscribe((response) => {
-        this.#projects.set(response.projects);
+      .pipe(finalize(() => this.#isLoadingProjects.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.#projects.set(response.projects);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -96,14 +96,14 @@ export class TaskFacade {
 
     this.http
       .get<GetTasksResponse>(`${this.apiUrl}/api/tasks`, { params })
-      .pipe(
-        catchError((error) => {
-          return EMPTY;
-        }),
-        finalize(() => this.#isLoadingTasks.set(false))
-      )
-      .subscribe((response) => {
-        this.#tasks.set(response.tasks);
+      .pipe(finalize(() => this.#isLoadingTasks.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.#tasks.set(response.tasks);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -121,16 +121,15 @@ export class TaskFacade {
 
     this.http
       .post<void>(`${this.apiUrl}/api/projects`, request)
-      .pipe(
-        catchError((error) => {
-          console.error("Error creating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
+      .pipe(finalize(() => this.#isSavingProject.set(false)))
+      .subscribe({
+        next: () => {
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -139,16 +138,15 @@ export class TaskFacade {
 
     this.http
       .put<void>(`${this.apiUrl}/api/projects/${projectId}`, request)
-      .pipe(
-        catchError((error) => {
-          console.error("Error updating project:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingProject.set(false))
-      )
-      .subscribe(() => {
-        const filter = this.#companyFilter();
-        this.getProjects(filter === "ALL" ? undefined : filter);
+      .pipe(finalize(() => this.#isSavingProject.set(false)))
+      .subscribe({
+        next: () => {
+          const filter = this.#companyFilter();
+          this.getProjects(filter === "ALL" ? undefined : filter);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -157,15 +155,14 @@ export class TaskFacade {
 
     this.http
       .post<void>(`${this.apiUrl}/api/tasks`, request)
-      .pipe(
-        catchError((error) => {
-          console.error("Error creating task:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingTask.set(false))
-      )
-      .subscribe(() => {
-        this.getTasks(request.projectId, false);
+      .pipe(finalize(() => this.#isSavingTask.set(false)))
+      .subscribe({
+        next: () => {
+          this.getTasks(request.projectId, false);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -174,17 +171,16 @@ export class TaskFacade {
 
     this.http
       .put<void>(`${this.apiUrl}/api/tasks/${taskId}`, request)
-      .pipe(
-        catchError((error) => {
-          console.error("Error updating task:", error);
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingTask.set(false))
-      )
-      .subscribe(() => {
-        const tasks = this.#tasks();
-        if (tasks.length > 0) {
-          this.getTasks(tasks[0].projectId, false);
+      .pipe(finalize(() => this.#isSavingTask.set(false)))
+      .subscribe({
+        next: () => {
+          const tasks = this.#tasks();
+          if (tasks.length > 0) {
+            this.getTasks(tasks[0].projectId, false);
+          }
+        },
+        error: () => {
+          // Error handled by interceptor
         }
       });
   }
@@ -194,16 +190,16 @@ export class TaskFacade {
 
     this.http
       .patch<void>(`${this.apiUrl}/api/tasks/${taskId}/status`, request)
-      .pipe(
-        catchError(() => {
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingTask.set(false))
-      )
-      .subscribe(() => {
-        const tasks = this.#tasks();
-        if (tasks.length > 0) {
-          this.getTasks(tasks[0].projectId, false);
+      .pipe(finalize(() => this.#isSavingTask.set(false)))
+      .subscribe({
+        next: () => {
+          const tasks = this.#tasks();
+          if (tasks.length > 0) {
+            this.getTasks(tasks[0].projectId, false);
+          }
+        },
+        error: () => {
+          // Error handled by interceptor
         }
       });
   }
@@ -213,14 +209,14 @@ export class TaskFacade {
 
     this.http
       .delete<void>(`${this.apiUrl}/api/tasks/${taskId}`)
-      .pipe(
-        catchError((error) => {
-          return EMPTY;
-        }),
-        finalize(() => this.#isSavingTask.set(false))
-      )
-      .subscribe(() => {
-        this.getTasks(projectId, false);
+      .pipe(finalize(() => this.#isSavingTask.set(false)))
+      .subscribe({
+        next: () => {
+          this.getTasks(projectId, false);
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
@@ -229,9 +225,13 @@ export class TaskFacade {
 
     this.http
       .get<{ employees: Employee[] }>(`${this.apiUrl}/api/employees`)
-      .pipe(
-        catchError((error) => {
-          console.error("Error loading employees:", error);
+      .pipe(finalize(() => this.#isLoadingEmployees.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.#employees.set(response.employees);
+        },
+        error: () => {
+          // Fallback to mock data for employees
           const mockEmployees: Employee[] = [
             { id: 1, name: "Amalia Van Dosselaer" },
             { id: 2, name: "Peter Carrein" },
@@ -243,12 +243,7 @@ export class TaskFacade {
             { id: 8, name: "Emma Claes" }
           ];
           this.#employees.set(mockEmployees);
-          return EMPTY;
-        }),
-        finalize(() => this.#isLoadingEmployees.set(false))
-      )
-      .subscribe((response) => {
-        this.#employees.set(response.employees);
+        }
       });
   }
 
@@ -257,44 +252,40 @@ export class TaskFacade {
 
     this.http
       .get<GetTaskTypesResponse>(`${this.apiUrl}/api/task-types`)
-      .pipe(
-        catchError((error) => {
-          console.error("Error loading task types:", error);
+      .pipe(finalize(() => this.#isLoadingTaskTypes.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.#taskTypes.set(response.taskTypes);
+        },
+        error: () => {
           this.#taskTypes.set([]);
-          return EMPTY;
-        }),
-        finalize(() => this.#isLoadingTaskTypes.set(false))
-      )
-      .subscribe((response) => {
-        this.#taskTypes.set(response.taskTypes);
+        }
       });
   }
 
   createTaskType(request: CreateTaskTypeRequest): void {
     this.http
       .post<void>(`${this.apiUrl}/api/task-types`, request)
-      .pipe(
-        catchError((error) => {
-          console.error("Error creating task type:", error);
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.getTaskTypes();
+      .subscribe({
+        next: () => {
+          this.getTaskTypes();
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 
   deleteTaskType(id: number): void {
     this.http
       .delete<void>(`${this.apiUrl}/api/task-types/${id}`)
-      .pipe(
-        catchError((error) => {
-          console.error("Error deleting task type:", error);
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
+      .subscribe({
+        next: () => {
+          this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
+        },
+        error: () => {
+          // Error handled by interceptor
+        }
       });
   }
 }

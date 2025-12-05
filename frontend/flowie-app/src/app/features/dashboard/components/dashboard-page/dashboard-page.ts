@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardFacade } from '../../facade/dashboard.facade';
 
@@ -9,13 +9,13 @@ import { DashboardFacade } from '../../facade/dashboard.facade';
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
-export class DashboardPage {
+export class DashboardPage implements OnInit {
   facade = inject(DashboardFacade);
   metrics = this.facade.metrics;
   isLoading = this.facade.isLoading;
   skeletons = [0, 1, 2, 3, 4, 5];
 
-  constructor() {
+  ngOnInit(): void {
     this.facade.load();
   }
 }

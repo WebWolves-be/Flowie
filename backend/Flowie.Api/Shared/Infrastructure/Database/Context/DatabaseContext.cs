@@ -22,7 +22,11 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Global query filters for soft delete
+        builder.Entity<Project>().HasQueryFilter(p => !p.IsDeleted);
+        builder.Entity<Task>().HasQueryFilter(t => !t.IsDeleted);
     }
 }

@@ -34,7 +34,9 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
             .HasForeignKey(t => t.ParentTaskId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
-            
+
+        builder.HasIndex(t => t.ParentTaskId);
+
         builder.HasOne(t => t.TaskType)
             .WithMany()
             .HasForeignKey(t => t.TaskTypeId)

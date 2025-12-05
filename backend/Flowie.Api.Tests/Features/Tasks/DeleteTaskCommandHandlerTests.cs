@@ -51,9 +51,15 @@ public class DeleteTaskCommandHandlerTests : BaseTestClass
         // Act
         await _sut.Handle(command, CancellationToken.None);
 
-        // Assert
-        var deletedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
-        Assert.Null(deletedTask);
+        // Assert - task should be soft deleted (not returned by normal queries due to global filter)
+        // Note: FindAsync bypasses query filters, so we use FirstOrDefaultAsync instead
+        var deletedTask = await DatabaseContext.Tasks.FirstOrDefaultAsync(t => t.Id == task.Id);
+        Assert.Null(deletedTask); // Global filter prevents finding deleted tasks
+
+        // Verify it's actually soft deleted by using IgnoreQueryFilters
+        var softDeletedTask = await DatabaseContext.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == task.Id);
+        Assert.NotNull(softDeletedTask);
+        Assert.True(softDeletedTask.IsDeleted);
     }
 
     [Fact]
@@ -100,9 +106,13 @@ public class DeleteTaskCommandHandlerTests : BaseTestClass
         // Act
         await _sut.Handle(command, CancellationToken.None);
 
-        // Assert
+        // Assert - all tasks should be soft deleted (not returned due to global filter)
         var remainingTasks = await DatabaseContext.Tasks.ToListAsync();
         Assert.Empty(remainingTasks);
+
+        // Verify they're actually soft deleted
+        var softDeletedTasks = await DatabaseContext.Tasks.IgnoreQueryFilters().Where(t => t.IsDeleted).ToListAsync();
+        Assert.Equal(3, softDeletedTasks.Count); // Parent + 2 subtasks
     }
 
     [Fact]

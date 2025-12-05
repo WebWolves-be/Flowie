@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
@@ -22,23 +22,41 @@ export interface SaveProjectDialogResult {
   templateUrl: "./save-project-dialog.component.html",
   styleUrl: "./save-project-dialog.component.scss"
 })
-export class SaveProjectDialogComponent {
+export class SaveProjectDialogComponent implements OnInit {
   private ref = inject<DialogRef<SaveProjectDialogResult>>(DialogRef);
   private data = inject<SaveProjectDialogData>(DIALOG_DATA);
   private fb = inject(FormBuilder);
 
   readonly Company = Company;
 
-  projectForm: FormGroup;
+  projectForm!: FormGroup;
 
   readonly isUpdate = this.data.mode === "update";
 
-  constructor() {
+  ngOnInit(): void {
     this.projectForm = this.fb.group({
-      title: [this.data.project?.title ?? "", Validators.required],
-      description: [this.data.project?.description ?? ""],
+      title: [
+        this.data.project?.title ?? "",
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(200)
+        ]
+      ],
+      description: [
+        this.data.project?.description ?? "",
+        [Validators.maxLength(4000)]
+      ],
       company: [this.data.project?.company ?? Company.Immoseed, Validators.required]
     });
+  }
+
+  get title() {
+    return this.projectForm.get("title");
+  }
+
+  get description() {
+    return this.projectForm.get("description");
   }
 
   get titleLabel(): string {

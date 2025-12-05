@@ -62,7 +62,7 @@ namespace Flowie.Api.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Identity.RefreshToken", b =>
@@ -101,7 +101,7 @@ namespace Flowie.Api.Migrations
 
                     b.HasIndex("UserId", "IsRevoked");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Identity.User", b =>
@@ -210,7 +210,7 @@ namespace Flowie.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Task", b =>
@@ -274,7 +274,7 @@ namespace Flowie.Api.Migrations
 
                     b.HasIndex("TaskTypeId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.TaskType", b =>
@@ -304,7 +304,7 @@ namespace Flowie.Api.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("TaskTypes");
+                    b.ToTable("TaskTypes", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

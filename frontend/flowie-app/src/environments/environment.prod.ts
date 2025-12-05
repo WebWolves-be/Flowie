@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://api-flowie.novara.be",
+  apiUrl: "https://api.flowie.com",
 };

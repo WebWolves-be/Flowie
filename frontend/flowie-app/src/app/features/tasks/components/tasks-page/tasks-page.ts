@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
+import { Component, computed, DestroyRef, inject, signal, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProjectListComponent } from "../project-list/project-list.component";
@@ -25,14 +25,14 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   templateUrl: "./tasks-page.html",
   styleUrl: "./tasks-page.scss"
 })
-export class TasksPage {
+export class TasksPage implements OnInit {
   #facade = inject(TaskFacade);
   #router = inject(Router);
   #route = inject(ActivatedRoute);
   #dialog = inject(Dialog);
   #destroy = inject(DestroyRef);
 
-  readonly #hasInitiallyLoaded: boolean = false;
+  #hasInitiallyLoaded = false;
 
   readonly Company = Company;
 
@@ -52,13 +52,13 @@ export class TasksPage {
     return id ? this.projects().find(p => p.projectId === id) : undefined;
   });
 
-  constructor() {
+  ngOnInit(): void {
     if (this.projects().length === 0 && !this.#hasInitiallyLoaded) {
       this.#hasInitiallyLoaded = true;
       this.#facade.getProjects();
     }
 
-    this.#route.paramMap.pipe(takeUntilDestroyed()).subscribe(params => {
+    this.#route.paramMap.pipe(takeUntilDestroyed(this.#destroy)).subscribe(params => {
       const projectId = params.get("id");
       if (projectId) {
         const idNum = Number(projectId);

@@ -9,7 +9,7 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
 
     public UpdateTaskCommandValidatorTests()
     {
-        _validator = new UpdateTaskCommandValidator(DatabaseContext);
+        _validator = new UpdateTaskCommandValidator();
     }
 
     [Fact]
@@ -116,11 +116,11 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
 
         // Assert
         Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.PropertyName == "Title" && e.ErrorMessage == "Title must be between 3 and 200 characters");
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title" && e.ErrorMessage == "Titel moet tussen 3 en 200 tekens zijn.");
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenTitleIsNull()
+    public void Validate_ShouldFail_WhenTitleIsNull()
     {
         // Arrange
         var command = new UpdateTaskCommand(
@@ -136,12 +136,12 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title");
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenTitleIsEmpty()
+    public void Validate_ShouldFail_WhenTitleIsEmpty()
     {
         // Arrange
         var command = new UpdateTaskCommand(
@@ -157,8 +157,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title");
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenDueDateIsToday()
+    public void Validate_ShouldFail_WhenDueDateIsToday()
     {
         // Arrange
         var command = new UpdateTaskCommand(
@@ -264,8 +264,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "DueDate");
     }
 
     [Fact]

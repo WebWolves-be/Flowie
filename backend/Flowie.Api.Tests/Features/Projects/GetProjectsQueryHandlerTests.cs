@@ -77,7 +77,7 @@ public class GetProjectsQueryHandlerTests : BaseTestClass
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Handle_ShouldReturnAllProjects_IncludingDeleted()
+    public async System.Threading.Tasks.Task Handle_ShouldReturnOnlyActiveProjects_ExcludingDeleted()
     {
         // Arrange
         var projects = new[]
@@ -93,8 +93,9 @@ public class GetProjectsQueryHandlerTests : BaseTestClass
         // Act
         var result = await _sut.Handle(query, CancellationToken.None);
 
-        // Assert
+        // Assert - only active project should be returned due to global query filter
         Assert.NotNull(result);
-        Assert.Equal(2, result.Projects.Count);
+        Assert.Single(result.Projects);
+        Assert.Equal("Active Project", result.Projects.First().Title);
     }
 }

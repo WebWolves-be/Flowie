@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from "@angular/core";
+import { Component, computed, effect, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
@@ -6,6 +6,7 @@ import { Task } from "../../models/task.model";
 import { TaskStatus } from "../../models/task-status.enum";
 import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
 import { TaskFacade } from "../../task.facade";
+import { DateValidators } from "../../../../core/validators/date.validators";
 
 export interface SaveTaskDialogData {
   mode: "create" | "update";
@@ -25,27 +26,40 @@ export interface SaveTaskDialogResult {
   templateUrl: "./save-task-dialog.component.html",
   styleUrl: "./save-task-dialog.component.scss"
 })
-export class SaveTaskDialogComponent {
+export class SaveTaskDialogComponent implements OnInit {
   private ref = inject<DialogRef<SaveTaskDialogResult>>(DialogRef);
   private data = inject<SaveTaskDialogData>(DIALOG_DATA);
   private taskTypeFacade = inject(TaskTypeFacade);
   private taskFacade = inject(TaskFacade);
   private fb = inject(FormBuilder);
 
-  taskForm: FormGroup;
+  taskForm!: FormGroup;
 
   taskTypes = this.taskTypeFacade.taskTypes;
   employees = this.taskFacade.employees;
 
-  constructor() {
+  ngOnInit(): void {
     this.taskTypeFacade.getTaskTypes();
     this.taskFacade.getEmployees();
 
     this.taskForm = this.fb.group({
-      title: [this.data.task?.title ?? "", Validators.required],
-      description: [this.data.task?.description ?? "", Validators.required],
+      title: [
+        this.data.task?.title ?? "",
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(200)
+        ]
+      ],
+      description: [
+        this.data.task?.description ?? "",
+        [Validators.maxLength(4000)]
+      ],
       typeId: [this.data.task?.typeId ?? null, Validators.required],
-      dueDate: [this.normalizeDate(this.data.task?.dueDate), Validators.required],
+      dueDate: [
+        this.normalizeDate(this.data.task?.dueDate),
+        [Validators.required, DateValidators.futureDate()]
+      ],
       assigneeId: [this.data.task?.employeeId ?? null, Validators.required]
     });
 
@@ -73,6 +87,18 @@ export class SaveTaskDialogComponent {
 
   titleLabel = computed(() => (this.isUpdate ? "Taak bewerken" : "Nieuwe taak aanmaken"));
   actionLabel = computed(() => (this.isUpdate ? "Bewerken" : "Aanmaken"));
+
+  get title() {
+    return this.taskForm.get("title");
+  }
+
+  get description() {
+    return this.taskForm.get("description");
+  }
+
+  get dueDate() {
+    return this.taskForm.get("dueDate");
+  }
 
   onCancel(): void {
     this.ref.close();

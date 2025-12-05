@@ -17,9 +17,11 @@ internal class DeleteTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
         {
             throw new EntityNotFoundException(nameof(Task), request.TaskId);
         }
-  
-        dbContext.Tasks.RemoveRange(task);
-        
+
+        // Soft delete the task
+        task.IsDeleted = true;
+
+        // Soft delete all subtasks
         var subTasks = await dbContext
             .Tasks
             .Where(t => t.ParentTaskId == request.TaskId)
@@ -27,7 +29,7 @@ internal class DeleteTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
 
         foreach (var subTask in subTasks)
         {
-            dbContext.Tasks.Remove(subTask);
+            subTask.IsDeleted = true;
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

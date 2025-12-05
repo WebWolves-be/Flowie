@@ -27,7 +27,7 @@ public class UpdateProjectCommandValidatorTests
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenTitleIsNull()
+    public void Validate_ShouldFail_WhenTitleIsNull()
     {
         // Arrange
         var command = new UpdateProjectCommand(1, null!, "Description", Company.Immoseed);
@@ -36,12 +36,12 @@ public class UpdateProjectCommandValidatorTests
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title");
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenTitleIsEmpty()
+    public void Validate_ShouldFail_WhenTitleIsEmpty()
     {
         // Arrange
         var command = new UpdateProjectCommand(1, "", "Description", Company.Immoseed);
@@ -50,12 +50,12 @@ public class UpdateProjectCommandValidatorTests
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title");
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenTitleIsWhitespace()
+    public void Validate_ShouldFail_WhenTitleIsWhitespace()
     {
         // Arrange
         var command = new UpdateProjectCommand(1, "   ", "Description", Company.Immoseed);
@@ -64,8 +64,8 @@ public class UpdateProjectCommandValidatorTests
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Title");
     }
 
     [Fact]
