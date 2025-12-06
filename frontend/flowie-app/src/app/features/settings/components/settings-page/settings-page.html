@@ -4,20 +4,21 @@
     <p class="mt-2 text-sm text-gray-600">Beheer algemene applicatie configuraties.</p>
   </div>
 
-  <!-- Tabs -->
   <div class="border-b border-gray-200">
     <nav class="flex gap-4" aria-label="Tabs">
       <button
         type="button"
         (click)="activeTab.set('task-types')"
         [ngClass]="{'border-blue-600 text-blue-600': activeTab() === 'task-types', 'border-transparent text-gray-600 hover:text-gray-800': activeTab() !== 'task-types'}"
-        class="whitespace-nowrap py-2 px-3 border-b-2 text-sm font-medium"
-      >Taak types</button>
+        class="whitespace-nowrap py-2 px-3 border-b-2 text-sm font-medium">
+        Taak types
+      </button>
     </nav>
   </div>
 
-  <!-- Tab content -->
   <div class="flex-1 overflow-y-auto">
-    <app-task-types-settings *ngIf="activeTab() === 'task-types'"></app-task-types-settings>
+    @if (activeTab() === 'task-types') {
+      <app-task-types-settings></app-task-types-settings>
+    }
   </div>
 </div>

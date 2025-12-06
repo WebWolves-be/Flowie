@@ -113,12 +113,18 @@ export class SaveTaskDialogComponent implements OnInit {
     const formValue = this.taskForm.value;
 
     const typeId = hasSubtasksValue ? this.data.task?.typeId! : formValue.typeId;
-    const selectedType = this.taskTypes().find(t => t.id === typeId);
+    const selectedType = this.taskTypes().find(t => t.taskTypeId === typeId);
 
-    const employeeId = hasSubtasksValue 
+    const employeeId = hasSubtasksValue
       ? (this.data.task?.employeeId ?? this.employees().find(e => e.name === this.data.task?.employeeName)?.id)
       : formValue.assigneeId;
     const selectedEmployee = this.employees().find(e => e.id === employeeId);
+
+    // Validate that employee was found
+    if (!selectedEmployee) {
+      console.error('No employee found with id:', employeeId);
+      return;
+    }
 
     const status = this.data.task?.status ?? TaskStatus.Pending;
 
@@ -131,8 +137,8 @@ export class SaveTaskDialogComponent implements OnInit {
       typeName: selectedType?.name ?? "",
       status: status,
       dueDate: hasSubtasksValue ? this.data.task?.dueDate! : formValue.dueDate,
-      employeeId: selectedEmployee!.id,
-      employeeName: selectedEmployee!.name,
+      employeeId: selectedEmployee.id,
+      employeeName: selectedEmployee.name,
       createdAt: this.data.task?.createdAt ?? new Date().toISOString(),
       updatedAt: this.data.task?.updatedAt ?? null,
       completedAt: status === TaskStatus.Done ? new Date().toISOString() : null,

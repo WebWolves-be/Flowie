@@ -36,11 +36,12 @@ export class SaveProjectDialogComponent implements OnInit {
   ngOnInit(): void {
     this.projectForm = this.fb.group({
       title: [
-        this.data.project?.title ?? "",
+        this.data.project?.title?.trim() ?? "",
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(200)
+          Validators.maxLength(200),
+          this.noWhitespaceValidator
         ]
       ],
       description: [
@@ -49,6 +50,12 @@ export class SaveProjectDialogComponent implements OnInit {
       ],
       company: [this.data.project?.company ?? Company.Immoseed, Validators.required]
     });
+  }
+
+  private noWhitespaceValidator(control: any) {
+    const value = control.value || '';
+    const isWhitespace = value.trim().length === 0;
+    return !isWhitespace || value.length === 0 ? null : { whitespace: true };
   }
 
   get title() {
@@ -79,8 +86,8 @@ export class SaveProjectDialogComponent implements OnInit {
     const formValue = this.projectForm.value;
     const base: Project = {
       projectId: this.data.project?.projectId ?? Date.now(),
-      title: formValue.title,
-      description: formValue.description,
+      title: formValue.title.trim(),
+      description: formValue.description?.trim() || null,
       company: formValue.company,
       taskCount: this.data.project?.taskCount ?? 0,
       completedTaskCount: this.data.project?.completedTaskCount ?? 0

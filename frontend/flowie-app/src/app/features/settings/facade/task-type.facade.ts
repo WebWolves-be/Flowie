@@ -1,52 +1,38 @@
-import { Injectable, signal, inject, effect } from "@angular/core";
-import { TaskFacade } from "../../tasks/task.facade";
-
-export interface TaskType {
-  id: number;
-  name: string;
-}
+import { inject, Injectable, signal } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../../environments/environment";
+import { finalize, Observable } from "rxjs";
+import { TaskType } from "../models/task-type.model";
+import { GetTaskTypesResponse } from "../models/get-task-types-response.model";
+import { CreateTaskTypeRequest } from "../models/create-task-type-request.model";
 
 @Injectable({ providedIn: "root" })
 export class TaskTypeFacade {
-  private taskFacade = inject(TaskFacade);
+  readonly #http = inject(HttpClient);
+  readonly #apiUrl = environment.apiUrl;
 
   #taskTypes = signal<TaskType[]>([]);
-  #isLoading = signal<boolean>(false);
+  #isLoadingTaskTypes = signal<boolean>(false);
 
   taskTypes = this.#taskTypes.asReadonly();
-  isLoading = this.#isLoading.asReadonly();
-
-  constructor() {
-    // Sync with TaskFacade state
-    effect(() => {
-      const taskTypes = this.taskFacade.taskTypes();
-      this.#taskTypes.set(taskTypes.map((dto) => ({
-        id: dto.id,
-        name: dto.name,
-      })));
-    });
-
-    effect(() => {
-      this.#isLoading.set(this.taskFacade.isLoadingTaskTypes());
-    });
-  }
+  isLoadingTaskTypes = this.#isLoadingTaskTypes.asReadonly();
 
   getTaskTypes(): void {
-    this.taskFacade.getTaskTypes();
+    this.#isLoadingTaskTypes.set(true);
+
+    this.#http
+      .get<GetTaskTypesResponse>(`${this.#apiUrl}/api/task-types`)
+      .pipe(finalize(() => this.#isLoadingTaskTypes.set(false)))
+      .subscribe(response => {
+        this.#taskTypes.set(response.taskTypes);
+      });
   }
 
-  add(name: string): void {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    const exists = this.#taskTypes().some(
-      (t) => t.name.toLowerCase() === trimmed.toLowerCase(),
-    );
-    if (exists) return;
-
-    this.taskFacade.createTaskType({ name: trimmed });
+  createTaskType(request: CreateTaskTypeRequest): Observable<void> {
+    return this.#http.post<void>(`${this.#apiUrl}/api/task-types`, request);
   }
 
-  remove(id: number) {
-    return this.taskFacade.deleteTaskType(id);
+  deleteTaskType(id: number): Observable<void> {
+    return this.#http.delete<void>(`${this.#apiUrl}/api/task-types/${id}`);
   }
 }

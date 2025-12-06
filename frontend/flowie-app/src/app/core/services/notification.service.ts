@@ -19,23 +19,33 @@ export class NotificationService {
 
   notifications = this.#notifications.asReadonly();
 
-  showError(title: string, message?: string, duration = 5000): void {
-    this.show("error", title, message, duration);
-  }
-
   showSuccess(title: string, message?: string, duration = 3000): void {
-    this.show("success", title, message, duration);
+    this.#show("success", title, message, duration);
   }
 
   showInfo(title: string, message?: string, duration = 3000): void {
-    this.show("info", title, message, duration);
+    this.#show("info", title, message, duration);
   }
 
   showWarning(title: string, message?: string, duration = 4000): void {
-    this.show("warning", title, message, duration);
+    this.#show("warning", title, message, duration);
   }
 
-  private show(type: NotificationType, title: string, message?: string, duration?: number): void {
+  showError(title: string, message?: string, duration = 5000): void {
+    this.#show("error", title, message, duration);
+  }
+
+  remove(id: number): void {
+    this.#notifications.update(notifications =>
+      notifications.filter(n => n.id !== id)
+    );
+  }
+
+  clear(): void {
+    this.#notifications.set([]);
+  }
+
+  #show(type: NotificationType, title: string, message?: string, duration?: number): void {
     const notification: Notification = {
       id: this.#nextId++,
       type,
@@ -51,13 +61,4 @@ export class NotificationService {
     }
   }
 
-  remove(id: number): void {
-    this.#notifications.update(notifications => 
-      notifications.filter(n => n.id !== id)
-    );
-  }
-
-  clear(): void {
-    this.#notifications.set([]);
-  }
 }

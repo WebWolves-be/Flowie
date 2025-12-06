@@ -19,14 +19,6 @@ export interface TaskTypeDto {
   name: string;
 }
 
-export interface GetTaskTypesResponse {
-  taskTypes: TaskTypeDto[];
-}
-
-export interface CreateTaskTypeRequest {
-  name: string;
-}
-
 @Injectable({
   providedIn: "root"
 })
@@ -247,45 +239,5 @@ export class TaskFacade {
       });
   }
 
-  getTaskTypes(): void {
-    this.#isLoadingTaskTypes.set(true);
 
-    this.http
-      .get<GetTaskTypesResponse>(`${this.apiUrl}/api/task-types`)
-      .pipe(finalize(() => this.#isLoadingTaskTypes.set(false)))
-      .subscribe({
-        next: (response) => {
-          this.#taskTypes.set(response.taskTypes);
-        },
-        error: () => {
-          this.#taskTypes.set([]);
-        }
-      });
-  }
-
-  createTaskType(request: CreateTaskTypeRequest): void {
-    this.http
-      .post<void>(`${this.apiUrl}/api/task-types`, request)
-      .subscribe({
-        next: () => {
-          this.getTaskTypes();
-        },
-        error: () => {
-          // Error handled by interceptor
-        }
-      });
-  }
-
-  deleteTaskType(id: number): void {
-    this.http
-      .delete<void>(`${this.apiUrl}/api/task-types/${id}`)
-      .subscribe({
-        next: () => {
-          this.#taskTypes.update((list) => list.filter((t) => t.id !== id));
-        },
-        error: () => {
-          // Error handled by interceptor
-        }
-      });
-  }
 }

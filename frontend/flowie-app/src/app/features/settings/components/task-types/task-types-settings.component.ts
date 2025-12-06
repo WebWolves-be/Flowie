@@ -1,40 +1,41 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
-import { Dialog } from '@angular/cdk/dialog';
-import { TaskTypeFacade, TaskType } from '../../facade/task-type.facade';
-import { ConfirmDeleteDialogComponent, ConfirmDeleteDialogData, ConfirmDeleteDialogResult } from '../confirm-delete-dialog/confirm-delete-dialog.component';
+import { Component, inject, OnInit } from "@angular/core";
+import { Dialog } from "@angular/cdk/dialog";
+import { TaskType } from "../../models/task-type.model";
+import { TaskTypeFacade } from "../../facade/task-type.facade";
+import { CreateTaskTypeDialogComponent } from "../create-task-type-dialog/create-task-type-dialog.component";
+import { DeleteTaskTypeDialogComponent } from "../delete-task-type-dialog/delete-task-type-dialog.component";
+import { DeleteTaskTypeDialogData } from "../../models/delete-task-type-dialog-data.model";
 
 @Component({
-  selector: 'app-task-types-settings',
+  selector: "app-task-types-settings",
   standalone: true,
-  imports: [NgFor, NgIf],
-  templateUrl: './task-types-settings.component.html',
-  styleUrl: './task-types-settings.component.scss'
+  imports: [],
+  templateUrl: "./task-types-settings.component.html",
+  styleUrl: "./task-types-settings.component.scss"
 })
-export class TaskTypesSettingsComponent {
-  #service = inject(TaskTypeFacade);
+export class TaskTypesSettingsComponent implements OnInit {
+  #facade = inject(TaskTypeFacade);
   #dialog = inject(Dialog);
 
-  taskTypes = this.#service.taskTypes;
-  isLoading = this.#service.isLoading;
+  taskTypes = this.#facade.taskTypes;
+  isTaskTypesLoading = this.#facade.isLoadingTaskTypes;
 
-  newName = signal('');
-  canAdd = computed(() => this.newName().trim().length > 0);
-
-  constructor() {
-    this.#service.getTaskTypes();
+  ngOnInit(): void {
+    this.#facade.getTaskTypes();
   }
 
-  add(): void {
-    this.#service.add(this.newName());
-    this.newName.set('');
+  openCreateDialog(): void {
+    this.#dialog.open(CreateTaskTypeDialogComponent, {
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
   }
 
-  remove(taskType: TaskType): void {
-    this.#dialog.open<ConfirmDeleteDialogResult>(ConfirmDeleteDialogComponent, {
-      data: { taskType } as ConfirmDeleteDialogData,
-      backdropClass: ['fixed', 'inset-0', 'bg-black/40'],
-      panelClass: ['dialog-panel', 'flex', 'items-center', 'justify-center']
+  openDeleteDialog(taskType: TaskType): void {
+    this.#dialog.open(DeleteTaskTypeDialogComponent, {
+      data: { taskType } as DeleteTaskTypeDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
   }
 }
