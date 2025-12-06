@@ -5,10 +5,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { catchError, EMPTY } from "rxjs";
 import { TaskTypeFacade } from "../../facade/task-type.facade";
 import { NotificationService } from "../../../../core/services/notification.service";
-
-interface ValidationError {
-  errorMessage: string;
-}
+import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 
 @Component({
   selector: "app-create-task-type-dialog",
@@ -42,7 +39,7 @@ export class CreateTaskTypeDialogComponent {
     this.#facade.createTaskType({ name: this.form.value.name! })
       .pipe(
         catchError((error: HttpErrorResponse) => {
-          this.errorMessage.set(this.#extractErrorMessage(error));
+          this.errorMessage.set(extractErrorMessage(error));
           return EMPTY;
         })
       )
@@ -51,18 +48,5 @@ export class CreateTaskTypeDialogComponent {
         this.#notificationService.showSuccess("Taak type succesvol aangemaakt");
         this.#ref.close();
       });
-  }
-
-  #extractErrorMessage(error: HttpErrorResponse): string {
-    if (error.status === 400 && error.error?.errors) {
-      const errors = error.error.errors as ValidationError[];
-      if (Array.isArray(errors) && errors.length > 0) {
-        return errors.map((e) => e.errorMessage).join(" ");
-      }
-    }
-    if (error.error?.title) {
-      return error.error.title;
-    }
-    return "Er is een fout opgetreden. Probeer het opnieuw.";
   }
 }

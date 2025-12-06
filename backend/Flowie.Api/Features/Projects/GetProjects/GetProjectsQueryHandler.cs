@@ -17,9 +17,9 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
             .Include(p => p.Tasks)
             .AsQueryable();
 
-        if (request.Company.HasValue)
+        if (request.Company is not null)
         {
-            query = query.Where(p => p.Company == request.Company.Value);
+            query = query.Where(p => p.Company == request.Company);
         }
 
         var projects = await query
@@ -28,6 +28,7 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
                 new ProjectDto(
                     p.Id,
                     p.Title,
+                    p.Description,
                     p.Company,
                     p.Tasks.Count,
                     p.Tasks.Count(t => t.Status == TaskStatus.Done)

@@ -23,6 +23,6 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 
         RuleFor(x => x.DueDate)
             .Must(x => x > DateOnly.FromDateTime(DateTime.Today))
-            .WithMessage("Vervaldatum moet in de toekomst zijn.");
+            .WithMessage("Deadline moet in de toekomst zijn.");
     }
 }

@@ -1,4 +1,5 @@
 using Flowie.Api.Features.Auth;
+using Flowie.Api.Features.Employees;
 using Flowie.Api.Features.Projects;
 using Flowie.Api.Features.Tasks;
 using Flowie.Api.Features.TaskTypes;
@@ -368,6 +369,7 @@ app.UseAuthorization();
 
 // Map API endpoints
 app.MapAuthEndpoints();
+app.MapEmployeeEndpoints();
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();

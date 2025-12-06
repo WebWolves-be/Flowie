@@ -7,7 +7,12 @@
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_type",
-      "mcp__playwright__browser_select_option"
+      "mcp__playwright__browser_select_option",
+      "Bash(mkdir:*)",
+      "Bash(dotnet ef migrations:*)",
+      "Bash(dotnet build:*)",
+      "Bash(taskkill:*)",
+      "Bash(dotnet ef database:*)"
     ],
     "deny": [],
     "ask": []

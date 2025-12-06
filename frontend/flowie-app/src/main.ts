@@ -4,8 +4,12 @@ import {
   provideHttpClient,
   withInterceptors,
 } from "@angular/common/http";
+import { registerLocaleData } from "@angular/common";
+import localeNl from "@angular/common/locales/nl";
 import { AppComponent } from "./app/app.component";
 import { errorInterceptor } from "./app/core/interceptors/error.interceptor";
+
+registerLocaleData(localeNl);
 
 const routes: Routes = [
   {

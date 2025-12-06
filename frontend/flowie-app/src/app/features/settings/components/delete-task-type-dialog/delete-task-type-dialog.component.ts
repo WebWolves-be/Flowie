@@ -5,10 +5,7 @@ import { catchError, EMPTY } from "rxjs";
 import { TaskTypeFacade } from "../../facade/task-type.facade";
 import { DeleteTaskTypeDialogData } from "../../models/delete-task-type-dialog-data.model";
 import { NotificationService } from "../../../../core/services/notification.service";
-
-interface ValidationError {
-  errorMessage: string;
-}
+import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 
 @Component({
   selector: "app-delete-task-type-dialog",
@@ -36,7 +33,7 @@ export class DeleteTaskTypeDialogComponent {
     this.#facade.deleteTaskType(this.taskType.taskTypeId)
       .pipe(
         catchError((error: HttpErrorResponse) => {
-          this.errorMessage.set(this.#extractErrorMessage(error));
+          this.errorMessage.set(extractErrorMessage(error));
           return EMPTY;
         })
       )
@@ -45,18 +42,5 @@ export class DeleteTaskTypeDialogComponent {
         this.#notificationService.showSuccess("Taak type succesvol verwijderd");
         this.#ref.close();
       });
-  }
-
-  #extractErrorMessage(error: HttpErrorResponse): string {
-    if (error.status === 400 && error.error?.errors) {
-      const errors = error.error.errors as ValidationError[];
-      if (Array.isArray(errors) && errors.length > 0) {
-        return errors.map((e) => e.errorMessage).join(" ");
-      }
-    }
-    if (error.error?.title) {
-      return error.error.title;
-    }
-    return "Er is een fout opgetreden. Probeer het opnieuw.";
   }
 }

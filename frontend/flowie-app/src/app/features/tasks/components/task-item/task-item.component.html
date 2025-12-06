@@ -14,7 +14,7 @@
         <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
       </div>
       <p class="text-sm text-gray-500 mb-3">{{ task().description }}</p>
-      @if (!task().subtasks) {
+      @if (!task().subtasks || task().subtasks!.length === 0) {
         <div class="flex items-center text-sm text-black">
           <span>{{ task().typeName }}</span>
           <span class="text-blue-600 font-bold mx-3">|</span>
@@ -89,11 +89,25 @@
           </div>
         </div>
       }
-      @if (taskProgress() < 100 && (!task().subtasks || task().subtasks!.length === 0)) {
+      @if (isPending()) {
         <button
-          (click)="onMarkComplete()"
+          (click)="onStartTask()"
+          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
+          Beginnen
+        </button>
+      }
+      @if (isOngoing()) {
+        <button
+          (click)="onCompleteTask()"
           class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
           Klaar
+        </button>
+      }
+      @if (isDone()) {
+        <button
+          (click)="onReopenTask()"
+          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
+          Openzetten
         </button>
       }
     </div>

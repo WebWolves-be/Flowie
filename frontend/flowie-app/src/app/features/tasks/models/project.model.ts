@@ -3,7 +3,7 @@ import { Company } from "./company.enum";
 export interface Project {
   projectId: number;
   title: string;
-  description: string;
+  description: string | null;
   company: Company;
   taskCount: number;
   completedTaskCount: number;

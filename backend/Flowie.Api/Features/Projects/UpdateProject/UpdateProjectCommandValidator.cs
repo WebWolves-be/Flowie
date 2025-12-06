@@ -1,11 +1,17 @@
+using Flowie.Api.Shared.Infrastructure.Database.Context;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flowie.Api.Features.Projects.UpdateProject;
 
 public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCommand>
 {
-    public UpdateProjectCommandValidator()
+    private readonly DatabaseContext _dbContext;
+
+    public UpdateProjectCommandValidator(DatabaseContext dbContext)
     {
+        _dbContext = dbContext;
+
         RuleFor(x => x.Title)
             .Must(title => !string.IsNullOrWhiteSpace(title))
             .WithMessage("Titel is verplicht.");
@@ -16,6 +22,10 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
             .When(x => !string.IsNullOrWhiteSpace(x.Title))
             .WithMessage("Titel moet tussen 3 en 200 tekens zijn.");
 
+        RuleFor(x => x)
+            .MustAsync(TitleIsUniqueExcludingCurrentProject())
+            .WithMessage(x => $"Project met titel '{x.Title}' bestaat al.");
+
         RuleFor(x => x.Description)
             .MaximumLength(4000)
             .When(x => !string.IsNullOrEmpty(x.Description))
@@ -24,5 +34,13 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
         RuleFor(x => x.Company)
             .IsInEnum()
             .WithMessage("Bedrijf moet 'Immoseed' of 'Novara' zijn.");
+    }
+
+    private Func<UpdateProjectCommand, CancellationToken, Task<bool>> TitleIsUniqueExcludingCurrentProject()
+    {
+        return async (command, cancellationToken) =>
+            !await _dbContext.Projects.AnyAsync(
+                p => p.Title == command.Title && p.Id != command.ProjectId && !p.IsDeleted,
+                cancellationToken);
     }
 }

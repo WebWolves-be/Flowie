@@ -5,6 +5,7 @@ import { ProjectListComponent } from "../project-list/project-list.component";
 import { ProjectDetailComponent } from "../project-detail/project-detail.component";
 import { TaskFacade } from "../../task.facade";
 import { Company } from "../../models/company.enum";
+import { TaskStatus } from "../../models/task-status.enum";
 import { Dialog } from "@angular/cdk/dialog";
 import {
   SaveProjectDialogComponent,
@@ -159,7 +160,7 @@ export class TasksPage implements OnInit {
             description: task.description ?? undefined,
             typeId: task.typeId,
             dueDate: task.dueDate ?? "",
-            assigneeId: task.employeeId ?? this.#facade.employees().find(e => e.name === task.employeeName)?.id ?? 0,
+            employeeId: task.employeeId ?? this.#facade.employees().find(e => e.name === task.employeeName)?.id ?? 0,
             status: task.status,
             progress: task.subtaskCount > 0 ? Math.round((task.completedSubtaskCount / task.subtaskCount) * 100) : 0
           });
@@ -183,7 +184,7 @@ export class TasksPage implements OnInit {
       return;
     }
 
-    const newStatus = task.completedAt ? 0 : 2;
+    const newStatus = task.completedAt ? TaskStatus.Pending : TaskStatus.Done;
 
     this.#facade.updateTaskStatus(taskId, { status: newStatus });
   }

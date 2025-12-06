@@ -58,9 +58,9 @@ public class GetProjectsQueryHandlerTests : BaseTestClass
         // Arrange
         var projects = new[]
         {
-            new Project { Title = "Project 1", Company = Company.Immoseed },
-            new Project { Title = "Project 2", Company = Company.NovaraRealEstate },
-            new Project { Title = "Project 3", Company = Company.Immoseed }
+            new Project { Title = "Project 1", Description = "Desc 1", Company = Company.Immoseed },
+            new Project { Title = "Project 2", Description = "Desc 2", Company = Company.NovaraRealEstate },
+            new Project { Title = "Project 3", Description = "Desc 3", Company = Company.Immoseed }
         };
         DatabaseContext.Projects.AddRange(projects);
         await DatabaseContext.SaveChangesAsync();
@@ -74,6 +74,30 @@ public class GetProjectsQueryHandlerTests : BaseTestClass
         Assert.NotNull(result);
         Assert.Equal(2, result.Projects.Count);
         Assert.All(result.Projects, p => Assert.Equal(Company.Immoseed, p.Company));
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldFilterByCompany_WhenNovaraRealEstateSpecified()
+    {
+        // Arrange
+        var projects = new[]
+        {
+            new Project { Title = "Project 1", Description = "Desc 1", Company = Company.Immoseed },
+            new Project { Title = "Project 2", Description = "Desc 2", Company = Company.NovaraRealEstate },
+            new Project { Title = "Project 3", Description = "Desc 3", Company = Company.NovaraRealEstate }
+        };
+        DatabaseContext.Projects.AddRange(projects);
+        await DatabaseContext.SaveChangesAsync();
+
+        var query = new GetProjectsQuery(Company.NovaraRealEstate);
+
+        // Act
+        var result = await _sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Projects.Count);
+        Assert.All(result.Projects, p => Assert.Equal(Company.NovaraRealEstate, p.Company));
     }
 
     [Fact]

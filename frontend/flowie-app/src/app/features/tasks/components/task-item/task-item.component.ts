@@ -2,6 +2,7 @@ import { Component, computed, input, output, signal } from "@angular/core";
 import { DatePipe, NgClass } from "@angular/common";
 import { Task } from "../../models/task.model";
 import { Subtask } from "../../models/subtask.model";
+import { TaskStatus } from "../../models/task-status.enum";
 
 @Component({
   selector: "app-task-item",
@@ -17,8 +18,15 @@ export class TaskItemComponent {
   taskToggled = output<number>();
   taskClicked = output<number>();
   taskEditRequested = output<number>();
+  taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
   showMenu = signal<boolean>(false);
+
+  readonly TaskStatus = TaskStatus;
+
+  isPending = computed(() => this.task().status === TaskStatus.Pending);
+  isOngoing = computed(() => this.task().status === TaskStatus.Ongoing);
+  isDone = computed(() => this.task().status === TaskStatus.Done);
 
   taskProgress = computed(() => {
     const task = this.task();
@@ -32,16 +40,16 @@ export class TaskItemComponent {
   });
 
   progressClass = computed(() => {
-    const pct = this.taskProgress();
-    if (pct === 100) return "progress-100";
-    if (pct === 0) return "progress-0";
+    const status = this.task().status;
+    if (status === TaskStatus.Done) return "progress-100";
+    if (status === TaskStatus.Pending) return "progress-0";
     return "progress-default";
   });
 
   statusIcon = computed(() => {
-    const pct = this.taskProgress();
-    if (pct === 100) return "fa-check";
-    if (pct === 0) return "fa-times";
+    const status = this.task().status;
+    if (status === TaskStatus.Done) return "fa-check";
+    if (status === TaskStatus.Pending) return "fa-times";
     return "fa-question";
   });
 
@@ -79,6 +87,18 @@ export class TaskItemComponent {
 
   onToggleSubtask(index: number) {
     this.taskToggled.emit(this.task().taskId);
+  }
+
+  onStartTask() {
+    this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Ongoing });
+  }
+
+  onCompleteTask() {
+    this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Done });
+  }
+
+  onReopenTask() {
+    this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Pending });
   }
 
   onEdit() {
