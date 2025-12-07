@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProjectListComponent } from "../project-list/project-list.component";
@@ -45,6 +45,7 @@ export class TasksPage implements OnInit {
   #destroy = inject(DestroyRef);
 
   #hasInitiallyLoaded = false;
+  #loadingTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly Company = Company;
 
@@ -52,7 +53,8 @@ export class TasksPage implements OnInit {
   isLoadingProjects = this.#taskFacade.isLoadingProjects;
 
   tasks = this.#taskFacade.tasks;
-  isLoadingTasks = this.#taskFacade.isLoadingTasks;
+  #facadeIsLoadingTasks = this.#taskFacade.isLoadingTasks;
+  isLoadingTasks = signal<boolean>(false);
 
   companyFilter = this.#taskFacade.companyFilter;
 
@@ -63,6 +65,22 @@ export class TasksPage implements OnInit {
     const id = this.selectedProjectId();
     return id ? this.projects().find(p => p.projectId === id) : undefined;
   });
+
+  constructor() {
+    // Watch for facade loading state changes
+    effect(() => {
+      const facadeLoading = this.#facadeIsLoadingTasks();
+
+      if (!facadeLoading) {
+        // API finished - clear timer and hide loading state
+        if (this.#loadingTimer) {
+          clearTimeout(this.#loadingTimer);
+          this.#loadingTimer = null;
+        }
+        this.isLoadingTasks.set(false);
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (this.projects().length === 0 && !this.#hasInitiallyLoaded) {
@@ -87,13 +105,33 @@ export class TasksPage implements OnInit {
         this.selectedProjectId.set(idNum);
         this.showOnlyMyTasks.set(false);
 
-        this.#taskFacade.getTasks(idNum, false);
+        this.#loadTasksWithDelay(idNum, false);
       } else {
         this.#taskFacade.clearTasks();
 
         this.selectedProjectId.set(null);
       }
     });
+  }
+
+  #loadTasksWithDelay(projectId: number, showOnlyMyTasks: boolean) {
+    // Clear any existing timer
+    if (this.#loadingTimer) {
+      clearTimeout(this.#loadingTimer);
+      this.#loadingTimer = null;
+    }
+
+    // Don't show loading state immediately
+    this.isLoadingTasks.set(false);
+
+    // Set a timer to show loading state if API takes longer than 150ms
+    this.#loadingTimer = setTimeout(() => {
+      this.isLoadingTasks.set(true);
+      this.#loadingTimer = null;
+    }, 150);
+
+    // Make the API call
+    this.#taskFacade.getTasks(projectId, showOnlyMyTasks);
   }
 
   onProjectSelected(projectId: number) {
@@ -134,7 +172,7 @@ export class TasksPage implements OnInit {
     const selectedProjectId = this.selectedProjectId();
 
     if (selectedProjectId) {
-      this.#taskFacade.getTasks(selectedProjectId, showOnlyMyTasks);
+      this.#loadTasksWithDelay(selectedProjectId, showOnlyMyTasks);
     }
   }
 

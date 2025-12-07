@@ -112,7 +112,7 @@
                         <div
                           class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
                           <button
-                            (click)="onEditSubtask(subtask)"
+                            (click)="onUpdateSubtask(subtask)"
                             class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
                             <i class="fas fa-edit mr-2 w-4"></i>
                             Bewerken
@@ -174,13 +174,13 @@
         @if (showMenu()) {
           <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
             <button
-              (click)="onAddSubtask()"
+              (click)="onCreateSubtask()"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
               <i class="fas fa-plus mr-2 w-4"></i>
               Subtaak toevoegen
             </button>
             <button
-              (click)="onEditTask()"
+              (click)="onUpdateTask()"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
               <i class="fas fa-edit mr-2 w-4"></i>
               Bewerken

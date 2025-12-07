@@ -15,12 +15,12 @@ export class TaskItemComponent {
   task = input.required<Task>();
   isLast = input<boolean>(false);
 
-  taskEditRequested = output<number>();
+  taskUpdateRequested = output<number>();
   taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  subtaskAddRequested = output<number>();
-  subtaskEditRequested = output<number>();
+  subtaskCreateRequested = output<number>();
+  subtaskUpdateRequested = output<number>();
   subtaskDeleteRequested = output<number>();
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
@@ -84,9 +84,9 @@ export class TaskItemComponent {
     this.showMenu.update(value => !value);
   }
 
-  onEditTask() {
+  onUpdateTask() {
     this.showMenu.set(false);
-    this.taskEditRequested.emit(this.task().taskId);
+    this.taskUpdateRequested.emit(this.task().taskId);
   }
 
   onDeleteTask() {
@@ -94,9 +94,9 @@ export class TaskItemComponent {
     this.taskDeleteRequested.emit(this.task().taskId);
   }
 
-  onAddSubtask() {
+  onCreateSubtask() {
     this.showMenu.set(false);
-    this.subtaskAddRequested.emit(this.task().taskId);
+    this.subtaskCreateRequested.emit(this.task().taskId);
   }
 
   onStartTask() {
@@ -128,9 +128,9 @@ export class TaskItemComponent {
     this.showSubtaskMenu.update(current => current === subtaskId ? null : subtaskId);
   }
 
-  onEditSubtask(subtask: Subtask) {
+  onUpdateSubtask(subtask: Subtask) {
     this.showSubtaskMenu.set(null);
-    this.subtaskEditRequested.emit(subtask.taskId);
+    this.subtaskUpdateRequested.emit(subtask.taskId);
   }
 
   onDeleteSubtask(subtask: Subtask) {

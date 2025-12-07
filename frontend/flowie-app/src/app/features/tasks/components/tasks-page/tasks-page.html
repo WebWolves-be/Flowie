@@ -64,14 +64,14 @@
         [showOnlyMyTasks]="showOnlyMyTasks()"
         (taskFilterToggled)="onTaskFilterChanges($event)"
         (taskClicked)="onOpenUpdateTaskDialog($event)"
-        (taskEditRequested)="onOpenUpdateTaskDialog($event)"
+        (taskUpdateRequested)="onOpenUpdateTaskDialog($event)"
         (taskDeleteRequested)="onOpenDeleteTaskDialog($event)"
-        (projectEditRequested)="onOpenUpdateProjectDialog()"
+        (projectUpdateRequested)="onOpenUpdateProjectDialog()"
         (taskCreateRequested)="onOpenCreateTaskDialog()"
         (taskStatusChanged)="onTaskStatusChanged($event)"
         (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
-        (subtaskAddRequested)="onOpenCreateSubtaskDialog($event)"
-        (subtaskEditRequested)="onOpenUpdateSubtaskDialog($event)"
+        (subtaskCreateRequested)="onOpenCreateSubtaskDialog($event)"
+        (subtaskUpdateRequested)="onOpenUpdateSubtaskDialog($event)"
         (subtaskDeleteRequested)="onOpenDeleteSubtaskDialog($event)">
       </app-project-detail>
     } @else {
@@ -89,14 +89,6 @@
           <p class="text-sm text-gray-500 mb-6">
             Selecteer een project uit de lijst aan de linkerkant om de taken te bekijken en te beheren.
           </p>
-          <div class="flex items-center justify-center space-x-2 text-gray-400">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span class="text-xs font-medium">Kies een project om te starten</span>
-          </div>
         </div>
       </div>
     }

@@ -23,15 +23,15 @@ export class ProjectDetailComponent {
 
   taskFilterToggled = output<boolean>();
 
-  projectEditRequested = output<void>();
+  projectUpdateRequested = output<void>();
 
   taskCreateRequested = output<void>();
-  taskEditRequested = output<number>();
+  taskUpdateRequested = output<number>();
   taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  subtaskAddRequested = output<number>();
-  subtaskEditRequested = output<number>();
+  subtaskCreateRequested = output<number>();
+  subtaskUpdateRequested = output<number>();
   subtaskDeleteRequested = output<number>();
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
@@ -39,16 +39,16 @@ export class ProjectDetailComponent {
     this.taskFilterToggled.emit(val);
   }
 
-  onEditProject() {
-    this.projectEditRequested.emit();
+  onUpdateProject() {
+    this.projectUpdateRequested.emit();
   }
 
   onCreateTask() {
     this.taskCreateRequested.emit();
   }
 
-  onTaskEdit(id: number) {
-    this.taskEditRequested.emit(id);
+  onTaskUpdate(id: number) {
+    this.taskUpdateRequested.emit(id);
   }
 
   onTaskDelete(id: number) {
@@ -59,12 +59,12 @@ export class ProjectDetailComponent {
     this.taskStatusChanged.emit(event);
   }
 
-  onSubtaskAdd(taskId: number) {
-    this.subtaskAddRequested.emit(taskId);
+  onSubtaskCreate(taskId: number) {
+    this.subtaskCreateRequested.emit(taskId);
   }
 
-  onSubtaskEdit(subtaskId: number) {
-    this.subtaskEditRequested.emit(subtaskId);
+  onSubtaskUpdate(subtaskId: number) {
+    this.subtaskUpdateRequested.emit(subtaskId);
   }
 
   onSubtaskDelete(subtaskId: number) {

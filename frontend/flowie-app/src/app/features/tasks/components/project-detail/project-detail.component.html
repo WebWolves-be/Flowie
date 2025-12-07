@@ -35,7 +35,7 @@
                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
             <i class="fas fa-plus mr-2"></i>Taak Toevoegen
           </button>
-          <button (click)="onEditProject()"
+          <button (click)="onUpdateProject()"
                   class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
             <i class="fas fa-edit mr-2"></i>Project bewerken
           </button>
@@ -105,12 +105,12 @@
           <app-task-item
             [task]="task"
             [isLast]="$last"
-            (taskEditRequested)="onTaskEdit(task.taskId)"
+            (taskUpdateRequested)="onTaskUpdate(task.taskId)"
             (taskDeleteRequested)="onTaskDelete(task.taskId)"
             (taskStatusChanged)="onTaskStatusChanged($event)"
             (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
-            (subtaskAddRequested)="onSubtaskAdd(task.taskId)"
-            (subtaskEditRequested)="onSubtaskEdit($event)"
+            (subtaskCreateRequested)="onSubtaskCreate(task.taskId)"
+            (subtaskUpdateRequested)="onSubtaskUpdate($event)"
             (subtaskDeleteRequested)="onSubtaskDelete($event)">
           </app-task-item>
         }
