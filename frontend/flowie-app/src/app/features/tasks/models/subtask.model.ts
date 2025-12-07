@@ -5,8 +5,8 @@ export interface Subtask {
   parentTaskId?: number | null;
   title: string;
   description?: string | null;
-  typeId: number;
-  typeName: string;
+  taskTypeId: number;
+  taskTypeName: string;
   dueDate: string;
   status: TaskStatus;
   employeeId: number;

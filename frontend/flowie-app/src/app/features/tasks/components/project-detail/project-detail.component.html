@@ -111,7 +111,8 @@
             [isLast]="$last"
             (taskToggled)="onTaskToggled(task.taskId)"
             (taskClicked)="onTaskClicked(task.taskId)"
-            (taskEditRequested)="onTaskEdit(task.taskId)">
+            (taskEditRequested)="onTaskEdit(task.taskId)"
+            (taskStatusChanged)="onTaskStatusChanged($event)">
           </app-task-item>
         }
       </div>

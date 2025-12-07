@@ -3,6 +3,7 @@ import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
 import { Project } from "../../models/project.model";
 import { Task } from "../../models/task.model";
+import { TaskStatus } from "../../models/task-status.enum";
 
 @Component({
   selector: "app-project-detail",
@@ -24,6 +25,7 @@ export class ProjectDetailComponent {
   taskEditRequested = output<number>();
   projectEditRequested = output<void>();
   taskCreateRequested = output<void>();
+  taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
   readonly Company = Company;
 
@@ -49,5 +51,9 @@ export class ProjectDetailComponent {
 
   onCreateTask() {
     this.taskCreateRequested.emit();
+  }
+
+  onTaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
+    this.taskStatusChanged.emit(event);
   }
 }

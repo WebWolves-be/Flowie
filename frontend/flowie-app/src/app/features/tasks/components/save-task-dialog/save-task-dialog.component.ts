@@ -1,8 +1,7 @@
-import { Component, computed, effect, inject, OnInit, signal } from "@angular/core";
+import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Task } from "../../models/task.model";
-import { TaskStatus } from "../../models/task-status.enum";
 import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
 import { TaskFacade } from "../../task.facade";
 import { EmployeeFacade } from "../../../../core/facades/employee.facade";
@@ -30,12 +29,20 @@ export interface SaveTaskDialogResult {
   styleUrl: "./save-task-dialog.component.scss"
 })
 export class SaveTaskDialogComponent implements OnInit {
-  #ref = inject<DialogRef<SaveTaskDialogResult>>(DialogRef);
-  #data = inject<SaveTaskDialogData>(DIALOG_DATA);
+  #dialogRef = inject<DialogRef<SaveTaskDialogResult>>(DialogRef);
+  #dialogData = inject<SaveTaskDialogData>(DIALOG_DATA);
   #taskTypeFacade = inject(TaskTypeFacade);
   #taskFacade = inject(TaskFacade);
   #employeeFacade = inject(EmployeeFacade);
   #notificationService = inject(NotificationService);
+
+  #taskTypes = this.#taskTypeFacade.taskTypes;
+  #employees = this.#employeeFacade.employees;
+
+  readonly taskTypes = this.#taskTypes;
+  readonly employees = this.#employees;
+
+  errorMessage = signal<string | null>(null);
 
   taskForm!: FormGroup<{
     title: FormControl<string>;
@@ -45,43 +52,46 @@ export class SaveTaskDialogComponent implements OnInit {
     employeeId: FormControl<number | null>;
   }>;
 
-  errorMessage = signal<string | null>(null);
-
-  readonly taskTypes = this.#taskTypeFacade.taskTypes;
-  readonly employees = this.#employeeFacade.employees;
+  readonly isUpdate = this.#dialogData.mode === "update";
 
   ngOnInit(): void {
-    this.#taskTypeFacade.getTaskTypes();
-    this.#employeeFacade.getEmployees();
+    const task = this.#dialogData.task;
 
+    console.log(task);
+    
     this.taskForm = new FormGroup({
-      title: new FormControl(this.#data.task?.title ?? "", { nonNullable: true, validators: [Validators.required] }),
-      description: new FormControl(this.#data.task?.description ?? "", { nonNullable: true }),
-      taskTypeId: new FormControl<number | null>(this.#data.task?.typeId ?? null, { validators: [Validators.required] }),
-      dueDate: new FormControl(this.normalizeDate(this.#data.task?.dueDate), { nonNullable: true, validators: [Validators.required] }),
-      employeeId: new FormControl<number | null>(this.#data.task?.employeeId ?? null, { validators: [Validators.required] })
+      title: new FormControl(task?.title ?? "", { nonNullable: true, validators: [Validators.required] }),
+      description: new FormControl(task?.description ?? "", { nonNullable: true }),
+      taskTypeId: new FormControl<number | null>(task?.taskTypeId ?? null, { validators: [Validators.required] }),
+      dueDate: new FormControl(this.#normalizeDate(task?.dueDate), {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+      employeeId: new FormControl<number | null>(task?.employeeId ?? null, { validators: [Validators.required] })
     });
 
-    if (this.isUpdate && this.#data.task?.employeeName && !this.#data.task?.employeeId) {
-      effect(() => {
-        const employees = this.employees();
-        const taskAssigneeName = this.#data.task?.employeeName;
-        if (employees.length > 0 && taskAssigneeName) {
-          const employee = employees.find(e => e.name === taskAssigneeName);
-          if (employee) {
-            this.taskForm.patchValue({ employeeId: employee.id });
-          }
-        }
-      });
+    // Load data if not already loaded
+    if (this.#taskTypes().length === 0) {
+      this.#taskTypeFacade.getTaskTypes();
+    }
+
+    if (this.#employees().length === 0) {
+      this.#employeeFacade.getEmployees();
+    }
+
+    // Update validators based on subtask status
+    if (this.isUpdate && this.hasSubtasks()) {
+      this.#updateValidators();
     }
   }
 
-  readonly isUpdate = this.#data.mode === "update";
-  readonly TaskStatus = TaskStatus;
-
   hasSubtasks = computed(() => {
-    const task = this.#data.task;
-    return this.isUpdate && task && ((task.subtasks && task.subtasks.length > 0) || (task.subtaskCount && task.subtaskCount > 0));
+    if (!this.isUpdate || !this.#dialogData.task) {
+      return false;
+    }
+
+    const task = this.#dialogData.task;
+    return (task.subtasks && task.subtasks.length > 0) || (task.subtaskCount && task.subtaskCount > 0);
   });
 
   titleLabel = computed(() => (this.isUpdate ? "Taak bewerken" : "Nieuwe taak aanmaken"));
@@ -91,16 +101,12 @@ export class SaveTaskDialogComponent implements OnInit {
     return this.taskForm.get("title");
   }
 
-  get description() {
-    return this.taskForm.get("description");
-  }
-
   get dueDate() {
     return this.taskForm.get("dueDate");
   }
 
   onCancel(): void {
-    this.#ref.close();
+    this.#dialogRef.close();
   }
 
   onSubmit(): void {
@@ -111,84 +117,106 @@ export class SaveTaskDialogComponent implements OnInit {
 
     this.errorMessage.set(null);
 
-    const hasSubtasksValue = this.hasSubtasks();
+    if (this.isUpdate) {
+      this.#updateTask();
+    } else {
+      this.#createTask();
+    }
+  }
+
+  #createTask(): void {
     const formValue = this.taskForm.value;
 
-    if (this.isUpdate) {
-      const typeId = hasSubtasksValue ? this.#data.task?.typeId! : formValue.taskTypeId!;
-      const employeeId = hasSubtasksValue
-        ? (this.#data.task?.employeeId ?? this.employees().find(e => e.name === this.#data.task?.employeeName)?.id)
-        : formValue.employeeId;
+    const request = {
+      projectId: this.#dialogData.projectId,
+      title: formValue.title!,
+      description: formValue.description || undefined,
+      taskTypeId: formValue.taskTypeId!,
+      dueDate: formValue.dueDate!,
+      employeeId: formValue.employeeId!
+    };
 
-      if (!employeeId) {
-        console.error('No employee found');
-        return;
-      }
+    this.#taskFacade.createTask(request)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.errorMessage.set(extractErrorMessage(error));
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.#taskFacade.getTasks(this.#dialogData.projectId);
+        this.#taskFacade.getProjects();
+        this.#notificationService.showSuccess("Taak succesvol aangemaakt");
+        this.#dialogRef.close();
+      });
+  }
 
-      const status = this.#data.task?.status ?? TaskStatus.Pending;
-      const request = {
-        title: formValue.title!,
-        description: formValue.description || undefined,
-        typeId: typeId,
-        dueDate: hasSubtasksValue ? this.#data.task?.dueDate! : formValue.dueDate!,
-        employeeId: employeeId,
-        status: status,
-        progress: this.calculateProgress(this.#data.task!)
-      };
+  #updateTask(): void {
+    const formValue = this.taskForm.value;
+    const task = this.#dialogData.task!;
 
-      this.#taskFacade.updateTask(this.#data.task!.taskId, request)
-        .pipe(
-          catchError((error: HttpErrorResponse) => {
-            this.errorMessage.set(extractErrorMessage(error));
-            return EMPTY;
-          })
-        )
-        .subscribe(() => {
-          this.#taskFacade.getTasks(this.#data.projectId);
-          this.#notificationService.showSuccess("Taak succesvol bewerkt");
-          this.#ref.close();
-        });
+    const request = {
+      title: formValue.title!,
+      description: formValue.description || undefined,
+      taskTypeId: this.hasSubtasks() ? task.taskTypeId : formValue.taskTypeId!,
+      dueDate: this.hasSubtasks() ? task.dueDate : formValue.dueDate!,
+      employeeId: this.hasSubtasks() ? task.employeeId : formValue.employeeId!,
+      status: task.status
+    };
+
+    this.#taskFacade.updateTask(task.taskId, request)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.errorMessage.set(extractErrorMessage(error));
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        this.#taskFacade.getTasks(this.#dialogData.projectId);
+        this.#taskFacade.getProjects();
+        this.#notificationService.showSuccess("Taak succesvol bewerkt");
+        this.#dialogRef.close();
+      });
+  }
+
+
+  #updateValidators(): void {
+    const taskTypeControl = this.taskForm.get("taskTypeId");
+    const dueDateControl = this.taskForm.get("dueDate");
+    const employeeIdControl = this.taskForm.get("employeeId");
+
+    if (this.hasSubtasks()) {
+      // Remove required validators for tasks with subtasks
+      taskTypeControl?.clearValidators();
+      dueDateControl?.clearValidators();
+      employeeIdControl?.clearValidators();
     } else {
-      const request = {
-        projectId: this.#data.projectId,
-        title: formValue.title!,
-        description: formValue.description || undefined,
-        taskTypeId: formValue.taskTypeId!,
-        dueDate: formValue.dueDate!,
-        employeeId: formValue.employeeId!
-      };
-
-      this.#taskFacade.createTask(request)
-        .pipe(
-          catchError((error: HttpErrorResponse) => {
-            this.errorMessage.set(extractErrorMessage(error));
-            return EMPTY;
-          })
-        )
-        .subscribe(() => {
-          this.#taskFacade.getTasks(this.#data.projectId);
-          this.#notificationService.showSuccess("Taak succesvol aangemaakt");
-          this.#ref.close();
-        });
+      // Add required validators for tasks without subtasks
+      taskTypeControl?.setValidators([Validators.required]);
+      dueDateControl?.setValidators([Validators.required]);
+      employeeIdControl?.setValidators([Validators.required]);
     }
+
+    taskTypeControl?.updateValueAndValidity();
+    dueDateControl?.updateValueAndValidity();
+    employeeIdControl?.updateValueAndValidity();
   }
 
-  private calculateProgress(task: Task): number {
-    if (!task.subtaskCount || task.subtaskCount === 0) {
-      return task.status === TaskStatus.Done ? 100 : 0;
+  #normalizeDate(input?: string | null): string {
+    if (!input) {
+      return "";
     }
-    return Math.round(((task.completedSubtaskCount ?? 0) / task.subtaskCount) * 100);
-  }
 
-  private normalizeDate(input?: string | null): string {
-    if (!input) return "";
     const iso = new Date(input);
+
     if (!isNaN(iso.getTime())) {
       const yyyy = iso.getFullYear();
       const mm = String(iso.getMonth() + 1).padStart(2, "0");
       const dd = String(iso.getDate()).padStart(2, "0");
+
       return `${yyyy}-${mm}-${dd}`;
     }
+
     return "";
   }
 }

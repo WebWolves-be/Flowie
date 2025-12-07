@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, signal, OnInit } from "@angular/core";
+import { Component, computed, DestroyRef, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProjectListComponent } from "../project-list/project-list.component";
@@ -18,6 +18,12 @@ import {
   SaveTaskDialogResult
 } from "../save-task-dialog/save-task-dialog.component";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
+import { EmployeeFacade } from "../../../../core/facades/employee.facade";
+import { NotificationService } from "../../../../core/services/notification.service";
+import { catchError, EMPTY } from "rxjs";
+import { HttpErrorResponse } from "@angular/common/http";
+import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 
 @Component({
   selector: "app-tasks-page",
@@ -27,7 +33,10 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   styleUrl: "./tasks-page.scss"
 })
 export class TasksPage implements OnInit {
-  #facade = inject(TaskFacade);
+  #taskFacade = inject(TaskFacade);
+  #taskTypeFacade = inject(TaskTypeFacade);
+  #employeeFacade = inject(EmployeeFacade);
+  #notificationService = inject(NotificationService);
   #router = inject(Router);
   #route = inject(ActivatedRoute);
   #dialog = inject(Dialog);
@@ -37,13 +46,13 @@ export class TasksPage implements OnInit {
 
   readonly Company = Company;
 
-  projects = this.#facade.projects;
-  isLoadingProjects = this.#facade.isLoadingProjects;
+  projects = this.#taskFacade.projects;
+  isLoadingProjects = this.#taskFacade.isLoadingProjects;
 
-  tasks = this.#facade.tasks;
-  isLoadingTasks = this.#facade.isLoadingTasks;
+  tasks = this.#taskFacade.tasks;
+  isLoadingTasks = this.#taskFacade.isLoadingTasks;
 
-  companyFilter = this.#facade.companyFilter;
+  companyFilter = this.#taskFacade.companyFilter;
 
   selectedProjectId = signal<number | null>(null);
   showOnlyMyTasks = signal<boolean>(false);
@@ -56,20 +65,29 @@ export class TasksPage implements OnInit {
   ngOnInit(): void {
     if (this.projects().length === 0 && !this.#hasInitiallyLoaded) {
       this.#hasInitiallyLoaded = true;
-      this.#facade.getProjects();
+      this.#taskFacade.getProjects();
+    }
+
+    if (this.#taskTypeFacade.taskTypes().length === 0) {
+      this.#taskTypeFacade.getTaskTypes();
+    }
+
+    if (this.#employeeFacade.employees().length === 0) {
+      this.#employeeFacade.getEmployees();
     }
 
     this.#route.paramMap.pipe(takeUntilDestroyed(this.#destroy)).subscribe(params => {
       const projectId = params.get("id");
+
       if (projectId) {
         const idNum = Number(projectId);
 
         this.selectedProjectId.set(idNum);
         this.showOnlyMyTasks.set(false);
 
-        this.#facade.getTasks(idNum, false);
+        this.#taskFacade.getTasks(idNum, false);
       } else {
-        this.#facade.clearTasks();
+        this.#taskFacade.clearTasks();
 
         this.selectedProjectId.set(null);
       }
@@ -80,14 +98,19 @@ export class TasksPage implements OnInit {
     void this.#router.navigate(["/taken/project", projectId]);
   }
 
+  onFilterProjectsByCompany(filter: "ALL" | Company) {
+    this.selectedProjectId.set(null);
+    this.#taskFacade.setCompanyFilter(filter);
+
+    void this.#router.navigate(["/taken"]);
+  }
+
   onOpenCreateProjectDialog() {
-    const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
+    this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
       data: { mode: "create" } as SaveProjectDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
-
-    // Dialog handles save via facade
   }
 
   onOpenUpdateProjectDialog() {
@@ -97,13 +120,20 @@ export class TasksPage implements OnInit {
       return;
     }
 
-    const ref = this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
+    this.#dialog.open<SaveProjectDialogResult>(SaveProjectDialogComponent, {
       data: { mode: "update", project: proj } as SaveProjectDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
+  }
 
-    // Dialog handles save via facade
+  onTaskFilterChanges(showOnlyMyTasks: boolean) {
+    this.showOnlyMyTasks.set(showOnlyMyTasks);
+    const selectedProjectId = this.selectedProjectId();
+
+    if (selectedProjectId) {
+      this.#taskFacade.getTasks(selectedProjectId, showOnlyMyTasks);
+    }
   }
 
   onOpenCreateTaskDialog() {
@@ -113,30 +143,15 @@ export class TasksPage implements OnInit {
       return;
     }
 
-    const ref = this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+    this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
       data: { mode: "create", projectId: selectedProject.projectId } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
-
-    ref.closed
-      .pipe(takeUntilDestroyed(this.#destroy))
-      .subscribe(result => {
-        if (result?.mode === "create") {
-          const task = result.task;
-          this.#facade.createTask({
-            projectId: task.projectId,
-            title: task.title,
-            taskTypeId: task.typeId,
-            dueDate: task.dueDate ?? "",
-            employeeId: task.employeeId ?? this.#facade.employees().find(e => e.name === task.employeeName)?.id ?? 0,
-            description: task.description ?? undefined
-          });
-        }
-      });
   }
 
   onOpenUpdateTaskDialog(taskId: number) {
+    console.log(this.tasks());
     const task = this.tasks().find(t => t.taskId === taskId);
     const selectedProject = this.selectedProject();
 
@@ -144,37 +159,11 @@ export class TasksPage implements OnInit {
       return;
     }
 
-    const ref = this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+    this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
       data: { mode: "update", projectId: selectedProject.projectId, task } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
-
-    ref.closed
-      .pipe(takeUntilDestroyed(this.#destroy))
-      .subscribe(result => {
-        if (result?.mode === "update") {
-          const task = result.task;
-          this.#facade.updateTask(task.taskId, {
-            title: task.title,
-            description: task.description ?? undefined,
-            typeId: task.typeId,
-            dueDate: task.dueDate ?? "",
-            employeeId: task.employeeId ?? this.#facade.employees().find(e => e.name === task.employeeName)?.id ?? 0,
-            status: task.status,
-            progress: task.subtaskCount > 0 ? Math.round((task.completedSubtaskCount / task.subtaskCount) * 100) : 0
-          });
-        }
-      });
-  }
-
-  onTaskFilterChanges(showOnlyMyTasks: boolean) {
-    this.showOnlyMyTasks.set(showOnlyMyTasks);
-    const selectedProjectId = this.selectedProjectId();
-
-    if (selectedProjectId) {
-      this.#facade.getTasks(selectedProjectId, showOnlyMyTasks);
-    }
   }
 
   onTaskStatusChanges(taskId: number) {
@@ -186,13 +175,37 @@ export class TasksPage implements OnInit {
 
     const newStatus = task.completedAt ? TaskStatus.Pending : TaskStatus.Done;
 
-    this.#facade.updateTaskStatus(taskId, { status: newStatus });
+    this.#taskFacade.updateTaskStatus(taskId, { status: newStatus }).subscribe(() => {
+      const projectId = this.selectedProjectId();
+      if (projectId) {
+        this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
+        this.#taskFacade.getProjects();
+      }
+    });
   }
 
-  filterProjectsByCompany(filter: "ALL" | Company) {
-    this.selectedProjectId.set(null);
-    this.#facade.setCompanyFilter(filter);
+  onTaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
+    const statusMessages = {
+      [TaskStatus.Ongoing]: "Taak gestart",
+      [TaskStatus.Done]: "Taak voltooid",
+      [TaskStatus.Pending]: "Taak heropend"
+    };
 
-    void this.#router.navigate(["/taken"]);
+    this.#taskFacade
+      .updateTaskStatus(event.taskId, { status: event.status })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.#notificationService.showError(extractErrorMessage(error));
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        const projectId = this.selectedProjectId();
+        if (projectId) {
+          this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
+          this.#taskFacade.getProjects();
+        }
+        this.#notificationService.showSuccess(statusMessages[event.status]);
+      });
   }
 }

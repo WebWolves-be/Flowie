@@ -6,8 +6,8 @@ export interface Task {
   projectId: number;
   title: string;
   description?: string | null;
-  typeId: number;
-  typeName: string;
+  taskTypeId: number;
+  taskTypeName: string;
   dueDate: string;
   status: TaskStatus;
   employeeId: number;

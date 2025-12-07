@@ -12,7 +12,12 @@
       "Bash(dotnet ef migrations:*)",
       "Bash(dotnet build:*)",
       "Bash(taskkill:*)",
-      "Bash(dotnet ef database:*)"
+      "Bash(dotnet ef database:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_console_messages",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

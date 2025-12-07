@@ -4,7 +4,6 @@ import { environment } from "../../../environments/environment";
 import { Company } from "./models/company.enum";
 import { finalize, Observable } from "rxjs";
 import { Project } from "./models/project.model";
-import { Employee } from "./models/employee.model";
 import { Task } from "./models/task.model";
 import { GetProjectsResponse } from "./models/get-projects-response.model";
 import { GetTasksResponse } from "./models/get-tasks-response.model";
@@ -28,16 +27,12 @@ export class TaskFacade {
   #tasks = signal<Task[]>([]);
   #isLoadingTasks = signal<boolean>(false);
 
-  #employees = signal<Employee[]>([]);
-
   projects = this.#projects.asReadonly();
   isLoadingProjects = this.#isLoadingProjects.asReadonly();
   companyFilter = this.#companyFilter.asReadonly();
 
   tasks = this.#tasks.asReadonly();
   isLoadingTasks = this.#isLoadingTasks.asReadonly();
-
-  employees = this.#employees.asReadonly();
 
   getProjects(company?: Company): void {
     this.#isLoadingProjects.set(true);
