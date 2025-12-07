@@ -37,7 +37,7 @@
           <div class="space-y-3">
             @for (subtask of task().subtasks!; track $index) {
               <div
-                class="pl-3 py-2 rounded-r"
+                class="px-3 py-2 rounded-r"
                 [class.border-l-4]="true"
                 [class.border-green-400]="isSubtaskDone(subtask)"
                 [class.bg-green-50]="isSubtaskDone(subtask)"
@@ -49,25 +49,23 @@
                       <span
                         class="text-sm font-medium"
                         [class.text-gray-500]="isSubtaskDone(subtask)"
-                        [class.line-through]="isSubtaskDone(subtask)"
                         [class.text-gray-900]="!isSubtaskDone(subtask)">
                         {{ subtask.title }}
                       </span>
                     </div>
                     @if (subtask.description) {
                       <p
-                        class="text-xs text-gray-500 mb-1"
-                        [class.line-through]="isSubtaskDone(subtask)"
+                        class="text-xs text-gray-500 mb-3"
                         [class.text-gray-400]="isSubtaskDone(subtask)">
                         {{ subtask.description }}
                       </p>
                     }
-                    <div class="flex items-center gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-xs mb-3">
                       <span class="text-gray-700">{{ subtask.taskTypeName }}</span>
                       <span class="text-blue-600 font-bold">|</span>
                       <span
                         class="font-medium"
-                        [class.text-green-600]="isSubtaskDone(subtask)"
+                        [class.text-gray-600]="isSubtaskDone(subtask)"
                         [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.font-semibold]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
@@ -75,13 +73,61 @@
                       <span class="text-blue-600 font-bold">|</span>
                       <span class="text-gray-700">{{ subtask.employeeName }}</span>
                     </div>
+                    <div class="flex items-center gap-2">
+                      @if (isSubtaskPending(subtask)) {
+                        <button
+                          (click)="onStartSubtask(subtask)"
+                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          Beginnen
+                        </button>
+                      }
+                      @if (isSubtaskOngoing(subtask)) {
+                        <button
+                          (click)="onCompleteSubtask(subtask)"
+                          class="border px-3 py-1 rounded text-sm bg-transparent"
+                          style="border-color: #10B981; color: #10B981;"
+                          onmouseover="this.style.backgroundColor='#D1FAE5'"
+                          onmouseout="this.style.backgroundColor='transparent'">
+                          Klaar
+                        </button>
+                      }
+                      @if (isSubtaskDone(subtask)) {
+                        <button
+                          (click)="onReopenSubtask(subtask)"
+                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          Openzetten
+                        </button>
+                      }
+                    </div>
                   </div>
                   @if (!isSubtaskDone(subtask)) {
-                    <button
-                      (click)="onToggleSubtask($index)"
-                      class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 ml-3">
-                      Klaar
-                    </button>
+                    <div class="relative ml-4">
+                      <button
+                        (click)="toggleSubtaskMenu($event, subtask.taskId)"
+                        class="text-gray-400 hover:text-gray-600 p-2 rounded-full focus:outline-none"
+                        title="Acties">
+                        <i class="fas fa-ellipsis-vertical"></i>
+                      </button>
+                      @if (showSubtaskMenu() === subtask.taskId) {
+                        <div
+                          class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+                          <button
+                            (click)="onEditSubtask(subtask)"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                            <i class="fas fa-edit mr-2 w-4"></i>
+                            Bewerken
+                          </button>
+                          @if (isSubtaskPending(subtask)) {
+                            <button
+                              (click)="onDeleteSubtask(subtask)"
+                              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
+                              <i class="fas fa-trash mr-2 w-4"></i>
+                              Verwijderen
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
                   }
                 </div>
               </div>
@@ -89,62 +135,68 @@
           </div>
         </div>
       }
-      @if (isPending()) {
-        <button
-          (click)="onStartTask()"
-          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
-          Beginnen
-        </button>
-      }
-      @if (isOngoing()) {
-        <button
-          (click)="onCompleteTask()"
-          class="border px-3 py-1 rounded text-sm bg-transparent mt-3"
-          style="border-color: #10B981; color: #10B981;"
-          onmouseover="this.style.backgroundColor='#D1FAE5'"
-          onmouseout="this.style.backgroundColor='transparent'">
-          Klaar
-        </button>
-      }
-      @if (isDone()) {
-        <button
-          (click)="onReopenTask()"
-          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
-          Openzetten
-        </button>
+      @if (!task().subtasks || task().subtasks!.length === 0) {
+        @if (isPending()) {
+          <button
+            (click)="onStartTask()"
+            class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
+            Beginnen
+          </button>
+        }
+        @if (isOngoing()) {
+          <button
+            (click)="onCompleteTask()"
+            class="border px-3 py-1 rounded text-sm bg-transparent mt-3"
+            style="border-color: #10B981; color: #10B981;"
+            onmouseover="this.style.backgroundColor='#D1FAE5'"
+            onmouseout="this.style.backgroundColor='transparent'">
+            Klaar
+          </button>
+        }
+        @if (isDone()) {
+          <button
+            (click)="onReopenTask()"
+            class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
+            Openzetten
+          </button>
+        }
       }
     </div>
 
-    <div class="ml-4 relative">
-      <button
-        (click)="toggleMenu($event)"
-        class="text-gray-400 hover:text-gray-600 p-2 rounded-full focus:outline-none"
-        title="Acties">
-        <i class="fas fa-ellipsis-vertical"></i>
-      </button>
-      @if (showMenu()) {
-        <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
-          <button
-            (click)="onAddSubtask()"
-            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-            <i class="fas fa-plus mr-2 w-4"></i>
-            Subtaak toevoegen
-          </button>
-          <button
-            (click)="onEdit()"
-            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-            <i class="fas fa-edit mr-2 w-4"></i>
-            Bewerken
-          </button>
-          <button
-            (click)="onDelete()"
-            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
-            <i class="fas fa-trash mr-2 w-4"></i>
-            Verwijderen
-          </button>
-        </div>
-      }
-    </div>
+    @if (!isDone()) {
+      <div class="ml-4 relative">
+        <button
+          (click)="toggleTaskMenu($event)"
+          class="text-gray-400 hover:text-gray-600 p-2 rounded-full focus:outline-none"
+          title="Acties">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        @if (showMenu()) {
+          <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+            <button
+              (click)="onAddSubtask()"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+              <i class="fas fa-plus mr-2 w-4"></i>
+              Subtaak toevoegen
+            </button>
+            <button
+              (click)="onEditTask()"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+              <i class="fas fa-edit mr-2 w-4"></i>
+              Bewerken
+            </button>
+            @if (isPending()) {
+              <button
+                (click)="onDeleteTask()"
+                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
+                <i class="fas fa-trash mr-2 w-4"></i>
+                Verwijderen
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>
 

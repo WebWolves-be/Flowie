@@ -1,21 +1,12 @@
-import { Component, inject, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DashboardFacade } from '../../facade/dashboard.facade';
+import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'app-dashboard-page',
+  selector: "app-dashboard-page",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard-page.html',
-  styleUrl: './dashboard-page.scss',
+  templateUrl: "./dashboard-page.html",
+  styleUrl: "./dashboard-page.scss"
 })
-export class DashboardPage implements OnInit {
-  facade = inject(DashboardFacade);
-  metrics = this.facade.metrics;
-  isLoading = this.facade.isLoading;
-  skeletons = [0, 1, 2, 3, 4, 5];
-
-  ngOnInit(): void {
-    this.facade.load();
-  }
+export class DashboardPage {
 }

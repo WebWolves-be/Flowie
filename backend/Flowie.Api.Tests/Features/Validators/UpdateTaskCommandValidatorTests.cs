@@ -1,5 +1,6 @@
 using Flowie.Api.Features.Tasks.UpdateTask;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
+using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
 namespace Flowie.Api.Tests.Features.Validators;
 
@@ -22,7 +23,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -43,7 +45,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -64,7 +67,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -86,7 +90,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -108,7 +113,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -129,7 +135,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -150,7 +157,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -171,7 +179,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: null!,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -192,7 +201,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -214,7 +224,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: description,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -236,7 +247,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: description,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -257,7 +269,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -278,7 +291,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act
@@ -299,7 +313,8 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
             Description: "Valid description",
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             TaskTypeId: 1,
-            EmployeeId: 1
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
         );
 
         // Act

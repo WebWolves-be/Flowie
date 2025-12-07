@@ -19,6 +19,8 @@ internal class GetTasksQueryHandler(
             .Include(t => t.Employee)
             .Include(t => t.Subtasks)
             .ThenInclude(st => st.Employee)
+            .Include(t => t.Subtasks)
+            .ThenInclude(st => st.TaskType)
             .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == null);
 
         if (request.OnlyShowMyTasks)
@@ -55,8 +57,8 @@ internal class GetTasksQueryHandler(
                                 ParentTaskId: st.ParentTaskId,
                                 Title: st.Title,
                                 Description: st.Description,
-                                TypeId: st.TaskTypeId,
-                                TypeName: st.TaskType.Name,
+                                TaskTypeId: st.TaskTypeId,
+                                TaskTypeName: st.TaskType.Name,
                                 DueDate: st.DueDate,
                                 Status: st.Status,
                                 EmployeeId: st.EmployeeId,

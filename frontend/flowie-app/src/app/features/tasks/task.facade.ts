@@ -39,8 +39,10 @@ export class TaskFacade {
 
     let params = new HttpParams();
 
-    if (company) {
-      params = params.set("company", company.toString());
+    const filterToUse = company ?? (this.#companyFilter() === "ALL" ? undefined : this.#companyFilter());
+
+    if (filterToUse) {
+      params = params.set("company", filterToUse.toString());
     }
 
     this.#http

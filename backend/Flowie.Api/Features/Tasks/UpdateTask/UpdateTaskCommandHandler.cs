@@ -23,6 +23,7 @@ internal class UpdateTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
         task.DueDate = request.DueDate;
         task.TaskTypeId = request.TaskTypeId;
         task.EmployeeId = request.EmployeeId;
+        task.Status = request.Status;
 
         // Update parent task due date if this is a subtask
         if (task.ParentTaskId.HasValue)
@@ -40,9 +41,11 @@ internal class UpdateTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
         var parentTask = await dbContext.Tasks.FindAsync([parentTaskId], cancellationToken);
         if (parentTask == null) return;
 
-        var maxSubtaskDueDate = await dbContext.Tasks
+        var subtasks = await dbContext.Tasks
             .Where(t => t.ParentTaskId == parentTaskId)
-            .MaxAsync(t => (DateOnly?)t.DueDate, cancellationToken);
+            .ToListAsync(cancellationToken);
+
+        var maxSubtaskDueDate = subtasks.Max(t => (DateOnly?)t.DueDate);
 
         if (maxSubtaskDueDate.HasValue && maxSubtaskDueDate.Value > parentTask.DueDate)
         {

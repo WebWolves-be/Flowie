@@ -63,12 +63,16 @@
         [isDetailLoading]="isLoadingTasks()"
         [showOnlyMyTasks]="showOnlyMyTasks()"
         (taskFilterToggled)="onTaskFilterChanges($event)"
-        (taskToggled)="onTaskStatusChanges($event)"
         (taskClicked)="onOpenUpdateTaskDialog($event)"
         (taskEditRequested)="onOpenUpdateTaskDialog($event)"
+        (taskDeleteRequested)="onOpenDeleteTaskDialog($event)"
         (projectEditRequested)="onOpenUpdateProjectDialog()"
         (taskCreateRequested)="onOpenCreateTaskDialog()"
-        (taskStatusChanged)="onTaskStatusChanged($event)">
+        (taskStatusChanged)="onTaskStatusChanged($event)"
+        (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
+        (subtaskAddRequested)="onOpenCreateSubtaskDialog($event)"
+        (subtaskEditRequested)="onOpenUpdateSubtaskDialog($event)"
+        (subtaskDeleteRequested)="onOpenDeleteSubtaskDialog($event)">
       </app-project-detail>
     } @else {
       <div class="flex-1 flex items-center justify-center bg-gray-50">

@@ -27,30 +27,30 @@ export interface SaveProjectDialogResult {
   styleUrl: "./save-project-dialog.component.scss"
 })
 export class SaveProjectDialogComponent {
-  #ref = inject(DialogRef);
-  #data = inject<SaveProjectDialogData>(DIALOG_DATA);
+  #dialogRef = inject(DialogRef);
+  #dialogData = inject<SaveProjectDialogData>(DIALOG_DATA);
   #facade = inject(TaskFacade);
   #notificationService = inject(NotificationService);
 
   readonly Company = Company;
-  readonly isUpdate = this.#data.mode === "update";
-
-  errorMessage = signal<string | null>(null);
+  readonly isUpdate = this.#dialogData.mode === "update";
 
   form = new FormGroup({
     title: new FormControl(
-      this.#data.project?.title?.trim() ?? "",
+      this.#dialogData.project?.title?.trim() ?? "",
       { validators: [Validators.required], nonNullable: true }
     ),
     description: new FormControl(
-      this.#data.project?.description ?? "",
+      this.#dialogData.project?.description ?? "",
       { nonNullable: true }
     ),
     company: new FormControl(
-      this.#data.project?.company ?? Company.Immoseed,
+      this.#dialogData.project?.company ?? Company.Immoseed,
       { validators: [Validators.required], nonNullable: true }
     )
   });
+
+  errorMessage = signal<string | null>(null);
 
   get titleLabel(): string {
     return this.isUpdate ? "Project bewerken" : "Nieuw project aanmaken";
@@ -61,7 +61,7 @@ export class SaveProjectDialogComponent {
   }
 
   onCancel(): void {
-    this.#ref.close();
+    this.#dialogRef.close();
   }
 
   onSubmit(): void {
@@ -72,7 +72,6 @@ export class SaveProjectDialogComponent {
 
     const trimmedTitle = this.form.value.title!.trim();
 
-    // Validate that title is not empty or whitespace-only
     if (!trimmedTitle) {
       this.form.controls.title.setErrors({ required: true });
       this.form.markAllAsTouched();
@@ -83,8 +82,8 @@ export class SaveProjectDialogComponent {
 
     const trimmedDescription = this.form.value.description!.trim();
 
-    if (this.isUpdate && this.#data.project) {
-      this.#facade.updateProject(this.#data.project.projectId, {
+    if (this.isUpdate && this.#dialogData.project) {
+      this.#facade.updateProject(this.#dialogData.project.projectId, {
         title: trimmedTitle,
         description: trimmedDescription || undefined,
         company: this.form.value.company!
@@ -98,7 +97,7 @@ export class SaveProjectDialogComponent {
         .subscribe(() => {
           this.#facade.getProjects();
           this.#notificationService.showSuccess("Project succesvol bijgewerkt");
-          this.#ref.close();
+          this.#dialogRef.close();
         });
     } else {
       this.#facade.createProject({
@@ -115,7 +114,7 @@ export class SaveProjectDialogComponent {
         .subscribe(() => {
           this.#facade.getProjects();
           this.#notificationService.showSuccess("Project succesvol aangemaakt");
-          this.#ref.close();
+          this.#dialogRef.close();
         });
     }
   }

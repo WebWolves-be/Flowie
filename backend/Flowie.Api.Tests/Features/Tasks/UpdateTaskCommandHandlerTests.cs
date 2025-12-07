@@ -52,7 +52,8 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             "Updated Description",
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             _taskType.Id,
-            _employee.Id
+            _employee.Id,
+            TaskStatus.Pending
         );
 
         // Act
@@ -76,7 +77,8 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             "Updated Description",
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             1,
-            1
+            1,
+            TaskStatus.Pending
         );
 
         // Act & Assert
@@ -108,7 +110,8 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             string.Empty,
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             _taskType.Id,
-            _employee.Id
+            _employee.Id,
+            TaskStatus.Pending
         );
 
         // Act
@@ -120,4 +123,55 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
         Assert.Equal("Updated Title", updatedTask.Title);
         Assert.Equal(string.Empty, updatedTask.Description);
     }
+
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldUpdateParentDueDate_WhenSubtaskDueDateIsLater()
+    {
+        // Arrange
+        var parentTask = new Shared.Domain.Entities.Task
+        {
+            Title = "Parent Task",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)),
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id
+        };
+        DatabaseContext.Tasks.Add(parentTask);
+        await DatabaseContext.SaveChangesAsync();
+
+        var subtask = new Shared.Domain.Entities.Task
+        {
+            Title = "Subtask",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id,
+            ParentTaskId = parentTask.Id
+        };
+        DatabaseContext.Tasks.Add(subtask);
+        await DatabaseContext.SaveChangesAsync();
+
+        var newDueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(20));
+        var command = new UpdateTaskCommand(
+            subtask.Id,
+            subtask.Title,
+            subtask.Description,
+            newDueDate,
+            subtask.TaskTypeId,
+            subtask.EmployeeId,
+            TaskStatus.Pending
+        );
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedParentTask = await DatabaseContext.Tasks.FindAsync(parentTask.Id);
+        Assert.NotNull(updatedParentTask);
+        Assert.Equal(newDueDate, updatedParentTask.DueDate);
+    }
+
 }

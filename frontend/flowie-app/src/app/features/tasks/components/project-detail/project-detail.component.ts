@@ -13,6 +13,8 @@ import { TaskStatus } from "../../models/task-status.enum";
   styleUrl: "./project-detail.component.scss"
 })
 export class ProjectDetailComponent {
+  readonly Company = Company;
+
   project = input.required<Project>();
   tasks = input<Task[]>([]);
   isLoadingTasks = input<boolean>(false);
@@ -20,29 +22,21 @@ export class ProjectDetailComponent {
   showOnlyMyTasks = input<boolean>(false);
 
   taskFilterToggled = output<boolean>();
-  taskClicked = output<number>();
-  taskToggled = output<number>();
-  taskEditRequested = output<number>();
+
   projectEditRequested = output<void>();
+
   taskCreateRequested = output<void>();
+  taskEditRequested = output<number>();
+  taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  readonly Company = Company;
+  subtaskAddRequested = output<number>();
+  subtaskEditRequested = output<number>();
+  subtaskDeleteRequested = output<number>();
+  subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  onToggleFilter(val: boolean) {
+  onToggleTaskFilter(val: boolean) {
     this.taskFilterToggled.emit(val);
-  }
-
-  onTaskClicked(id: number) {
-    this.taskClicked.emit(id);
-  }
-
-  onTaskToggled(id: number) {
-    this.taskToggled.emit(id);
-  }
-
-  onTaskEdit(id: number) {
-    this.taskEditRequested.emit(id);
   }
 
   onEditProject() {
@@ -53,7 +47,31 @@ export class ProjectDetailComponent {
     this.taskCreateRequested.emit();
   }
 
+  onTaskEdit(id: number) {
+    this.taskEditRequested.emit(id);
+  }
+
+  onTaskDelete(id: number) {
+    this.taskDeleteRequested.emit(id);
+  }
+
   onTaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
     this.taskStatusChanged.emit(event);
+  }
+
+  onSubtaskAdd(taskId: number) {
+    this.subtaskAddRequested.emit(taskId);
+  }
+
+  onSubtaskEdit(subtaskId: number) {
+    this.subtaskEditRequested.emit(subtaskId);
+  }
+
+  onSubtaskDelete(subtaskId: number) {
+    this.subtaskDeleteRequested.emit(subtaskId);
+  }
+
+  onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
+    this.subtaskStatusChanged.emit(event);
   }
 }

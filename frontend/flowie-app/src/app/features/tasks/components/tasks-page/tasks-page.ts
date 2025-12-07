@@ -17,6 +17,8 @@ import {
   SaveTaskDialogData,
   SaveTaskDialogResult
 } from "../save-task-dialog/save-task-dialog.component";
+import { DeleteTaskDialogComponent } from "../delete-task-dialog/delete-task-dialog.component";
+import { DeleteTaskDialogData } from "../../models/delete-task-dialog-data.model";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
 import { EmployeeFacade } from "../../../../core/facades/employee.facade";
@@ -151,7 +153,6 @@ export class TasksPage implements OnInit {
   }
 
   onOpenUpdateTaskDialog(taskId: number) {
-    console.log(this.tasks());
     const task = this.tasks().find(t => t.taskId === taskId);
     const selectedProject = this.selectedProject();
 
@@ -166,20 +167,26 @@ export class TasksPage implements OnInit {
     });
   }
 
-  onTaskStatusChanges(taskId: number) {
+  onOpenDeleteTaskDialog(taskId: number) {
     const task = this.tasks().find(t => t.taskId === taskId);
 
     if (!task) {
       return;
     }
 
-    const newStatus = task.completedAt ? TaskStatus.Pending : TaskStatus.Done;
+    const dialogRef = this.#dialog.open<boolean>(DeleteTaskDialogComponent, {
+      data: { task } as DeleteTaskDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
 
-    this.#taskFacade.updateTaskStatus(taskId, { status: newStatus }).subscribe(() => {
-      const projectId = this.selectedProjectId();
-      if (projectId) {
-        this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
-        this.#taskFacade.getProjects();
+    dialogRef.closed.subscribe(result => {
+      if (result) {
+        const projectId = this.selectedProjectId();
+        if (projectId) {
+          this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
+          this.#taskFacade.getProjects();
+        }
       }
     });
   }
@@ -207,5 +214,145 @@ export class TasksPage implements OnInit {
         }
         this.#notificationService.showSuccess(statusMessages[event.status]);
       });
+  }
+
+  onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
+    const statusMessages = {
+      [TaskStatus.Ongoing]: "Subtaak gestart",
+      [TaskStatus.Done]: "Subtaak voltooid",
+      [TaskStatus.Pending]: "Subtaak heropend"
+    };
+
+    this.#taskFacade
+      .updateTaskStatus(event.taskId, { status: event.status })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.#notificationService.showError(extractErrorMessage(error));
+          return EMPTY;
+        })
+      )
+      .subscribe(() => {
+        const projectId = this.selectedProjectId();
+        if (projectId) {
+          this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
+          this.#taskFacade.getProjects();
+        }
+        this.#notificationService.showSuccess(statusMessages[event.status]);
+      });
+  }
+
+  onOpenCreateSubtaskDialog(parentTaskId: number) {
+    const selectedProject = this.selectedProject();
+
+    if (!selectedProject) {
+      return;
+    }
+
+    const parentTask = this.#taskFacade.tasks().find(t => t.taskId === parentTaskId);
+
+    this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+      data: {
+        mode: "create-subtask",
+        projectId: selectedProject.projectId,
+        parentTaskId,
+        parentTaskTitle: parentTask?.title
+      } as SaveTaskDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+  }
+
+  onOpenUpdateSubtaskDialog(subtaskId: number) {
+    const selectedProject = this.selectedProject();
+
+    if (!selectedProject) {
+      return;
+    }
+
+    let subtask = null;
+    for (const task of this.tasks()) {
+      if (task.subtasks) {
+        subtask = task.subtasks.find(s => s.taskId === subtaskId);
+        if (subtask) break;
+      }
+    }
+
+    if (!subtask) {
+      return;
+    }
+
+    const taskData = {
+      taskId: subtask.taskId,
+      projectId: selectedProject.projectId,
+      title: subtask.title,
+      description: subtask.description,
+      taskTypeId: subtask.taskTypeId,
+      taskTypeName: subtask.taskTypeName,
+      dueDate: subtask.dueDate,
+      status: subtask.status,
+      employeeId: subtask.employeeId,
+      employeeName: subtask.employeeName,
+      createdAt: subtask.createdAt,
+      updatedAt: subtask.updatedAt,
+      completedAt: subtask.completedAt,
+      subtaskCount: 0,
+      completedSubtaskCount: 0,
+      subtasks: []
+    };
+
+    this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
+      data: { mode: "update-subtask", projectId: selectedProject.projectId, task: taskData } as SaveTaskDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+  }
+
+  onOpenDeleteSubtaskDialog(subtaskId: number) {
+    let subtask = null;
+    for (const task of this.tasks()) {
+      if (task.subtasks) {
+        subtask = task.subtasks.find(s => s.taskId === subtaskId);
+        if (subtask) break;
+      }
+    }
+
+    if (!subtask) {
+      return;
+    }
+
+    const taskData = {
+      taskId: subtask.taskId,
+      projectId: this.selectedProject()!.projectId,
+      title: subtask.title,
+      description: subtask.description,
+      taskTypeId: subtask.taskTypeId,
+      taskTypeName: subtask.taskTypeName,
+      dueDate: subtask.dueDate,
+      status: subtask.status,
+      employeeId: subtask.employeeId,
+      employeeName: subtask.employeeName,
+      createdAt: subtask.createdAt,
+      updatedAt: subtask.updatedAt,
+      completedAt: subtask.completedAt,
+      subtaskCount: 0,
+      completedSubtaskCount: 0,
+      subtasks: []
+    };
+
+    const dialogRef = this.#dialog.open<boolean>(DeleteTaskDialogComponent, {
+      data: { task: taskData, isSubtask: true } as DeleteTaskDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+
+    dialogRef.closed.subscribe(result => {
+      if (result) {
+        const projectId = this.selectedProjectId();
+        if (projectId) {
+          this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
+          this.#taskFacade.getProjects();
+        }
+      }
+    });
   }
 }

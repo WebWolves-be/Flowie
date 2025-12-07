@@ -11,9 +11,11 @@ import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 import { catchError, EMPTY } from "rxjs";
 
 export interface SaveTaskDialogData {
-  mode: "create" | "update";
+  mode: "create" | "update" | "create-subtask" | "update-subtask";
   projectId: number;
   task?: Task;
+  parentTaskId?: number;
+  parentTaskTitle?: string;
 }
 
 export interface SaveTaskDialogResult {
@@ -52,13 +54,13 @@ export class SaveTaskDialogComponent implements OnInit {
     employeeId: FormControl<number | null>;
   }>;
 
-  readonly isUpdate = this.#dialogData.mode === "update";
+  readonly isUpdate = this.#dialogData.mode === "update" || this.#dialogData.mode === "update-subtask";
+  readonly isSubtask = this.#dialogData.mode === "create-subtask" || this.#dialogData.mode === "update-subtask";
+  readonly isUpdateSubtask = this.#dialogData.mode === "update-subtask";
 
   ngOnInit(): void {
     const task = this.#dialogData.task;
 
-    console.log(task);
-    
     this.taskForm = new FormGroup({
       title: new FormControl(task?.title ?? "", { nonNullable: true, validators: [Validators.required] }),
       description: new FormControl(task?.description ?? "", { nonNullable: true }),
@@ -70,7 +72,6 @@ export class SaveTaskDialogComponent implements OnInit {
       employeeId: new FormControl<number | null>(task?.employeeId ?? null, { validators: [Validators.required] })
     });
 
-    // Load data if not already loaded
     if (this.#taskTypes().length === 0) {
       this.#taskTypeFacade.getTaskTypes();
     }
@@ -79,7 +80,6 @@ export class SaveTaskDialogComponent implements OnInit {
       this.#employeeFacade.getEmployees();
     }
 
-    // Update validators based on subtask status
     if (this.isUpdate && this.hasSubtasks()) {
       this.#updateValidators();
     }
@@ -94,7 +94,15 @@ export class SaveTaskDialogComponent implements OnInit {
     return (task.subtasks && task.subtasks.length > 0) || (task.subtaskCount && task.subtaskCount > 0);
   });
 
-  titleLabel = computed(() => (this.isUpdate ? "Taak bewerken" : "Nieuwe taak aanmaken"));
+  titleLabel = computed(() => {
+    if (this.isUpdateSubtask) return "Subtaak bewerken";
+    if (this.isUpdate) return "Taak bewerken";
+    if (this.isSubtask) return "Nieuwe subtaak aanmaken";
+    return "Nieuwe taak aanmaken";
+  });
+
+  parentTaskTitle = computed(() => this.#dialogData.parentTaskTitle);
+
   actionLabel = computed(() => (this.isUpdate ? "Bewerken" : "Aanmaken"));
 
   get title() {
@@ -133,8 +141,11 @@ export class SaveTaskDialogComponent implements OnInit {
       description: formValue.description || undefined,
       taskTypeId: formValue.taskTypeId!,
       dueDate: formValue.dueDate!,
-      employeeId: formValue.employeeId!
+      employeeId: formValue.employeeId!,
+      parentTaskId: this.isSubtask ? this.#dialogData.parentTaskId : undefined
     };
+
+    const successMessage = this.isSubtask ? "Subtaak succesvol aangemaakt" : "Taak succesvol aangemaakt";
 
     this.#taskFacade.createTask(request)
       .pipe(
@@ -146,7 +157,7 @@ export class SaveTaskDialogComponent implements OnInit {
       .subscribe(() => {
         this.#taskFacade.getTasks(this.#dialogData.projectId);
         this.#taskFacade.getProjects();
-        this.#notificationService.showSuccess("Taak succesvol aangemaakt");
+        this.#notificationService.showSuccess(successMessage);
         this.#dialogRef.close();
       });
   }
@@ -164,6 +175,8 @@ export class SaveTaskDialogComponent implements OnInit {
       status: task.status
     };
 
+    const successMessage = this.isUpdateSubtask ? "Subtaak succesvol bewerkt" : "Taak succesvol bewerkt";
+
     this.#taskFacade.updateTask(task.taskId, request)
       .pipe(
         catchError((error: HttpErrorResponse) => {
@@ -174,7 +187,7 @@ export class SaveTaskDialogComponent implements OnInit {
       .subscribe(() => {
         this.#taskFacade.getTasks(this.#dialogData.projectId);
         this.#taskFacade.getProjects();
-        this.#notificationService.showSuccess("Taak succesvol bewerkt");
+        this.#notificationService.showSuccess(successMessage);
         this.#dialogRef.close();
       });
   }
@@ -186,12 +199,10 @@ export class SaveTaskDialogComponent implements OnInit {
     const employeeIdControl = this.taskForm.get("employeeId");
 
     if (this.hasSubtasks()) {
-      // Remove required validators for tasks with subtasks
       taskTypeControl?.clearValidators();
       dueDateControl?.clearValidators();
       employeeIdControl?.clearValidators();
     } else {
-      // Add required validators for tasks without subtasks
       taskTypeControl?.setValidators([Validators.required]);
       dueDateControl?.setValidators([Validators.required]);
       employeeIdControl?.setValidators([Validators.required]);

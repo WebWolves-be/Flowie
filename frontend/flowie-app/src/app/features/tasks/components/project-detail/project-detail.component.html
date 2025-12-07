@@ -47,22 +47,26 @@
     <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex-shrink-0">
       <div class="flex flex-wrap gap-2">
         <button
-          (click)="onToggleFilter(false)"
+          (click)="onToggleTaskFilter(false)"
           [class.bg-blue-600]="!showOnlyMyTasks()"
           [class.text-white]="!showOnlyMyTasks()"
+          [class.hover:bg-blue-700]="!showOnlyMyTasks()"
           [class.bg-gray-200]="showOnlyMyTasks()"
           [class.text-gray-700]="showOnlyMyTasks()"
-          class="task-filter px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
+          [class.hover:bg-gray-300]="showOnlyMyTasks()"
+          class="px-3 py-1 rounded-full text-sm transition-colors">
           Alle Taken
         </button>
         <button
-          (click)="onToggleFilter(true)"
+          (click)="onToggleTaskFilter(true)"
           [class.bg-blue-600]="showOnlyMyTasks()"
           [class.text-white]="showOnlyMyTasks()"
+          [class.hover:bg-blue-700]="showOnlyMyTasks()"
           [class.bg-gray-200]="!showOnlyMyTasks()"
           [class.text-gray-700]="!showOnlyMyTasks()"
-          class="px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors">
-          <i class="fas fa-user mr-1"></i>Alleen Mijn Taken
+          [class.hover:bg-gray-300]="!showOnlyMyTasks()"
+          class="px-3 py-1 rounded-full text-sm transition-colors">
+          Alleen Mijn Taken
         </button>
       </div>
     </div>
@@ -93,14 +97,6 @@
           <p class="text-sm text-gray-500 mb-6">
             Er zijn nog geen taken voor dit project. Klik op "Taak Toevoegen" om een nieuwe taak aan te maken.
           </p>
-          <div class="flex items-center justify-center space-x-2 text-gray-400">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span class="text-xs font-medium">Voeg je eerste taak toe</span>
-          </div>
         </div>
       </div>
     } @else {
@@ -109,10 +105,13 @@
           <app-task-item
             [task]="task"
             [isLast]="$last"
-            (taskToggled)="onTaskToggled(task.taskId)"
-            (taskClicked)="onTaskClicked(task.taskId)"
             (taskEditRequested)="onTaskEdit(task.taskId)"
-            (taskStatusChanged)="onTaskStatusChanged($event)">
+            (taskDeleteRequested)="onTaskDelete(task.taskId)"
+            (taskStatusChanged)="onTaskStatusChanged($event)"
+            (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
+            (subtaskAddRequested)="onSubtaskAdd(task.taskId)"
+            (subtaskEditRequested)="onSubtaskEdit($event)"
+            (subtaskDeleteRequested)="onSubtaskDelete($event)">
           </app-task-item>
         }
       </div>

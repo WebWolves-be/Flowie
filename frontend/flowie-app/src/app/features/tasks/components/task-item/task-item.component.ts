@@ -15,14 +15,17 @@ export class TaskItemComponent {
   task = input.required<Task>();
   isLast = input<boolean>(false);
 
-  taskToggled = output<number>();
-  taskClicked = output<number>();
   taskEditRequested = output<number>();
+  taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  showMenu = signal<boolean>(false);
+  subtaskAddRequested = output<number>();
+  subtaskEditRequested = output<number>();
+  subtaskDeleteRequested = output<number>();
+  subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
 
-  readonly TaskStatus = TaskStatus;
+  showMenu = signal<boolean>(false);
+  showSubtaskMenu = signal<number | null>(null);
 
   isPending = computed(() => this.task().status === TaskStatus.Pending);
   isOngoing = computed(() => this.task().status === TaskStatus.Ongoing);
@@ -60,7 +63,15 @@ export class TaskItemComponent {
   });
 
   isSubtaskDone(subtask: Subtask): boolean {
-    return subtask.completedAt != null;
+    return subtask.status === TaskStatus.Done;
+  }
+
+  isSubtaskPending(subtask: Subtask): boolean {
+    return subtask.status === TaskStatus.Pending;
+  }
+
+  isSubtaskOngoing(subtask: Subtask): boolean {
+    return subtask.status === TaskStatus.Ongoing;
   }
 
   isSubtaskOverdue(subtask: Subtask): boolean {
@@ -68,25 +79,24 @@ export class TaskItemComponent {
     return new Date(subtask.dueDate) < new Date();
   }
 
-  toggleMenu(event: Event) {
+  toggleTaskMenu(event: Event) {
     event.stopPropagation();
     this.showMenu.update(value => !value);
   }
 
-  onToggleTask() {
-    this.taskToggled.emit(this.task().taskId);
+  onEditTask() {
+    this.showMenu.set(false);
+    this.taskEditRequested.emit(this.task().taskId);
   }
 
-  onClickTask() {
-    this.taskClicked.emit(this.task().taskId);
+  onDeleteTask() {
+    this.showMenu.set(false);
+    this.taskDeleteRequested.emit(this.task().taskId);
   }
 
-  onMarkComplete() {
-    this.taskToggled.emit(this.task().taskId);
-  }
-
-  onToggleSubtask(index: number) {
-    this.taskToggled.emit(this.task().taskId);
+  onAddSubtask() {
+    this.showMenu.set(false);
+    this.subtaskAddRequested.emit(this.task().taskId);
   }
 
   onStartTask() {
@@ -101,17 +111,30 @@ export class TaskItemComponent {
     this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Pending });
   }
 
-  onEdit() {
-    this.showMenu.set(false);
-    this.taskEditRequested.emit(this.task().taskId);
+  onStartSubtask(subtask: Subtask) {
+    this.subtaskStatusChanged.emit({ taskId: subtask.taskId, status: TaskStatus.Ongoing });
   }
 
-  onDelete() {
-    this.showMenu.set(false);
+  onCompleteSubtask(subtask: Subtask) {
+    this.subtaskStatusChanged.emit({ taskId: subtask.taskId, status: TaskStatus.Done });
   }
 
-  onAddSubtask() {
-    this.showMenu.set(false);
-    this.taskToggled.emit(this.task().taskId);
+  onReopenSubtask(subtask: Subtask) {
+    this.subtaskStatusChanged.emit({ taskId: subtask.taskId, status: TaskStatus.Pending });
+  }
+
+  toggleSubtaskMenu(event: Event, subtaskId: number) {
+    event.stopPropagation();
+    this.showSubtaskMenu.update(current => current === subtaskId ? null : subtaskId);
+  }
+
+  onEditSubtask(subtask: Subtask) {
+    this.showSubtaskMenu.set(null);
+    this.subtaskEditRequested.emit(subtask.taskId);
+  }
+
+  onDeleteSubtask(subtask: Subtask) {
+    this.showSubtaskMenu.set(null);
+    this.subtaskDeleteRequested.emit(subtask.taskId);
   }
 }
