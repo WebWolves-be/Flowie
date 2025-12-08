@@ -44,7 +44,7 @@ internal class GetTasksQueryHandler(
                         DueDate: t.DueDate,
                         Status: t.Status,
                         EmployeeId: t.EmployeeId,
-                        EmployeeName: t.Employee?.Name,
+                        EmployeeName: t.Employee != null ? $"{t.Employee.FirstName} {t.Employee.LastName}" : null,
                         CreatedAt: t.CreatedAt,
                         UpdatedAt: t.UpdatedAt,
                         CompletedAt: t.CompletedAt,
@@ -62,7 +62,7 @@ internal class GetTasksQueryHandler(
                                 DueDate: st.DueDate,
                                 Status: st.Status,
                                 EmployeeId: st.EmployeeId,
-                                EmployeeName: st.Employee?.Name,
+                                EmployeeName: st.Employee != null ? $"{st.Employee.FirstName} {st.Employee.LastName}" : null,
                                 CreatedAt: st.CreatedAt,
                                 UpdatedAt: st.UpdatedAt,
                                 CompletedAt: st.CompletedAt

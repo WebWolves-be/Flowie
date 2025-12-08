@@ -14,8 +14,9 @@ internal class GetEmployeesQueryHandler(IDatabaseContext databaseContext)
             .Employees
             .AsNoTracking()
             .Where(e => e.Active)
-            .OrderBy(e => e.Name)
-            .Select(e => new EmployeeDto(e.Id, e.Name))
+            .OrderBy(e => e.LastName)
+            .ThenBy(e => e.FirstName)
+            .Select(e => new EmployeeDto(e.Id, e.FirstName, e.LastName))
             .ToListAsync(cancellationToken);
 
         return new GetEmployeesQueryResult(employees);

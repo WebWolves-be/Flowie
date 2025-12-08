@@ -8,7 +8,7 @@ internal static class EmployeeEndpoints
     {
         var employees = app
             .MapGroup("/api/employees")
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .WithOpenApi()
             .WithTags("Employees");
 

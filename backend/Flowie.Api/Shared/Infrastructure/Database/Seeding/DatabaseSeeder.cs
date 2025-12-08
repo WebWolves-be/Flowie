@@ -18,7 +18,8 @@ public static class DatabaseSeeder
 
         await db.Database.MigrateAsync(ct);
 
-        const string name = "Nanou Ponette";
+        const string firstName = "Nanou";
+        const string lastName = "Ponette";
         const string email = "nanou.ponette@webwolves.be";
         const string password = "Development123!";
 
@@ -52,7 +53,8 @@ public static class DatabaseSeeder
         {
             var employee = new Employee
             {
-                Name = name,
+                FirstName = firstName,
+                LastName = lastName,
                 Email = email,
                 UserId = user.Id,
                 User = user,

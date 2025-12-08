@@ -22,29 +22,33 @@ public class JwtService : IJwtService
         _logger = logger;
     }
     
-    public string GenerateAccessToken(User user)
+    public string GenerateAccessToken(User user, string employeeId)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey))
+        {
+            KeyId = "FlowieSigningKey"
+        };
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        
+
         var now = _timeProvider.GetUtcNow();
         var expires = now.AddMinutes(_jwtSettings.ExpirationInMinutes);
         var jti = Guid.NewGuid().ToString();
-        
+
         var claims = new List<Claim>
         {
             // Standard JWT claims (RFC 7519) - timestamps handled by JwtSecurityToken constructor
             new(JwtRegisteredClaimNames.Sub, user.Id),                    // Subject
             new(JwtRegisteredClaimNames.Jti, jti),                        // JWT ID (prevents replay)
-            
+
             // User identity claims
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            
+
             // Application-specific claims
             new("user_id", user.Id),
+            new("employee_id", employeeId),
             new("token_type", "access_token"),
             new("scope", "api.access"),
             new("version", user.TokenVersion.ToString(CultureInfo.InvariantCulture)) // Token version for invalidation
@@ -56,8 +60,8 @@ public class JwtService : IJwtService
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            notBefore: now.DateTime,
-            expires: expires.DateTime,
+            notBefore: now.UtcDateTime,
+            expires: expires.UtcDateTime,
             signingCredentials: credentials
         );
         

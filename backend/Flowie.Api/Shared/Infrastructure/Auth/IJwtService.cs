@@ -5,14 +5,14 @@ namespace Flowie.Api.Shared.Infrastructure.Auth;
 
 public interface IJwtService
 {
-    string GenerateAccessToken(User user);
-    
+    string GenerateAccessToken(User user, string employeeId);
+
     string GenerateRefreshToken();
-    
+
     ClaimsPrincipal? ValidateToken(string token);
-    
+
     DateTimeOffset GetTokenExpiration(string token);
-    
+
     string? GetTokenId(string token);
 }
 

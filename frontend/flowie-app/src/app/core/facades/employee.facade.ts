@@ -4,7 +4,8 @@ import { environment } from "../../../environments/environment";
 
 export interface EmployeeDto {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   email?: string;
 }
 

@@ -22,7 +22,11 @@ public class DeleteTaskCommandHandlerTests : BaseTestClass
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
-        _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
+        _employee = new Employee
+        {
+            FirstName = "John",
+            LastName = "Doe", Email = "john@test.com", UserId = "test-user-id"
+        };
         DatabaseContext.Projects.Add(_project);
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);
@@ -57,7 +61,8 @@ public class DeleteTaskCommandHandlerTests : BaseTestClass
         Assert.Null(deletedTask); // Global filter prevents finding deleted tasks
 
         // Verify it's actually soft deleted by using IgnoreQueryFilters
-        var softDeletedTask = await DatabaseContext.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == task.Id);
+        var softDeletedTask =
+            await DatabaseContext.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == task.Id);
         Assert.NotNull(softDeletedTask);
         Assert.True(softDeletedTask.IsDeleted);
     }
@@ -122,8 +127,7 @@ public class DeleteTaskCommandHandlerTests : BaseTestClass
         var command = new DeleteTaskCommand(999);
 
         // Act & Assert
-        await Assert.ThrowsAsync<EntityNotFoundException>(
-            async () => await _sut.Handle(command, CancellationToken.None)
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () => await _sut.Handle(command, CancellationToken.None)
         );
     }
 

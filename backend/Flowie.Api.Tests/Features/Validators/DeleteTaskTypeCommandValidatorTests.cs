@@ -48,7 +48,8 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         var employee = new Employee
         {
-            Name = "John Doe",
+            FirstName = "John",
+            LastName = "Doe",
             Email = "john@example.com",
             UserId = "user-123"
         };
@@ -107,7 +108,8 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         var employee = new Employee
         {
-            Name = "John Doe",
+            FirstName = "John",
+            LastName = "Doe",
             Email = "john@example.com",
             UserId = "user-123"
         };
@@ -161,7 +163,8 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         var employee = new Employee
         {
-            Name = "John Doe",
+            FirstName = "John",
+            LastName = "Doe",
             Email = "john@example.com",
             UserId = "user-123"
         };

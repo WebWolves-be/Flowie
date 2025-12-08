@@ -19,9 +19,9 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Arrange
         var employees = new[]
         {
-            new Employee { Name = "John Doe", Email = "john@example.com", UserId = "user1", Active = true },
-            new Employee { Name = "Jane Smith", Email = "jane@example.com", UserId = "user2", Active = true },
-            new Employee { Name = "Bob Wilson", Email = "bob@example.com", UserId = "user3", Active = true }
+            new Employee { FirstName = "John", LastName = "Doe", Email = "john@example.com", UserId = "user1", Active = true },
+            new Employee { FirstName = "Jane", LastName = "Smith", Email = "jane@example.com", UserId = "user2", Active = true },
+            new Employee { FirstName = "Bob", LastName = "Wilson", Email = "bob@example.com", UserId = "user3", Active = true }
         };
         DatabaseContext.Employees.AddRange(employees);
         await DatabaseContext.SaveChangesAsync();
@@ -56,8 +56,8 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Arrange
         var employees = new[]
         {
-            new Employee { Name = "Active Employee", Email = "active@example.com", UserId = "user1", Active = true },
-            new Employee { Name = "Inactive Employee", Email = "inactive@example.com", UserId = "user2", Active = false }
+            new Employee { FirstName = "Active", LastName = "Employee", Email = "active@example.com", UserId = "user1", Active = true },
+            new Employee { FirstName = "Inactive", LastName = "Employee", Email = "inactive@example.com", UserId = "user2", Active = false }
         };
         DatabaseContext.Employees.AddRange(employees);
         await DatabaseContext.SaveChangesAsync();
@@ -70,7 +70,8 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Assert
         Assert.NotNull(result);
         Assert.Single(result.Employees);
-        Assert.Equal("Active Employee", result.Employees.First().Name);
+        Assert.Equal("Active", result.Employees.First().FirstName);
+        Assert.Equal("Employee", result.Employees.First().LastName);
     }
 
     [Fact]
@@ -79,9 +80,9 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Arrange
         var employees = new[]
         {
-            new Employee { Name = "Zebra Last", Email = "zebra@example.com", UserId = "user1", Active = true },
-            new Employee { Name = "Alpha First", Email = "alpha@example.com", UserId = "user2", Active = true },
-            new Employee { Name = "Mike Middle", Email = "mike@example.com", UserId = "user3", Active = true }
+            new Employee { FirstName = "Zebra", LastName = "Last", Email = "zebra@example.com", UserId = "user1", Active = true },
+            new Employee { FirstName = "Alpha", LastName = "First", Email = "alpha@example.com", UserId = "user2", Active = true },
+            new Employee { FirstName = "Mike", LastName = "Middle", Email = "mike@example.com", UserId = "user3", Active = true }
         };
         DatabaseContext.Employees.AddRange(employees);
         await DatabaseContext.SaveChangesAsync();
@@ -94,8 +95,10 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Assert
         Assert.NotNull(result);
         Assert.Equal(3, result.Employees.Count);
-        Assert.Equal("Alpha First", result.Employees.First().Name);
-        Assert.Equal("Zebra Last", result.Employees.Last().Name);
+        Assert.Equal("Alpha", result.Employees.First().FirstName);
+        Assert.Equal("First", result.Employees.First().LastName);
+        Assert.Equal("Mike", result.Employees.Last().FirstName);
+        Assert.Equal("Middle", result.Employees.Last().LastName);
     }
 
     [Fact]
@@ -104,7 +107,8 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         // Arrange
         var employee = new Employee
         {
-            Name = "Test Employee",
+            FirstName = "Test",
+            LastName = "Employee",
             Email = "test@example.com",
             UserId = "user1",
             Active = true
@@ -121,6 +125,7 @@ public class GetEmployeesQueryHandlerTests : BaseTestClass
         Assert.NotNull(result);
         var employeeDto = result.Employees.Single();
         Assert.Equal(employee.Id, employeeDto.Id);
-        Assert.Equal("Test Employee", employeeDto.Name);
+        Assert.Equal("Test", employeeDto.FirstName);
+        Assert.Equal("Employee", employeeDto.LastName);
     }
 }

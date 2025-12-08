@@ -21,7 +21,11 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         // Setup common test data
         _project = new Project { Title = "Test Project", Company = Company.Immoseed };
         _taskType = new TaskType { Name = "Bug", Active = true };
-        _employee = new Employee { Name = "John Doe", Email = "john@test.com", UserId = "test-user-id" };
+        _employee = new Employee
+        {
+            FirstName = "John",
+            LastName = "Doe", Email = "john@test.com", UserId = "test-user-id"
+        };
         DatabaseContext.Projects.Add(_project);
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);

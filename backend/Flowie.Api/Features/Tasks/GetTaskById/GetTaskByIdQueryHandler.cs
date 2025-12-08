@@ -35,7 +35,7 @@ internal class GetTaskByIdQueryHandler(DatabaseContext dbContext)
             task.DueDate,
             task.Status,
             task.EmployeeId,
-            task.Employee?.Name,
+            task.Employee != null ? $"{task.Employee.FirstName} {task.Employee.LastName}" : null,
             task.CreatedAt,
             task.UpdatedAt,
             task.CompletedAt,

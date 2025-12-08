@@ -4,4 +4,5 @@ internal record GetEmployeesQueryResult(IReadOnlyCollection<EmployeeDto> Employe
 
 internal record EmployeeDto(
     int Id,
-    string Name);
+    string FirstName,
+    string LastName);

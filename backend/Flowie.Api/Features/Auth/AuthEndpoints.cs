@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace Flowie.Api.Features.Auth;
 
@@ -51,14 +52,6 @@ public static class AuthEndpoints
             .Produces<ProblemDetails>(429)
             .RequireAuthorization()
             .RequireRateLimiting("AuthPolicy");
-
-        auth.MapGet("/me", GetCurrentUserAsync)
-            .WithName("GetCurrentUser")
-            .WithSummary("Get current authenticated user information")
-            .Produces<UserInfoResponse>(200)
-            .Produces<ProblemDetails>(401)
-            .Produces<ProblemDetails>(429)
-            .RequireAuthorization();
     }
 
     private static async Task<IResult> RegisterAsync(
@@ -70,8 +63,8 @@ public static class AuthEndpoints
         [FromServices] ILoggerFactory loggerFactory,
         HttpContext httpContext)
     {
-        // Check if user already exists
         var existingUser = await userManager.FindByEmailAsync(request.Email);
+        
         if (existingUser != null)
         {
             return Results.Problem(
@@ -80,32 +73,33 @@ public static class AuthEndpoints
                 statusCode: 409);
         }
 
-        // Create new user
         var user = new User
         {
             UserName = request.Email,
             Email = request.Email,
-            EmailConfirmed = true, // Auto-confirm for now
+            EmailConfirmed = true,
             CreatedAt = timeProvider.GetUtcNow()
         };
 
         var result = await userManager.CreateAsync(user, request.Password);
+        
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            
             return Results.Problem(
                 title: "Registration failed",
                 detail: errors,
                 statusCode: 400);
         }
 
-        // Create employee record
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<Shared.Infrastructure.Database.Context.DatabaseContext>();
         
         var employee = new Employee
         {
-            Name = request.Name,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             Email = request.Email,
             UserId = user.Id,
             CreatedAt = timeProvider.GetUtcNow()
@@ -114,12 +108,10 @@ public static class AuthEndpoints
         dbContext.Employees.Add(employee);
         await dbContext.SaveChangesAsync();
 
-        // Generate tokens for immediate login
-        var accessToken = jwtService.GenerateAccessToken(user);
+        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture));
         var refreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
 
-        // Store refresh token in database
         var refreshTokenEntity = new RefreshToken
         {
             Token = refreshToken,
@@ -158,14 +150,24 @@ public static class AuthEndpoints
                 statusCode: 401);
         }
 
-        var accessToken = jwtService.GenerateAccessToken(user);
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<Shared.Infrastructure.Database.Context.DatabaseContext>();
+
+        var employee = await dbContext.Employees
+            .FirstOrDefaultAsync(e => e.UserId == user.Id);
+
+        if (employee == null)
+        {
+            return Results.Problem(
+                title: "Authentication failed",
+                detail: "Employee record not found for this user",
+                statusCode: 401);
+        }
+
+        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture));
         var refreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
 
-        // Store refresh token in database
-        using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<Shared.Infrastructure.Database.Context.DatabaseContext>();
-        
         var refreshTokenEntity = new RefreshToken
         {
             Token = refreshToken,
@@ -212,7 +214,6 @@ public static class AuthEndpoints
 
         var user = refreshTokenEntity.User;
         
-        // Check if user account is still active
         var currentUser = await userManager.FindByIdAsync(user.Id);
         if (currentUser == null || currentUser.LockoutEnd > timeProvider.GetUtcNow())
         {
@@ -222,12 +223,21 @@ public static class AuthEndpoints
                 statusCode: 401);
         }
 
-        // Generate new tokens with current user data (including current TokenVersion)
-        var accessToken = jwtService.GenerateAccessToken(currentUser);
+        var employee = await dbContext.Employees
+            .FirstOrDefaultAsync(e => e.UserId == currentUser.Id);
+
+        if (employee == null)
+        {
+            return Results.Problem(
+                title: "Authentication failed",
+                detail: "Employee record not found for this user",
+                statusCode: 401);
+        }
+
+        var accessToken = jwtService.GenerateAccessToken(currentUser, employee.Id.ToString(CultureInfo.InvariantCulture));
         var newRefreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
-
-        // Revoke old refresh token and create new one (refresh token rotation)
+        
         refreshTokenEntity.IsRevoked = true;
         
         var newRefreshTokenEntity = new RefreshToken
@@ -257,7 +267,10 @@ public static class AuthEndpoints
         [FromServices] ILoggerFactory loggerFactory,
         HttpContext httpContext)
     {
-        var userId = httpContext.User.FindFirst("sub")?.Value;
+        var userId = httpContext.User.FindFirst("sub")?.Value
+            ?? httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? httpContext.User.FindFirst("user_id")?.Value;
+
         if (string.IsNullOrEmpty(userId))
         {
             return Results.Problem(
@@ -269,7 +282,6 @@ public static class AuthEndpoints
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<Shared.Infrastructure.Database.Context.DatabaseContext>();
 
-        // Revoke refresh token
         var refreshTokenEntity = await dbContext.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
 
@@ -279,8 +291,8 @@ public static class AuthEndpoints
             await dbContext.SaveChangesAsync();
         }
         
-        // Increment token version - this invalidates ALL user's access tokens
         var user = await userManager.FindByIdAsync(userId);
+        
         if (user != null)
         {
             user.TokenVersion++;
@@ -300,58 +312,12 @@ public static class AuthEndpoints
 
         return Results.Ok(new { message = "Logged out successfully" });
     }
-
-    private static async Task<IResult> GetCurrentUserAsync(
-        [FromServices] UserManager<User> userManager,
-        [FromServices] ILoggerFactory loggerFactory,
-        HttpContext httpContext)
-    {
-        var logger = loggerFactory.CreateLogger("Auth");
-        
-        // Log authentication status
-        var isAuthenticated = httpContext.User.Identity?.IsAuthenticated ?? false;
-        logger.LogDebug("GetCurrentUser - IsAuthenticated: {IsAuthenticated}, HasClaims: {HasClaims}", 
-            isAuthenticated, httpContext.User.Claims.Any());
-        
-        // Log all claims for debugging
-        foreach (var claim in httpContext.User.Claims)
-        {
-            logger.LogDebug("Claim: {Type} = {Value}", claim.Type, claim.Value);
-        }
-        
-        var userId = httpContext.User.FindFirst("sub")?.Value;
-        if (string.IsNullOrEmpty(userId))
-        {
-            logger.LogWarning("GetCurrentUser failed: No 'sub' claim found in token");
-            return Results.Problem(
-                title: "Unauthorized",
-                detail: "User is not authenticated",
-                statusCode: 401);
-        }
-
-        logger.LogDebug("GetCurrentUser - Found userId: {UserId}", userId);
-
-        var user = await userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            logger.LogWarning("GetCurrentUser failed: User {UserId} not found in database", userId);
-            return Results.Problem(
-                title: "User not found",
-                detail: "The authenticated user could not be found",
-                statusCode: 401);
-        }
-
-        logger.LogInformation("GetCurrentUser successful for user {UserId}", userId);
-        return Results.Ok(new UserInfoResponse(
-            user.Id,
-            user.Email ?? string.Empty,
-            user.UserName ?? string.Empty));
-    }
 }
 
 
 public record RegisterRequest(
-    [Required] string Name,
+    [Required] string FirstName,
+    [Required] string LastName,
     [Required][EmailAddress] string Email,
     [Required][StringLength(100, MinimumLength = 6)] string Password);
 
@@ -364,8 +330,3 @@ public record RefreshTokenRequest(
 
 public record LogoutRequest(
     [Required] string RefreshToken);
-
-public record UserInfoResponse(
-    string Id,
-    string Email,
-    string UserName);
