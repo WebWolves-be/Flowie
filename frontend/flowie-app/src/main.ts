@@ -29,6 +29,14 @@ const routes: Routes = [
       ),
   },
   {
+    path: "register",
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import("./app/features/auth/components/register-page/register-page.component").then(
+        (m) => m.RegisterPageComponent
+      ),
+  },
+  {
     path: "dashboard",
     canActivate: [authGuard],
     loadComponent: () =>

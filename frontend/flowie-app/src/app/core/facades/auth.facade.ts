@@ -1,9 +1,9 @@
 import { inject, Injectable, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { catchError, Observable, tap, throwError } from "rxjs";
+import { catchError, map, Observable, tap, throwError } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { AuthUser, LoginRequest, LogoutRequest, RefreshTokenRequest, TokenResponse } from "../models/auth.model";
+import { AuthUser, LoginRequest, RegisterRequest, LogoutRequest, RefreshTokenRequest, TokenResponse } from "../models/auth.model";
 
 @Injectable({
   providedIn: "root"
@@ -30,10 +30,24 @@ export class AuthFacade {
         this.#storeTokens(response);
         this.#updateAuthState(response);
       }),
+      map(() => void 0),
       catchError((error) => {
         return throwError(() => error);
       })
-    ) as Observable<void>;
+    );
+  }
+
+  register(request: RegisterRequest): Observable<void> {
+    return this.#http.post<TokenResponse>(`${this.#apiUrl}/register`, request).pipe(
+      tap((response) => {
+        this.#storeTokens(response);
+        this.#updateAuthState(response);
+      }),
+      map(() => void 0),
+      catchError((error) => {
+        return throwError(() => error);
+      })
+    );
   }
 
   logout(): Observable<void> {
@@ -59,7 +73,7 @@ export class AuthFacade {
     });
   }
 
-  refreshToken(): Observable<TokenResponse> {
+  refreshToken(): Observable<void> {
     const refreshToken = sessionStorage.getItem("refresh_token");
 
     if (!refreshToken) {
@@ -74,11 +88,12 @@ export class AuthFacade {
         this.#storeTokens(response);
         this.#scheduleTokenRefresh(new Date(response.expiresAt));
       }),
+      map(() => void 0),
       catchError((error) => {
         this.#clearAuthState();
         return throwError(() => error);
       })
-    ) as Observable<void>;
+    );
   }
 
   getAccessToken(): string | null {

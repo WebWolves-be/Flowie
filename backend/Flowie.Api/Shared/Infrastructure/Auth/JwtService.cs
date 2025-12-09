@@ -22,7 +22,7 @@ public class JwtService : IJwtService
         _logger = logger;
     }
     
-    public string GenerateAccessToken(User user, string employeeId)
+    public string GenerateAccessToken(User user, string employeeId, string employeeName)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey))
         {
@@ -43,12 +43,13 @@ public class JwtService : IJwtService
             // User identity claims
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Name, employeeName),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
 
             // Application-specific claims
             new("user_id", user.Id),
             new("employee_id", employeeId),
+            new("name", employeeName),
             new("token_type", "access_token"),
             new("scope", "api.access"),
             new("version", user.TokenVersion.ToString(CultureInfo.InvariantCulture)) // Token version for invalidation

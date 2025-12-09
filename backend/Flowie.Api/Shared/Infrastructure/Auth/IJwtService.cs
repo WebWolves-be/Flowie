@@ -5,7 +5,7 @@ namespace Flowie.Api.Shared.Infrastructure.Auth;
 
 public interface IJwtService
 {
-    string GenerateAccessToken(User user, string employeeId);
+    string GenerateAccessToken(User user, string employeeId, string employeeName);
 
     string GenerateRefreshToken();
 

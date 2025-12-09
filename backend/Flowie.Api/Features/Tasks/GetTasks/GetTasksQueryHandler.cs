@@ -25,8 +25,11 @@ internal class GetTasksQueryHandler(
 
         if (request.OnlyShowMyTasks)
         {
-            var userId = currentUserService.UserId;
-            query = query.Where(t => t.Employee != null && t.Employee.UserId == userId);
+            var employeeIdStr = currentUserService.FindFirst("employee_id");
+            if (int.TryParse(employeeIdStr, out var employeeId))
+            {
+                query = query.Where(t => t.EmployeeId == employeeId);
+            }
         }
 
         var result = await query.ToListAsync(cancellationToken);

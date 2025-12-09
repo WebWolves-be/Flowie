@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { AuthFacade } from "../../../../core/facades/auth.facade";
 import { HttpErrorResponse } from "@angular/common/http";
 import { extractErrorMessage } from "../../../../core/utils/error-message.util";
@@ -9,7 +9,7 @@ import { catchError, EMPTY } from "rxjs";
 @Component({
   selector: "app-login-page",
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: "./login-page.component.html",
   styleUrl: "./login-page.component.scss"
 })

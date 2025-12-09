@@ -61,8 +61,18 @@ public static class AuthEndpoints
         [FromServices] IServiceProvider serviceProvider,
         [FromServices] TimeProvider timeProvider,
         [FromServices] ILoggerFactory loggerFactory,
+        [FromServices] Microsoft.Extensions.Options.IOptions<RegistrationSettings> registrationSettings,
         HttpContext httpContext)
     {
+        var settings = registrationSettings.Value;
+        if (request.RegistrationCode != settings.Code)
+        {
+            return Results.Problem(
+                title: "Registratie mislukt",
+                detail: "Registratie mislukt",
+                statusCode: 400);
+        }
+
         var existingUser = await userManager.FindByEmailAsync(request.Email);
         
         if (existingUser != null)
@@ -108,7 +118,8 @@ public static class AuthEndpoints
         dbContext.Employees.Add(employee);
         await dbContext.SaveChangesAsync();
 
-        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture));
+        var employeeName = $"{employee.FirstName} {employee.LastName}";
+        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture), employeeName);
         var refreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
 
@@ -164,7 +175,8 @@ public static class AuthEndpoints
                 statusCode: 401);
         }
 
-        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture));
+        var employeeName = $"{employee.FirstName} {employee.LastName}";
+        var accessToken = jwtService.GenerateAccessToken(user, employee.Id.ToString(CultureInfo.InvariantCulture), employeeName);
         var refreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
 
@@ -234,7 +246,8 @@ public static class AuthEndpoints
                 statusCode: 401);
         }
 
-        var accessToken = jwtService.GenerateAccessToken(currentUser, employee.Id.ToString(CultureInfo.InvariantCulture));
+        var employeeName = $"{employee.FirstName} {employee.LastName}";
+        var accessToken = jwtService.GenerateAccessToken(currentUser, employee.Id.ToString(CultureInfo.InvariantCulture), employeeName);
         var newRefreshToken = jwtService.GenerateRefreshToken();
         var expiresAt = jwtService.GetTokenExpiration(accessToken);
         
@@ -319,7 +332,8 @@ public record RegisterRequest(
     [Required] string FirstName,
     [Required] string LastName,
     [Required][EmailAddress] string Email,
-    [Required][StringLength(100, MinimumLength = 6)] string Password);
+    [Required][StringLength(100, MinimumLength = 6)] string Password,
+    [Required][StringLength(4, MinimumLength = 4)] string RegistrationCode);
 
 public record LoginRequest(
     [Required][EmailAddress] string Email,

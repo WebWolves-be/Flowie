@@ -14,7 +14,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           "De gevraagde resource bestaat niet.",
           4000
         );
-      } else if (error.status !== 400) {
+      } else if (error.status !== 400 && error.status !== 401) {
         notificationService.showError(
           "Er is iets misgegaan",
           "Probeer het later opnieuw of neem contact op met Nanou.",
