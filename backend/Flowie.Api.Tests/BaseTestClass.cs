@@ -9,7 +9,7 @@ public abstract class BaseTestClass : IDisposable
 
     protected BaseTestClass()
     {
-        DatabaseContext = DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
+        DatabaseContext = Helpers.DatabaseContextFactory.CreateInMemoryContext(Guid.NewGuid().ToString());
     }
 
     public void Dispose()
