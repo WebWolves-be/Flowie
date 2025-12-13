@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Flowie.Api.Migrations
+namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateEmployeeUserProperty : Migration
