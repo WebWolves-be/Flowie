@@ -93,7 +93,11 @@ jobs:
           containerAppName: ${{ secrets.CONTAINER_APP_NAME_TESTING }}
           resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }}
           imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_TESTING }}/flowie-api:${{ github.sha }}
-          environmentVariables: "ASPNETCORE_ENVIRONMENT=Testing" "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_TESTING }}" "Registration__Code=${{ secrets.REGISTRATION_CODE_TESTING }}"
+          environmentVariables: >
+            "ASPNETCORE_ENVIRONMENT=Testing"
+            "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
+            "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_TESTING }}"
+            "Registration__Code=${{ secrets.REGISTRATION_CODE_TESTING }}"
 
       - name: Azure Logout
         run: az logout
@@ -157,7 +161,11 @@ jobs:
           containerAppName: ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }}
           resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }}
           imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }}/flowie-api:${{ github.sha }}
-          environmentVariables: "ASPNETCORE_ENVIRONMENT=Production" "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_PRODUCTION }}" "Registration__Code=${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
+          environmentVariables: >
+            "ASPNETCORE_ENVIRONMENT=Production"
+            "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
+            "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_PRODUCTION }}"
+            "Registration__Code=${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
 
       - name: Azure Logout
         run: az logout
