@@ -80,7 +80,7 @@ jobs:
           dotnet restore backend/Flowie.Api/Flowie.Api.csproj
           dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
-          dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
+          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
@@ -146,7 +146,7 @@ jobs:
           dotnet restore backend/Flowie.Api/Flowie.Api.csproj
           dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
-          dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
+          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
