@@ -35,6 +35,31 @@ jobs:
       - name: Run tests
         run: dotnet test Flowie.sln --configuration Release --no-build --verbosity normal
 
+      - name: Install EF Core tools
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
+      - name: Verify migrations exist
+        run: |
+          cd backend/Flowie.Api
+          echo "Listing all migrations..."
+          dotnet ef migrations list --context DatabaseContext --verbose
+
+      - name: Create migration bundle
+        run: |
+          cd backend/Flowie.Api
+          echo "Creating migration bundle..."
+          dotnet ef migrations bundle --configuration Release --context DatabaseContext --output efbundle --self-contained --verbose
+          echo "Verifying bundle was created..."
+          ls -lh efbundle
+          file efbundle
+
+      - name: Upload migration bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-bundle
+          path: backend/Flowie.Api/efbundle
+          retention-days: 1
+
   deploy-testing:
     name: Deploy to Testing
     needs: [build]
@@ -69,18 +94,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download migration bundle
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          name: migration-bundle
+          path: ./migrations
+
+      - name: Make bundle executable
+        run: chmod +x ./migrations/efbundle
 
       - name: Run EF Core Migrations
         env:
           ASPNETCORE_ENVIRONMENT: Testing
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.*
-          cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose --configuration Release
+        run: ./migrations/efbundle --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
@@ -141,18 +167,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download migration bundle
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          name: migration-bundle
+          path: ./migrations
+
+      - name: Make bundle executable
+        run: chmod +x ./migrations/efbundle
 
       - name: Run EF Core Migrations
         env:
           ASPNETCORE_ENVIRONMENT: Production
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.*
-          cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose --configuration Release
+        run: ./migrations/efbundle --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
