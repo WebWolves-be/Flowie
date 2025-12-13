@@ -76,7 +76,7 @@ jobs:
 
       - name: Run EF Core Migrations
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 8.*
           dotnet restore backend/Flowie.Api/Flowie.Api.csproj
           dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
@@ -139,7 +139,7 @@ jobs:
 
       - name: Run EF Core Migrations
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 8.*
           dotnet restore backend/Flowie.Api/Flowie.Api.csproj
           dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
