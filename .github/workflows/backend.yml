@@ -82,6 +82,9 @@ jobs:
           cd backend/Flowie.Api
           dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
 
+      - name: Register Microsoft.App provider
+        run: az provider register -n Microsoft.App --wait
+
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
         with:
@@ -144,6 +147,9 @@ jobs:
           dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
           dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
+
+      - name: Register Microsoft.App provider
+        run: az provider register -n Microsoft.App --wait
 
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
