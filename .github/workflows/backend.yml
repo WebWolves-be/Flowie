@@ -69,9 +69,16 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: Run EF Core Migrations
         run: |
           dotnet tool install --global dotnet-ef
+          dotnet restore backend/Flowie.Api/Flowie.Api.csproj
+          dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
           dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
 
@@ -125,9 +132,16 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: Run EF Core Migrations
         run: |
           dotnet tool install --global dotnet-ef
+          dotnet restore backend/Flowie.Api/Flowie.Api.csproj
+          dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
           cd backend/Flowie.Api
           dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
 
