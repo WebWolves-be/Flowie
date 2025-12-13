@@ -10,6 +10,7 @@ using Flowie.Api.Shared.Infrastructure.Extensions;
 using Flowie.Api.Shared.Infrastructure.Middleware;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -113,6 +114,13 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavi
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 var app = builder.Build();
+
+// Apply pending migrations automatically on startup
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    await db.Database.MigrateAsync();
+}
 
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Testing")
 {

@@ -70,17 +70,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Run EF Core Migrations
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.*
-          cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
-
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
 
@@ -139,17 +128,6 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Run EF Core Migrations
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.*
-          cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
