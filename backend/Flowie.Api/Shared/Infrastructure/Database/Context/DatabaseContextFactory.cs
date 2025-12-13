@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -13,19 +14,11 @@ public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContex
     {
         var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
 
-        // Get connection string from command line args if provided (for migrations with --connection parameter)
-        var connectionString = args.FirstOrDefault(arg => arg.StartsWith("--connection=", StringComparison.Ordinal))?.Split('=', 2).LastOrDefault();
-
-        if (!string.IsNullOrEmpty(connectionString))
-        {
-            optionsBuilder.UseSqlServer(connectionString);
-        }
-        else
-        {
-            // Fallback: Use a placeholder connection string for design-time operations
-            // This will be overridden by the actual connection string passed via --connection parameter
-            optionsBuilder.UseSqlServer("Server=localhost;Database=FlowieDb;Integrated Security=true;TrustServerCertificate=true;");
-        }
+        // Use placeholder connection string - actual connection is provided via --connection parameter
+        // which EF Core tools handle separately from the factory
+        optionsBuilder.UseSqlServer(
+            "Server=localhost;Database=FlowieDb;Integrated Security=true;TrustServerCertificate=true;",
+            options => options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
 
         return new DatabaseContext(optionsBuilder.Options);
     }
