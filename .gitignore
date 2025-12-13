@@ -419,3 +419,6 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Deployment documentation with sensitive information
+DEPLOYMENT.md
