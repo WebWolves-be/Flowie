@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testing
-      url: XXX
+      url: https://flowie-api-tst.graybush-4be8f739.westeurope.azurecontainerapps.io
 
     steps:
       - name: Checkout code
