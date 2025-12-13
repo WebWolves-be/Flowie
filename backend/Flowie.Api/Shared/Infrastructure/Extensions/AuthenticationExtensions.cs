@@ -16,6 +16,7 @@ public static class AuthenticationExtensions
         services.Configure<RegistrationSettings>(configuration.GetSection(RegistrationSettings.SectionName));
 
         var registrationSettings = configuration.GetSection(RegistrationSettings.SectionName).Get<RegistrationSettings>();
+        
         if (registrationSettings == null || string.IsNullOrWhiteSpace(registrationSettings.Code))
             throw new InvalidOperationException("Registration code is not configured in appsettings.json");
 
