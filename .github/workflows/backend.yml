@@ -79,13 +79,21 @@ jobs:
           ASPNETCORE_ENVIRONMENT: Testing
         run: |
           dotnet tool install --global dotnet-ef --version 8.*
-          dotnet restore backend/Flowie.Api/Flowie.Api.csproj
-          dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore --configuration Release
           cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose --no-build --configuration Release
+          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose --configuration Release
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
+
+      - name: Set Container App secrets
+        run: |
+          az containerapp secret set \
+            --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
+            --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
+            --secrets \
+              flowie-db-connection="${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" \
+              jwt-secret-key="${{ secrets.JWT_SECRET_KEY_TESTING }}" \
+              registration-code="${{ secrets.REGISTRATION_CODE_TESTING }}"
 
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
@@ -93,11 +101,7 @@ jobs:
           containerAppName: ${{ secrets.CONTAINER_APP_NAME_TESTING }}
           resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }}
           imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_TESTING }}/flowie-api:${{ github.sha }}
-          environmentVariables: >
-            "ASPNETCORE_ENVIRONMENT=Testing"
-            "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}"
-            "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_TESTING }}"
-            "Registration__Code=${{ secrets.REGISTRATION_CODE_TESTING }}"
+          environmentVariables: "ASPNETCORE_ENVIRONMENT=Testing ConnectionStrings__FlowieDb=secretref:flowie-db-connection JwtSettings__SecretKey=secretref:jwt-secret-key Registration__Code=secretref:registration-code"
 
       - name: Azure Logout
         run: az logout
@@ -147,13 +151,21 @@ jobs:
           ASPNETCORE_ENVIRONMENT: Production
         run: |
           dotnet tool install --global dotnet-ef --version 8.*
-          dotnet restore backend/Flowie.Api/Flowie.Api.csproj
-          dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore --configuration Release
           cd backend/Flowie.Api
-          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose --no-build --configuration Release
+          dotnet ef database update --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose --configuration Release
 
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
+
+      - name: Set Container App secrets
+        run: |
+          az containerapp secret set \
+            --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
+            --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
+            --secrets \
+              flowie-db-connection="${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" \
+              jwt-secret-key="${{ secrets.JWT_SECRET_KEY_PRODUCTION }}" \
+              registration-code="${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
 
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
@@ -161,11 +173,7 @@ jobs:
           containerAppName: ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }}
           resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }}
           imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }}/flowie-api:${{ github.sha }}
-          environmentVariables: >
-            "ASPNETCORE_ENVIRONMENT=Production"
-            "ConnectionStrings__FlowieDb=${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}"
-            "JwtSettings__SecretKey=${{ secrets.JWT_SECRET_KEY_PRODUCTION }}"
-            "Registration__Code=${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
+          environmentVariables: "ASPNETCORE_ENVIRONMENT=Production ConnectionStrings__FlowieDb=secretref:flowie-db-connection JwtSettings__SecretKey=secretref:jwt-secret-key Registration__Code=secretref:registration-code"
 
       - name: Azure Logout
         run: az logout
