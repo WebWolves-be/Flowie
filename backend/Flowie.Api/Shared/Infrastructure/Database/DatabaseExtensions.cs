@@ -22,6 +22,6 @@ internal static class DatabaseExtensions
             options.UseSqlServer(connectionString
                                  ?? throw new ConfigurationException(
                                      "FlowieDb", "Connection string 'FlowieDb' not found."));
-        });
+        });    
     }
 }

@@ -71,7 +71,24 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+        var allowedOrigins = new List<string>
+        {
+            "http://localhost:4200",
+            "https://localhost:4200"
+        };
+
+        var environment = builder.Environment.EnvironmentName;
+
+        if (environment == "Testing")
+        {
+            allowedOrigins.Add("https://mango-hill-07750e203.3.azurestaticapps.net");
+        }
+        else if (environment == "Production")
+        {
+            allowedOrigins.Add("https://agreeable-sand-0809e7a03.3.azurestaticapps.net");
+        }
+
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -87,6 +104,9 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddRateLimitingServices();
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<DatabaseContext>();
+
 builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
@@ -94,7 +114,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Testing")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -107,6 +127,7 @@ app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHealthChecks("/health");
 
 app.MapAuthEndpoints();
 app.MapEmployeeEndpoints();
