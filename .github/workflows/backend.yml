@@ -54,13 +54,22 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef --version 9.0.0 || dotnet tool update --global dotnet-ef --version 9.0.0
+        run: dotnet tool install --global dotnet-ef --version 9.0.9 || dotnet tool update --global dotnet-ef --version 9.0.9
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
 
       - name: Build for migrations
         run: dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
+
+      - name: Debug - Check DLL for migration types
+        run: |
+          echo "=== Checking if migration classes exist in compiled DLL ==="
+          dotnet tool install --global dotnet-ildasm 2>/dev/null || true
+          # List all files in bin directory
+          ls -la backend/Flowie.Api/bin/Debug/net8.0/
+          # Check if migration files were compiled by searching for the type names
+          strings backend/Flowie.Api/bin/Debug/net8.0/Flowie.Api.dll | grep -i "Migration" | head -20 || echo "No migration strings found"
 
       - name: Debug - List migrations
         run: dotnet ef migrations list --project backend/Flowie.Api/Flowie.Api.csproj --no-build --no-connect --verbose
@@ -142,7 +151,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef --version 9.0.0 || dotnet tool update --global dotnet-ef --version 9.0.0
+        run: dotnet tool install --global dotnet-ef --version 9.0.9 || dotnet tool update --global dotnet-ef --version 9.0.9
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
