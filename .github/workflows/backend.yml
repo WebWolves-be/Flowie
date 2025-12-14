@@ -56,6 +56,9 @@ jobs:
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef
 
+      - name: Restore dependencies
+        run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
+
       - name: Run database migrations
         run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose
 
@@ -134,6 +137,9 @@ jobs:
 
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
 
       - name: Run database migrations
         run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose
