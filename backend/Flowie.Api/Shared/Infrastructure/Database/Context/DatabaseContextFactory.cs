@@ -13,10 +13,20 @@ public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContex
     {
         var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
 
-        // Use placeholder connection string - actual connection is provided via --connection parameter
-        // which EF Core tools handle separately from the factory
+        // Parse --connection argument if provided by EF tools
+        var connectionString = "Server=localhost;Database=FlowieDb;Integrated Security=true;TrustServerCertificate=true;";
+
+        for (var i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "--connection" && i + 1 < args.Length)
+            {
+                connectionString = args[i + 1];
+                break;
+            }
+        }
+
         optionsBuilder.UseSqlServer(
-            "Server=localhost;Database=FlowieDb;Integrated Security=true;TrustServerCertificate=true;",
+            connectionString,
             options => options.MigrationsAssembly(typeof(DatabaseContext).Assembly.GetName().Name));
 
         return new DatabaseContext(optionsBuilder.Options);

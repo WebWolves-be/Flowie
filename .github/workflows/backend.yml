@@ -54,7 +54,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool update --global dotnet-ef --version 8.0.6
+        run: dotnet tool update --global dotnet-ef
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
@@ -63,7 +63,7 @@ jobs:
         run: dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
 
       - name: Debug - List migrations
-        run: dotnet ef migrations list --project backend/Flowie.Api/Flowie.Api.csproj --no-build --verbose
+        run: dotnet ef migrations list --project backend/Flowie.Api/Flowie.Api.csproj --no-build --no-connect --verbose
 
       - name: Run database migrations
         run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --no-build --verbose
@@ -142,7 +142,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool update --global dotnet-ef --version 8.0.6
+        run: dotnet tool update --global dotnet-ef
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
