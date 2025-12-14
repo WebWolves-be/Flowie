@@ -119,6 +119,30 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+
+    // Debug: List all migration types in the assembly
+    var assembly = typeof(DatabaseContext).Assembly;
+    var migrationTypes = assembly.GetTypes()
+        .Where(t => t.GetCustomAttributes(typeof(Microsoft.EntityFrameworkCore.Migrations.MigrationAttribute), false).Any())
+        .ToList();
+
+    Console.WriteLine($"=== DEBUG: Found {migrationTypes.Count} migration types in assembly {assembly.FullName} ===");
+    foreach (var type in migrationTypes)
+    {
+        var attr = type.GetCustomAttributes(typeof(Microsoft.EntityFrameworkCore.Migrations.MigrationAttribute), false)
+            .Cast<Microsoft.EntityFrameworkCore.Migrations.MigrationAttribute>()
+            .FirstOrDefault();
+        Console.WriteLine($"  Migration: {type.FullName} - ID: {attr?.Id}");
+    }
+
+    // Also check pending migrations
+    var pending = db.Database.GetPendingMigrations().ToList();
+    Console.WriteLine($"=== DEBUG: {pending.Count} pending migrations ===");
+    foreach (var m in pending)
+    {
+        Console.WriteLine($"  Pending: {m}");
+    }
+
     db.Database.Migrate();
 }
 
