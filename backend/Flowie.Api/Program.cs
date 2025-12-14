@@ -115,18 +115,6 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 var app = builder.Build();
 
-// Apply pending migrations automatically on startup
-try
-{
-    await using var scope = app.Services.CreateAsyncScope();
-    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-    await db.Database.MigrateAsync();
-}
-catch (Exception ex)
-{
-    Log.Error(ex, "Database migration failed on startup");
-}
-
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Testing")
 {
     app.UseSwagger();
@@ -137,7 +125,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseRateLimiter();
 app.UseCors();
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthChecks("/health");
