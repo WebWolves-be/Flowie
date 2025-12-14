@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -18,7 +17,7 @@ public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContex
         // which EF Core tools handle separately from the factory
         optionsBuilder.UseSqlServer(
             "Server=localhost;Database=FlowieDb;Integrated Security=true;TrustServerCertificate=true;",
-            options => options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
+            options => options.MigrationsAssembly(typeof(DatabaseContext).Assembly.GetName().Name));
 
         return new DatabaseContext(optionsBuilder.Options);
     }

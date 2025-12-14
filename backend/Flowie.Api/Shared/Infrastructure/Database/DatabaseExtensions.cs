@@ -1,4 +1,3 @@
-using System.Reflection;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Flowie.Api.Shared.Infrastructure.Database.Interceptors;
 using Flowie.Api.Shared.Infrastructure.Exceptions;
@@ -22,7 +21,7 @@ internal static class DatabaseExtensions
 
             options.UseSqlServer(
                 connectionString ?? throw new ConfigurationException("FlowieDb", "Connection string 'FlowieDb' not found."),
-                sqlOptions => sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
+                sqlOptions => sqlOptions.MigrationsAssembly(typeof(DatabaseContext).Assembly.GetName().Name));
         });
     }
 }
