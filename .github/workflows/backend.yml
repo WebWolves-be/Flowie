@@ -73,23 +73,21 @@ jobs:
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
 
-      - name: Set Container App secrets
+      - name: Deploy to Azure Container Apps
         run: |
-          az containerapp secret set \
+          az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
+            --image ${{ secrets.ACR_LOGIN_SERVER_TESTING }}/flowie-api:${{ github.sha }} \
             --secrets \
               flowie-db-connection="${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" \
               jwt-secret-key="${{ secrets.JWT_SECRET_KEY_TESTING }}" \
-              registration-code="${{ secrets.REGISTRATION_CODE_TESTING }}"
-
-      - name: Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          containerAppName: ${{ secrets.CONTAINER_APP_NAME_TESTING }}
-          resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }}
-          imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_TESTING }}/flowie-api:${{ github.sha }}
-          environmentVariables: "ASPNETCORE_ENVIRONMENT=Testing ConnectionStrings__FlowieDb=secretref:flowie-db-connection JwtSettings__SecretKey=secretref:jwt-secret-key Registration__Code=secretref:registration-code"
+              registration-code="${{ secrets.REGISTRATION_CODE_TESTING }}" \
+            --set-env-vars \
+              "ASPNETCORE_ENVIRONMENT=Testing" \
+              "ConnectionStrings__FlowieDb=secretref:flowie-db-connection" \
+              "JwtSettings__SecretKey=secretref:jwt-secret-key" \
+              "Registration__Code=secretref:registration-code"
 
       - name: Azure Logout
         run: az logout
@@ -132,23 +130,21 @@ jobs:
       - name: Register Microsoft.App provider
         run: az provider register -n Microsoft.App --wait
 
-      - name: Set Container App secrets
+      - name: Deploy to Azure Container Apps
         run: |
-          az containerapp secret set \
+          az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
+            --image ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }}/flowie-api:${{ github.sha }} \
             --secrets \
               flowie-db-connection="${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" \
               jwt-secret-key="${{ secrets.JWT_SECRET_KEY_PRODUCTION }}" \
-              registration-code="${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
-
-      - name: Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          containerAppName: ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }}
-          resourceGroup: ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }}
-          imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }}/flowie-api:${{ github.sha }}
-          environmentVariables: "ASPNETCORE_ENVIRONMENT=Production ConnectionStrings__FlowieDb=secretref:flowie-db-connection JwtSettings__SecretKey=secretref:jwt-secret-key Registration__Code=secretref:registration-code"
+              registration-code="${{ secrets.REGISTRATION_CODE_PRODUCTION }}" \
+            --set-env-vars \
+              "ASPNETCORE_ENVIRONMENT=Production" \
+              "ConnectionStrings__FlowieDb=secretref:flowie-db-connection" \
+              "JwtSettings__SecretKey=secretref:jwt-secret-key" \
+              "Registration__Code=secretref:registration-code"
 
       - name: Azure Logout
         run: az logout
