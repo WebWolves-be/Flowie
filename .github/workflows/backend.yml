@@ -54,7 +54,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool update --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.0.0 || dotnet tool update --global dotnet-ef --version 9.0.0
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
@@ -142,7 +142,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool update --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.0.0 || dotnet tool update --global dotnet-ef --version 9.0.0
 
       - name: Restore dependencies
         run: dotnet restore backend/Flowie.Api/Flowie.Api.csproj
