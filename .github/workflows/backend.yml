@@ -75,17 +75,22 @@ jobs:
 
       - name: Deploy to Azure Container Apps
         run: |
-          # Step 1: Update image with minimal env vars (no secret refs) to get app healthy
+          # Step 1: Configure registry credentials
+          az containerapp registry set \
+            --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
+            --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
+            --server ${{ secrets.ACR_LOGIN_SERVER_TESTING }} \
+            --username ${{ secrets.ACR_USERNAME_TESTING }} \
+            --password ${{ secrets.ACR_PASSWORD_TESTING }}
+
+          # Step 2: Update image with minimal env vars (no secret refs) to get app healthy
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
             --image ${{ secrets.ACR_LOGIN_SERVER_TESTING }}/flowie-api:${{ github.sha }} \
-            --registry-server ${{ secrets.ACR_LOGIN_SERVER_TESTING }} \
-            --registry-username ${{ secrets.ACR_USERNAME_TESTING }} \
-            --registry-password ${{ secrets.ACR_PASSWORD_TESTING }} \
             --replace-env-vars "ASPNETCORE_ENVIRONMENT=Testing"
 
-          # Step 2: Set secrets (app is now in healthy state)
+          # Step 3: Set secrets (app is now in healthy state)
           az containerapp secret set \
             --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
@@ -94,7 +99,7 @@ jobs:
               jwt-secret-key="${{ secrets.JWT_SECRET_KEY_TESTING }}" \
               registration-code="${{ secrets.REGISTRATION_CODE_TESTING }}"
 
-          # Step 3: Update env vars to reference secrets
+          # Step 4: Update env vars to reference secrets
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_TESTING }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_TESTING }} \
@@ -147,17 +152,22 @@ jobs:
 
       - name: Deploy to Azure Container Apps
         run: |
-          # Step 1: Update image with minimal env vars (no secret refs) to get app healthy
+          # Step 1: Configure registry credentials
+          az containerapp registry set \
+            --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
+            --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
+            --server ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }} \
+            --username ${{ secrets.ACR_USERNAME_PRODUCTION }} \
+            --password ${{ secrets.ACR_PASSWORD_PRODUCTION }}
+
+          # Step 2: Update image with minimal env vars (no secret refs) to get app healthy
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
             --image ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }}/flowie-api:${{ github.sha }} \
-            --registry-server ${{ secrets.ACR_LOGIN_SERVER_PRODUCTION }} \
-            --registry-username ${{ secrets.ACR_USERNAME_PRODUCTION }} \
-            --registry-password ${{ secrets.ACR_PASSWORD_PRODUCTION }} \
             --replace-env-vars "ASPNETCORE_ENVIRONMENT=Production"
 
-          # Step 2: Set secrets (app is now in healthy state)
+          # Step 3: Set secrets (app is now in healthy state)
           az containerapp secret set \
             --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
@@ -166,7 +176,7 @@ jobs:
               jwt-secret-key="${{ secrets.JWT_SECRET_KEY_PRODUCTION }}" \
               registration-code="${{ secrets.REGISTRATION_CODE_PRODUCTION }}"
 
-          # Step 3: Update env vars to reference secrets
+          # Step 4: Update env vars to reference secrets
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME_PRODUCTION }} \
             --resource-group ${{ secrets.CONTAINER_APP_RESOURCE_GROUP_PRODUCTION }} \
