@@ -65,17 +65,19 @@ jobs:
       - name: Debug - Check DLL for migration types
         run: |
           echo "=== Checking if migration classes exist in compiled DLL ==="
-          dotnet tool install --global dotnet-ildasm 2>/dev/null || true
-          # List all files in bin directory
-          ls -la backend/Flowie.Api/bin/Debug/net8.0/
-          # Check if migration files were compiled by searching for the type names
-          strings backend/Flowie.Api/bin/Debug/net8.0/Flowie.Api.dll | grep -i "Migration" | head -20 || echo "No migration strings found"
+          # Search for specific migration class names
+          echo "=== Looking for InitialCreate migration ==="
+          strings backend/Flowie.Api/bin/Debug/net8.0/Flowie.Api.dll | grep -i "InitialCreate" || echo "InitialCreate not found"
+          echo "=== Looking for all Migration-related strings ==="
+          strings backend/Flowie.Api/bin/Debug/net8.0/Flowie.Api.dll | grep -E "(20[0-9]{12}_|Migration)" | head -30 || echo "No migration strings found"
+          echo "=== DLL file size ==="
+          ls -la backend/Flowie.Api/bin/Debug/net8.0/Flowie.Api.dll
 
       - name: Debug - List migrations
-        run: dotnet ef migrations list --project backend/Flowie.Api/Flowie.Api.csproj --no-build --no-connect --verbose
+        run: dotnet ef migrations list --project backend/Flowie.Api/Flowie.Api.csproj --context DatabaseContext --no-connect --verbose
 
       - name: Run database migrations
-        run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --no-build --verbose
+        run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_TESTING }}" --verbose
 
       - name: Log in to Azure Container Registry
         uses: docker/login-action@v3
@@ -160,7 +162,7 @@ jobs:
         run: dotnet build backend/Flowie.Api/Flowie.Api.csproj --no-restore
 
       - name: Run database migrations
-        run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --no-build --verbose
+        run: dotnet ef database update --project backend/Flowie.Api/Flowie.Api.csproj --context DatabaseContext --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_PRODUCTION }}" --verbose
 
       - name: Log in to Azure Container Registry
         uses: docker/login-action@v3

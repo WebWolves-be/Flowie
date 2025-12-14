@@ -21,7 +21,7 @@ internal static class DatabaseExtensions
 
             options.UseSqlServer(
                 connectionString ?? throw new ConfigurationException("FlowieDb", "Connection string 'FlowieDb' not found."),
-                sqlOptions => sqlOptions.MigrationsAssembly(typeof(DatabaseContext).Assembly.GetName().Name));
+                sqlOptions => sqlOptions.MigrationsAssembly("Flowie.Api"));
         });
     }
 }

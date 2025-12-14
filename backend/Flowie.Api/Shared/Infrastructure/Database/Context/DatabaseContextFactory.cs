@@ -27,7 +27,7 @@ public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContex
 
         optionsBuilder.UseSqlServer(
             connectionString,
-            options => options.MigrationsAssembly(typeof(DatabaseContext).Assembly.GetName().Name));
+            options => options.MigrationsAssembly("Flowie.Api"));
 
         return new DatabaseContext(optionsBuilder.Options);
     }
