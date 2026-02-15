@@ -44,7 +44,7 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
             .Where(t => t.ParentTaskId == parentTaskId)
             .MaxAsync(t => (DateOnly?)t.DueDate, cancellationToken);
 
-        if (maxSubtaskDueDate.HasValue && maxSubtaskDueDate.Value > parentTask.DueDate)
+        if (maxSubtaskDueDate.HasValue && (!parentTask.DueDate.HasValue || maxSubtaskDueDate.Value > parentTask.DueDate.Value))
         {
             parentTask.DueDate = maxSubtaskDueDate.Value;
         }

@@ -7,8 +7,8 @@ public record UpdateTaskCommand(
     int TaskId,
     string Title,
     string Description,
-    DateOnly DueDate,
+    DateOnly? DueDate,
     int TaskTypeId,
-    int EmployeeId,
+    int? EmployeeId,
     TaskStatus Status
 ) : IRequest<Unit>;

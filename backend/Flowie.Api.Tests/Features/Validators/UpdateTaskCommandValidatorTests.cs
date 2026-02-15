@@ -36,6 +36,28 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
+    public void Validate_ShouldPass_WhenEmployeeIdIsNull()
+    {
+        // Arrange
+        var command = new UpdateTaskCommand(
+            TaskId: 1,
+            Title: "Valid Task Title",
+            Description: "Valid description",
+            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            TaskTypeId: 1,
+            EmployeeId: null,
+            Status: TaskStatus.Pending
+        );
+
+        // Act
+        var result = _validator.Validate(command);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
     public void Validate_ShouldFail_WhenTitleIsTooShort()
     {
         // Arrange
@@ -257,6 +279,28 @@ public class UpdateTaskCommandValidatorTests : BaseTestClass
         // Assert
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Description");
+    }
+
+    [Fact]
+    public void Validate_ShouldPass_WhenDueDateIsNull()
+    {
+        // Arrange
+        var command = new UpdateTaskCommand(
+            TaskId: 1,
+            Title: "Valid Task Title",
+            Description: "Valid description",
+            DueDate: null,
+            TaskTypeId: 1,
+            EmployeeId: 1,
+            Status: TaskStatus.Pending
+        );
+
+        // Act
+        var result = _validator.Validate(command);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
     }
 
     [Fact]

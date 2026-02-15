@@ -22,7 +22,7 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
             .HasConversion<string>();
             
         builder.Property(e => e.DueDate)
-            .IsRequired();
+            .IsRequired(false);
         
         builder.HasOne(t => t.Project)
             .WithMany(p => p.Tasks)
@@ -46,6 +46,6 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
             .WithMany(e => e.AssignedTasks)
             .HasForeignKey(t => t.EmployeeId)
             .OnDelete(DeleteBehavior.NoAction)
-            .IsRequired();
+            .IsRequired(false);
     }
 }

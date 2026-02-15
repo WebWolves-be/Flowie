@@ -47,7 +47,7 @@ internal class UpdateTaskCommandHandler(DatabaseContext dbContext) : IRequestHan
 
         var maxSubtaskDueDate = subtasks.Max(t => (DateOnly?)t.DueDate);
 
-        if (maxSubtaskDueDate.HasValue && maxSubtaskDueDate.Value > parentTask.DueDate)
+        if (maxSubtaskDueDate.HasValue && (!parentTask.DueDate.HasValue || maxSubtaskDueDate.Value > parentTask.DueDate.Value))
         {
             parentTask.DueDate = maxSubtaskDueDate.Value;
         }

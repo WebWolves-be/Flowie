@@ -14,13 +14,13 @@ public class Task : BaseEntity
     
     public required int TaskTypeId { get; set; }
 
-    public required int EmployeeId { get; set; }
+    public int? EmployeeId { get; set; }
 
     public bool IsDeleted { get; set; }
     
     public TaskStatus Status { get; set; }
 
-    public DateOnly DueDate { get; set; }
+    public DateOnly? DueDate { get; set; }
     
     public DateTimeOffset? StartedAt { get; set; }
 
@@ -30,7 +30,7 @@ public class Task : BaseEntity
     
     public TaskType TaskType { get; set; } = null!;
 
-    public Employee Employee { get; set; } = null!;
+    public Employee? Employee { get; set; }
     
     public Task? ParentTask { get; set; }
     

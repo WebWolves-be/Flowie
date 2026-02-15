@@ -63,6 +63,29 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldCreateTask_WhenEmployeeIsUnassigned()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            _project.Id,
+            "Test Task",
+            _taskType.Id,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            null,
+            "Test Description",
+            null
+        );
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var task = await DatabaseContext.Tasks.FirstOrDefaultAsync();
+        Assert.NotNull(task);
+        Assert.Null(task.EmployeeId);
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldCreateTask_WithNullDescription()
     {
         // Arrange
@@ -84,6 +107,29 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         Assert.NotNull(task);
         Assert.Equal("Test Task", task.Title);
         Assert.Null(task.Description);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldCreateTask_WithNullDueDate()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            _project.Id,
+            "Test Task",
+            _taskType.Id,
+            null,
+            _employee.Id,
+            "Test Description",
+            null
+        );
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var task = await DatabaseContext.Tasks.FirstOrDefaultAsync();
+        Assert.NotNull(task);
+        Assert.Null(task.DueDate);
     }
 
     [Fact]

@@ -4,7 +4,7 @@ export interface UpdateTaskRequest {
   title: string;
   description?: string;
   taskTypeId: number;
-  dueDate: string;
-  employeeId: number;
+  dueDate?: string;
+  employeeId?: number;
   status: TaskStatus;
 }

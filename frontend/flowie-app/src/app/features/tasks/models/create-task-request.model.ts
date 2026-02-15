@@ -3,7 +3,7 @@ export interface CreateTaskRequest {
   title: string;
   description?: string;
   taskTypeId: number;
-  dueDate: string;
-  employeeId: number;
+  dueDate?: string;
+  employeeId?: number;
   parentTaskId?: number;
 }

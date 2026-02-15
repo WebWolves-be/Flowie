@@ -127,6 +127,42 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
         Assert.Equal(string.Empty, updatedTask.Description);
     }
 
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldUpdateTask_WithNullDueDate()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Original Title",
+            Description = "Original Description",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        var command = new UpdateTaskCommand(
+            task.Id,
+            "Updated Title",
+            "Updated Description",
+            null,
+            _taskType.Id,
+            _employee.Id,
+            TaskStatus.Pending
+        );
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.DueDate);
+    }
+
 
     [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldUpdateParentDueDate_WhenSubtaskDueDateIsLater()

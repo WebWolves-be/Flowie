@@ -22,7 +22,7 @@ public class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskCommand>
             .WithMessage("Beschrijving mag niet langer dan 4000 tekens zijn.");
 
         RuleFor(x => x.DueDate)
-            .Must(x => x > DateOnly.FromDateTime(DateTime.Today))
+            .Must(x => !x.HasValue || x.Value > DateOnly.FromDateTime(DateTime.Today))
             .WithMessage("Deadline moet in de toekomst zijn.");
     }
 }
