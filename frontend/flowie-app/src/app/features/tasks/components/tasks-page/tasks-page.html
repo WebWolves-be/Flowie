@@ -40,6 +40,16 @@
           [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
           class="px-2 py-1 rounded text-xs transition-colors">Novara
         </button>
+        <button
+          (click)="onFilterProjectsByCompany(Company.Algemeen)"
+          [class.bg-blue-600]="companyFilter() === Company.Algemeen"
+          [class.text-white]="companyFilter() === Company.Algemeen"
+          [class.hover:bg-blue-700]="companyFilter() === Company.Algemeen"
+          [class.bg-gray-200]="companyFilter() !== Company.Algemeen"
+          [class.text-gray-700]="companyFilter() !== Company.Algemeen"
+          [class.hover:bg-gray-300]="companyFilter() !== Company.Algemeen"
+          class="px-2 py-1 rounded text-xs transition-colors">Algemeen
+        </button>
       </div>
     </div>
     <div class="flex-1 overflow-y-auto">

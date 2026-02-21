@@ -3,7 +3,7 @@ import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { HttpErrorResponse } from "@angular/common/http";
 import { catchError, EMPTY } from "rxjs";
-import { Company } from "../../models/company.enum";
+import { Company, CompanyDisplayLabels } from "../../models/company.enum";
 import { Project } from "../../models/project.model";
 import { TaskFacade } from "../../task.facade";
 import { NotificationService } from "../../../../core/services/notification.service";
@@ -33,6 +33,7 @@ export class SaveProjectDialogComponent {
   #notificationService = inject(NotificationService);
 
   readonly Company = Company;
+  readonly CompanyDisplayLabels = CompanyDisplayLabels;
   readonly isUpdate = this.#dialogData.mode === "update";
 
   form = new FormGroup({

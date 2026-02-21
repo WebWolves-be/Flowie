@@ -33,7 +33,7 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .WithMessage("Bedrijf moet 'Immoseed' of 'Novara' zijn.");
+            .WithMessage("Ongeldig bedrijf.");
     }
 
     private Func<UpdateProjectCommand, CancellationToken, Task<bool>> TitleIsUniqueExcludingCurrentProject()

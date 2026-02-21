@@ -21,12 +21,14 @@
           <span
             [class.text-red-600]="isTaskOverdue()"
             [class.font-semibold]="isTaskOverdue()">
-            Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen deadline' }}
+            Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
-          <span class="text-blue-600 font-bold mx-3">|</span>
-          <span class="inline-flex items-center">
-            {{ task().employeeName || 'Niet toegewezen' }}
-          </span>
+          @if (task().employeeName) {
+            <span class="text-blue-600 font-bold mx-3">|</span>
+            <span class="inline-flex items-center">
+              {{ task().employeeName }}
+            </span>
+          }
         </div>
       }
       @if (task().subtasks && task().subtasks!.length > 0) {
@@ -69,9 +71,11 @@
                         [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.font-semibold]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
-                      >Deadline: {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen deadline' }}</span>
-                      <span class="text-blue-600 font-bold">|</span>
-                      <span class="text-gray-700">{{ subtask.employeeName || 'Niet toegewezen' }}</span>
+                      >Deadline: {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}</span>
+                      @if (subtask.employeeName) {
+                        <span class="text-blue-600 font-bold">|</span>
+                        <span class="text-gray-700">{{ subtask.employeeName }}</span>
+                      }
                     </div>
                     <div class="flex items-center gap-2">
                       @if (isSubtaskPending(subtask)) {

@@ -58,7 +58,7 @@
 ## 1. Session - Prevent Auto-Logout on Inactivity
 
 - [x] Implemented
-- [ ] User Tested
+- [x] User Tested
 
 **Priority: P0 - Critical**
 **Area:** Auth, Session
@@ -91,7 +91,7 @@ The application logs users out or becomes unresponsive after a period of inactiv
 ## 2. Tasks - Make Employee Assignment Optional
 
 - [x] Implemented
-- [ ] User Tested
+- [x] User Tested
 
 **Priority: P0 - Critical**
 **Area:** Tasks
@@ -123,7 +123,7 @@ Employee assignment is currently required (`EmployeeId` is non-nullable). Users 
 ## 3. Tasks - Make Deadline Optional (Keep Visible)
 
 - [x] Implemented
-- [ ] User Tested
+- [x] User Tested
 
 **Priority: P0 - Critical**
 **Area:** Tasks
@@ -157,7 +157,7 @@ Deadline (`DueDate`) may be required in forms. User wants it optional but still 
 
 ## 4. Projects - "Algemeen" (General) Tab
 
-- [ ] Implemented
+- [x] Implemented
 - [ ] User Tested
 
 **Priority: P1 - High**
