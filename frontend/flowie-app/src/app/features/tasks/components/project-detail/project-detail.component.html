@@ -102,19 +102,30 @@
         </div>
       </div>
     } @else {
-      <div class="space-y-4">
-        @for (task of tasks(); track task.taskId) {
-          <app-task-item
-            [task]="task"
-            [isLast]="$last"
-            (taskUpdateRequested)="onTaskUpdate(task.taskId)"
-            (taskDeleteRequested)="onTaskDelete(task.taskId)"
-            (taskStatusChanged)="onTaskStatusChanged($event)"
-            (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
-            (subtaskCreateRequested)="onSubtaskCreate(task.taskId)"
-            (subtaskUpdateRequested)="onSubtaskUpdate($event)"
-            (subtaskDeleteRequested)="onSubtaskDelete($event)">
-          </app-task-item>
+      <div
+        class="space-y-4"
+        cdkDropList
+        (cdkDropListDropped)="onTaskDrop($event)">
+        @for (task of orderedTasks(); track task.taskId) {
+          <div cdkDrag class="relative group">
+            <div cdkDragHandle class="cursor-grab active:cursor-grabbing absolute -left-5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg>
+            </div>
+            <app-task-item
+              [task]="task"
+              [isLast]="$last"
+              (taskUpdateRequested)="onTaskUpdate(task.taskId)"
+              (taskDeleteRequested)="onTaskDelete(task.taskId)"
+              (taskStatusChanged)="onTaskStatusChanged($event)"
+              (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
+              (subtaskCreateRequested)="onSubtaskCreate(task.taskId)"
+              (subtaskUpdateRequested)="onSubtaskUpdate($event)"
+              (subtaskDeleteRequested)="onSubtaskDelete($event)"
+              (subtaskReorderRequested)="onSubtaskReorder($event)">
+            </app-task-item>
+          </div>
         }
       </div>
     }

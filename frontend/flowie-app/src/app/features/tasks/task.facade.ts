@@ -100,4 +100,8 @@ export class TaskFacade {
   updateTaskStatus(taskId: number, request: UpdateTaskStatusRequest): Observable<void> {
     return this.#http.patch<void>(`${this.#apiUrl}/api/tasks/${taskId}/status`, request);
   }
+
+  reorderTasks(items: { taskId: number; displayOrder: number }[]): Observable<void> {
+    return this.#http.patch<void>(`${this.#apiUrl}/api/tasks/reorder`, { items });
+  }
 }

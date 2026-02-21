@@ -19,4 +19,5 @@ export interface Task {
   subtaskCount: number;
   completedSubtaskCount: number;
   subtasks: Subtask[];
+  displayOrder: number;
 }

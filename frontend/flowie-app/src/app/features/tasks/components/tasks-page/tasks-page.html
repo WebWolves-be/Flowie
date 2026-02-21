@@ -82,7 +82,9 @@
         (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
         (subtaskCreateRequested)="onOpenCreateSubtaskDialog($event)"
         (subtaskUpdateRequested)="onOpenUpdateSubtaskDialog($event)"
-        (subtaskDeleteRequested)="onOpenDeleteSubtaskDialog($event)">
+        (subtaskDeleteRequested)="onOpenDeleteSubtaskDialog($event)"
+        (taskReorderRequested)="onTaskReorder($event)"
+        (subtaskReorderRequested)="onSubtaskReorder($event)">
       </app-project-detail>
     } @else {
       <div class="flex-1 flex items-center justify-center bg-gray-50">

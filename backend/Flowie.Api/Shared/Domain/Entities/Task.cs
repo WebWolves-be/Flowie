@@ -28,6 +28,8 @@ public class Task : BaseEntity
 
     public DateTimeOffset? WaitingSince { get; set; }
 
+    public int DisplayOrder { get; set; }
+
     public Project Project { get; set; } = null!;
     
     public TaskType TaskType { get; set; } = null!;

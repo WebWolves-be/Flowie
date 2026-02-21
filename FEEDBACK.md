@@ -278,8 +278,8 @@ Current statuses are: Pending, Ongoing, Done. There's no way to indicate "action
 
 ## 8. Tasks - Drag & Drop Reordering
 
-- [ ] Implemented
-- [ ] User Tested
+- [x] Implemented
+- [x] User Tested
 
 **Priority: P1 - High**
 **Area:** Tasks
@@ -302,9 +302,9 @@ Tasks and subtasks are displayed in a fixed order. Users want to manually reorde
 6. Default ordering by `SortOrder` ascending
 
 ### Acceptance Criteria
-- [ ] Users can drag tasks to reorder them
-- [ ] Order persists after page refresh
-- [ ] Subtasks can also be reordered within their parent
+- [x] Users can drag tasks to reorder them
+- [x] Order persists after page refresh
+- [x] Subtasks can also be reordered within their parent
 
 ---
 

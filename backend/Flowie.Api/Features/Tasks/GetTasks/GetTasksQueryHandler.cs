@@ -32,7 +32,10 @@ internal class GetTasksQueryHandler(
             }
         }
 
-        var result = await query.ToListAsync(cancellationToken);
+        var result = await query
+            .OrderBy(t => t.DisplayOrder)
+            .ThenBy(t => t.Id)
+            .ToListAsync(cancellationToken);
 
         var tasks =
             result
@@ -56,7 +59,10 @@ internal class GetTasksQueryHandler(
                         CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done),
                         Subtasks:
                         [
-                            .. t.Subtasks.Select(st => new SubtaskDto(
+                            .. t.Subtasks
+                                .OrderBy(st => st.DisplayOrder)
+                                .ThenBy(st => st.Id)
+                                .Select(st => new SubtaskDto(
                                 TaskId: st.Id,
                                 ParentTaskId: st.ParentTaskId,
                                 Title: st.Title,
@@ -70,9 +76,11 @@ internal class GetTasksQueryHandler(
                                 CreatedAt: st.CreatedAt,
                                 UpdatedAt: st.UpdatedAt,
                                 CompletedAt: st.CompletedAt,
-                                WaitingSince: st.WaitingSince
+                                WaitingSince: st.WaitingSince,
+                                DisplayOrder: st.DisplayOrder
                             ))
-                        ]
+                        ],
+                        DisplayOrder: t.DisplayOrder
                     ))
                 .ToList();
 

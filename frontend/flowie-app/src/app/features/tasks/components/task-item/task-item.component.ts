@@ -1,17 +1,18 @@
-import { Component, computed, input, output, signal } from "@angular/core";
+import { Component, computed, input, OnChanges, output, signal } from "@angular/core";
 import { DatePipe, NgClass } from "@angular/common";
 import { Task } from "../../models/task.model";
 import { Subtask } from "../../models/subtask.model";
 import { TaskStatus } from "../../models/task-status.enum";
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-task-item",
   standalone: true,
-  imports: [NgClass, DatePipe],
+  imports: [NgClass, DatePipe, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: "./task-item.component.html",
   styleUrl: "./task-item.component.scss"
 })
-export class TaskItemComponent {
+export class TaskItemComponent implements OnChanges {
   task = input.required<Task>();
   isLast = input<boolean>(false);
 
@@ -23,9 +24,22 @@ export class TaskItemComponent {
   subtaskUpdateRequested = output<number>();
   subtaskDeleteRequested = output<number>();
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
+  subtaskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
 
   showMenu = signal<boolean>(false);
   showSubtaskMenu = signal<number | null>(null);
+  orderedSubtasks = signal<Subtask[]>([]);
+
+  ngOnChanges() {
+    this.orderedSubtasks.set([...(this.task().subtasks ?? [])]);
+  }
+
+  onSubtaskDrop(event: CdkDragDrop<Subtask[]>) {
+    const subtasks = [...this.orderedSubtasks()];
+    moveItemInArray(subtasks, event.previousIndex, event.currentIndex);
+    this.orderedSubtasks.set(subtasks);
+    this.subtaskReorderRequested.emit(subtasks.map((s, i) => ({ taskId: s.taskId, displayOrder: i })));
+  }
 
   isPending = computed(() => this.task().status === TaskStatus.Pending);
   isOngoing = computed(() => this.task().status === TaskStatus.Ongoing);

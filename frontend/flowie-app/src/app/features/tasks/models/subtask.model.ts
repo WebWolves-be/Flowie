@@ -15,4 +15,5 @@ export interface Subtask {
   updatedAt?: string | null;
   completedAt?: string | null;
   waitingSince?: string | null;
+  displayOrder: number;
 }
