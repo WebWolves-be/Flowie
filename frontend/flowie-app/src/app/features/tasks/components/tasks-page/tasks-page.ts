@@ -233,7 +233,8 @@ export class TasksPage implements OnInit {
     const statusMessages = {
       [TaskStatus.Ongoing]: "Taak gestart",
       [TaskStatus.Done]: "Taak voltooid",
-      [TaskStatus.Pending]: "Taak heropend"
+      [TaskStatus.Pending]: "Taak heropend",
+      [TaskStatus.WaitingOn]: "Wachten op"
     };
 
     this.#taskFacade
@@ -258,7 +259,8 @@ export class TasksPage implements OnInit {
     const statusMessages = {
       [TaskStatus.Ongoing]: "Subtaak gestart",
       [TaskStatus.Done]: "Subtaak voltooid",
-      [TaskStatus.Pending]: "Subtaak heropend"
+      [TaskStatus.Pending]: "Subtaak heropend",
+      [TaskStatus.WaitingOn]: "Wachten op"
     };
 
     this.#taskFacade

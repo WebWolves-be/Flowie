@@ -51,6 +51,7 @@ internal class GetTasksQueryHandler(
                         CreatedAt: t.CreatedAt,
                         UpdatedAt: t.UpdatedAt,
                         CompletedAt: t.CompletedAt,
+                        WaitingSince: t.WaitingSince,
                         SubtaskCount: t.Subtasks.Count,
                         CompletedSubtaskCount: t.Subtasks.Count(st => st.Status is TaskStatus.Done),
                         Subtasks:
@@ -68,7 +69,8 @@ internal class GetTasksQueryHandler(
                                 EmployeeName: st.Employee != null ? $"{st.Employee.FirstName} {st.Employee.LastName}" : null,
                                 CreatedAt: st.CreatedAt,
                                 UpdatedAt: st.UpdatedAt,
-                                CompletedAt: st.CompletedAt
+                                CompletedAt: st.CompletedAt,
+                                WaitingSince: st.WaitingSince
                             ))
                         ]
                     ))

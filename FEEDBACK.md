@@ -158,7 +158,7 @@ Deadline (`DueDate`) may be required in forms. User wants it optional but still 
 ## 4. Projects - "Algemeen" (General) Tab
 
 - [x] Implemented
-- [ ] User Tested
+- [x] User Tested
 
 **Priority: P1 - High**
 **Area:** Projects
@@ -178,9 +178,9 @@ Projects are currently split by company (Immoseed / Novara). There's no place fo
 3. Update project creation form to allow selecting Algemeen
 
 ### Acceptance Criteria
-- [ ] New "Algemeen" tab appears in project list
-- [ ] Projects can be created under "Algemeen"
-- [ ] "Alles" tab shows all three categories
+- [x] New "Algemeen" tab appears in project list
+- [x] Projects can be created under "Algemeen"
+- [x] "Alles" tab shows all three categories
 
 ---
 
@@ -215,8 +215,8 @@ When viewing all projects together, there's no visual indicator of which company
 
 ## 6. Tasks - Show Creation Date
 
-- [ ] Implemented
-- [ ] User Tested
+- [x] Implemented
+- [x] User Tested
 
 **Priority: P1 - High**
 **Area:** Tasks
@@ -237,16 +237,16 @@ No creation date is shown on tasks. Users want to see how long a task has been o
 4. Calculate and show elapsed time
 
 ### Acceptance Criteria
-- [ ] Creation date is visible on every task
-- [ ] Users can see at a glance how old a task is
+- [x] Creation date is visible on every task
+- [x] Users can see at a glance how old a task is
 
 ---
 
 
 ## 7. Tasks - "Wachten Op" (Waiting On) Status
 
-- [ ] Implemented
-- [ ] User Tested
+- [x] Implemented
+- [x] User Tested
 
 **Priority: P1 - High**
 **Area:** Tasks
@@ -269,9 +269,9 @@ Current statuses are: Pending, Ongoing, Done. There's no way to indicate "action
 6. Optional: add a `WaitingOnNote` field for context
 
 ### Acceptance Criteria
-- [ ] "Wachten Op" status is available in the task status options
-- [ ] Tasks with this status are visually distinct
-- [ ] Status flow works: Pending -> Ongoing -> Wachten Op -> Done (flexible)
+- [x] "Wachten Op" status is available in the task status options
+- [x] Tasks with this status are visually distinct
+- [x] Status flow works: Pending -> Ongoing -> Wachten Op -> Done (flexible)
 
 ---
 

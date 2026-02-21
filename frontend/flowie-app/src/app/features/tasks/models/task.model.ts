@@ -15,6 +15,7 @@ export interface Task {
   createdAt: string;
   updatedAt?: string | null;
   completedAt?: string | null;
+  waitingSince?: string | null;
   subtaskCount: number;
   completedSubtaskCount: number;
   subtasks: Subtask[];

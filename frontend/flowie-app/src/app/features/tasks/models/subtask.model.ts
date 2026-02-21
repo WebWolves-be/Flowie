@@ -14,4 +14,5 @@ export interface Subtask {
   createdAt: string;
   updatedAt?: string | null;
   completedAt?: string | null;
+  waitingSince?: string | null;
 }

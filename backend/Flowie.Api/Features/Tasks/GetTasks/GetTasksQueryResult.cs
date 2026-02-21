@@ -18,6 +18,7 @@ public record TaskDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? CompletedAt,
+    DateTimeOffset? WaitingSince,
     int SubtaskCount,
     int CompletedSubtaskCount,
     IEnumerable<SubtaskDto> Subtasks);
@@ -35,5 +36,6 @@ public record SubtaskDto(
     string? EmployeeName,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
-    DateTimeOffset? CompletedAt
+    DateTimeOffset? CompletedAt,
+    DateTimeOffset? WaitingSince
 );

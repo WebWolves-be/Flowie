@@ -26,6 +26,8 @@ public class Task : BaseEntity
 
     public DateTimeOffset? CompletedAt { get; set; }
 
+    public DateTimeOffset? WaitingSince { get; set; }
+
     public Project Project { get; set; } = null!;
     
     public TaskType TaskType { get; set; } = null!;
