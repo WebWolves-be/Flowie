@@ -13,12 +13,22 @@
         class="whitespace-nowrap py-2 px-3 border-b-2 text-sm font-medium">
         Taak types
       </button>
+      <button
+        type="button"
+        (click)="activeTab.set('calendar')"
+        [ngClass]="{'border-blue-600 text-blue-600': activeTab() === 'calendar', 'border-transparent text-gray-600 hover:text-gray-800': activeTab() !== 'calendar'}"
+        class="whitespace-nowrap py-2 px-3 border-b-2 text-sm font-medium">
+        Agenda feed
+      </button>
     </nav>
   </div>
 
   <div class="flex-1 overflow-y-auto">
     @if (activeTab() === 'task-types') {
       <app-task-types-settings></app-task-types-settings>
+    }
+    @if (activeTab() === 'calendar') {
+      <app-calendar-settings></app-calendar-settings>
     }
   </div>
 </div>

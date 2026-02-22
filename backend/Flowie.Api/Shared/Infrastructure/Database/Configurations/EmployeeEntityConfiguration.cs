@@ -28,5 +28,9 @@ public class EmployeeEntityConfiguration : BaseEntityConfiguration<Employee>
         builder.HasIndex(e => e.UserId)
             .IsUnique()
             .HasFilter("[UserId] IS NOT NULL");
+
+        builder.HasIndex(e => e.CalendarFeedToken)
+            .IsUnique()
+            .HasFilter("[CalendarFeedToken] IS NOT NULL");
     }
 }

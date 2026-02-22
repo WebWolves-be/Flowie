@@ -3,7 +3,12 @@
     "allow": [
       "Bash(find:*)",
       "Bash(cd:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet build:*)",
+      "Bash(npm run build:*)",
+      "Bash(dotnet ef database update:*)"
     ]
   }
 }

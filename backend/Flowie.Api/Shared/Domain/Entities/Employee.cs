@@ -13,7 +13,9 @@ public class Employee : BaseEntity
     public required string UserId { get; set; }
 
     public bool Active { get; set; } = true;
-    
+
+    public Guid? CalendarFeedToken { get; set; }
+
     public User? User { get; set; }
     
     public ICollection<Task> AssignedTasks { get; } = [];
