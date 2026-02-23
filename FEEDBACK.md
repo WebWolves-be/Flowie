@@ -342,8 +342,8 @@ Task deadlines don't appear in users' calendars. They must manually track them.
 
 ## 10. Tasks - Rich Description (List/Bullet Support)
 
-- [ ] Implemented
-- [ ] User Tested
+- [x] Implemented
+- [x] User Tested
 
 **Priority: P2 - Medium**
 **Area:** Tasks
@@ -360,8 +360,8 @@ Task descriptions are plain text. When users enter multiple items, they appear i
 1. Add a simple markdown or rich-text editor (e.g., textarea with markdown preview, or a lightweight WYSIWYG)
 
 ### Acceptance Criteria
-- [ ] Line breaks in descriptions are preserved and displayed
-- [ ] Lists (bullet points) render vertically, not inline
+- [x] Line breaks in descriptions are preserved and displayed
+- [x] Lists (bullet points) render vertically, not inline
 
 ---
 
