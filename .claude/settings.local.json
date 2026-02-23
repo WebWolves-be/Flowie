@@ -8,7 +8,13 @@
       "Bash(dotnet ef migrations add:*)",
       "Bash(dotnet build:*)",
       "Bash(npm run build:*)",
-      "Bash(dotnet ef database update:*)"
+      "Bash(dotnet ef database update:*)",
+      "Bash(xargs ls:*)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install:*)",
+      "Bash(npm view:*)",
+      "Bash(npx ng build:*)"
     ]
   }
 }

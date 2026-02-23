@@ -27,9 +27,9 @@
             </span>
           </div>
           @if (project().description) {
-            <p class="text-sm text-gray-500 mb-3 max-w-2xl">
-              {{ project().description }}
-            </p>
+            <div class="text-sm text-gray-500 mb-3 max-w-2xl description-content"
+                 [innerHTML]="project().description">
+            </div>
           }
         </div>
         <div class="flex space-x-3">

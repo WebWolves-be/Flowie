@@ -311,8 +311,8 @@ Tasks and subtasks are displayed in a fixed order. Users want to manually reorde
 
 ## 9. Integration - Calendar Sync (Deadlines)
 
-- [ ] Implemented
-- [ ] User Tested
+- [x] Implemented
+- [x] User Tested
 
 **Priority: P1 - High**
 **Area:** Integrations
@@ -330,8 +330,8 @@ Task deadlines don't appear in users' calendars. They must manually track them.
 2. Generate `.ics` feed endpoint: `GET /api/calendar/{userId}/feed.ics`
 
 ### Acceptance Criteria
-- [ ] Users can subscribe to a calendar feed showing their task deadlines
-- [ ] Calendar updates when tasks/deadlines change
+- [x] Users can subscribe to a calendar feed showing their task deadlines
+- [x] Calendar updates when tasks/deadlines change
 
 ---
 

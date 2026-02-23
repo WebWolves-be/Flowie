@@ -9,6 +9,7 @@ import { NotificationService } from "../../../../core/services/notification.serv
 import { HttpErrorResponse } from "@angular/common/http";
 import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 import { catchError, EMPTY } from "rxjs";
+import { QuillEditorComponent } from "ngx-quill";
 
 export interface SaveTaskDialogData {
   mode: "create" | "update" | "create-subtask" | "update-subtask";
@@ -26,7 +27,7 @@ export interface SaveTaskDialogResult {
 @Component({
   selector: "app-save-task-dialog",
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, QuillEditorComponent],
   templateUrl: "./save-task-dialog.component.html",
   styleUrl: "./save-task-dialog.component.scss"
 })
@@ -45,6 +46,13 @@ export class SaveTaskDialogComponent implements OnInit {
   readonly employees = this.#employees;
 
   errorMessage = signal<string | null>(null);
+
+  editorModules = {
+    toolbar: [
+      ['bold', 'italic'],
+      [{ list: 'ordered' }, { list: 'bullet' }]
+    ]
+  };
 
   taskForm!: FormGroup<{
     title: FormControl<string>;

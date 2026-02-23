@@ -13,7 +13,11 @@
         </div>
         <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
       </div>
-      <p class="text-sm text-gray-500 mb-3">{{ task().description }}</p>
+      @if (task().description) {
+        <div class="text-sm text-gray-900 mb-3 description-content"
+             [innerHTML]="task().description">
+        </div>
+      }
       @if (!task().subtasks || task().subtasks!.length === 0) {
         <div id="task-metadata-row" class="flex items-center text-sm text-black">
           <span>{{ task().taskTypeName }}</span>
@@ -70,11 +74,11 @@
                       </span>
                     </div>
                     @if (subtask.description) {
-                      <p
-                        class="text-xs text-gray-500 mb-3"
-                        [class.text-gray-400]="isSubtaskDone(subtask)">
-                        {{ subtask.description }}
-                      </p>
+                      <div
+                        class="text-xs text-gray-900 mb-3 description-content"
+                        [class.text-gray-400]="isSubtaskDone(subtask)"
+                        [innerHTML]="subtask.description">
+                      </div>
                     }
                     <div class="flex items-center gap-2 text-xs mb-3">
                       <span class="text-gray-700">{{ subtask.taskTypeName }}</span>

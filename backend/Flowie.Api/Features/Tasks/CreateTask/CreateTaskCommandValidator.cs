@@ -16,11 +16,6 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
             .When(x => !string.IsNullOrWhiteSpace(x.Title))
             .WithMessage("Titel moet tussen 3 en 200 tekens zijn.");
 
-        RuleFor(x => x.Description)
-            .MaximumLength(4000)
-            .When(x => !string.IsNullOrEmpty(x.Description))
-            .WithMessage("Beschrijving mag niet langer dan 4000 tekens zijn.");
-
         RuleFor(x => x.DueDate)
             .Must(x => !x.HasValue || x.Value > DateOnly.FromDateTime(DateTime.Today))
             .WithMessage("Deadline moet in de toekomst zijn.");
