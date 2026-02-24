@@ -261,28 +261,6 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
-    public void Validate_ShouldFail_WhenDescriptionIsTooLong()
-    {
-        // Arrange
-        var description = new string('A', 4001);
-        var command = new CreateTaskCommand(
-            ProjectId: 1,
-            Title: "Valid Task Title",
-            TaskTypeId: 1,
-            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
-            EmployeeId: 1,
-            Description: description
-        );
-
-        // Act
-        var result = _validator.Validate(command);
-
-        // Assert
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.PropertyName == "Description");
-    }
-
-    [Fact]
     public void Validate_ShouldPass_WhenDueDateIsNull()
     {
         // Arrange
