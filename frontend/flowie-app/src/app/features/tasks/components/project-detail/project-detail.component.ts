@@ -1,18 +1,19 @@
-import { Component, input, output } from "@angular/core";
+import { Component, input, OnChanges, output, signal } from "@angular/core";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
 import { Project } from "../../models/project.model";
 import { Task } from "../../models/task.model";
 import { TaskStatus } from "../../models/task-status.enum";
+import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-project-detail",
   standalone: true,
-  imports: [TaskItemComponent],
+  imports: [TaskItemComponent, CdkDropList, CdkDrag],
   templateUrl: "./project-detail.component.html",
   styleUrl: "./project-detail.component.scss"
 })
-export class ProjectDetailComponent {
+export class ProjectDetailComponent implements OnChanges {
   readonly Company = Company;
 
   project = input.required<Project>();
@@ -22,18 +23,30 @@ export class ProjectDetailComponent {
   showOnlyMyTasks = input<boolean>(false);
 
   taskFilterToggled = output<boolean>();
-
   projectUpdateRequested = output<void>();
-
   taskCreateRequested = output<void>();
   taskUpdateRequested = output<number>();
   taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
-
   subtaskCreateRequested = output<number>();
   subtaskUpdateRequested = output<number>();
   subtaskDeleteRequested = output<number>();
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
+  taskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
+  subtaskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
+
+  orderedTasks = signal<Task[]>([]);
+
+  ngOnChanges() {
+    this.orderedTasks.set([...this.tasks()]);
+  }
+
+  onTaskDrop(event: CdkDragDrop<Task[]>) {
+    const tasks = [...this.orderedTasks()];
+    moveItemInArray(tasks, event.previousIndex, event.currentIndex);
+    this.orderedTasks.set(tasks);
+    this.taskReorderRequested.emit(tasks.map((t, i) => ({ taskId: t.taskId, displayOrder: i })));
+  }
 
   onToggleTaskFilter(val: boolean) {
     this.taskFilterToggled.emit(val);
@@ -73,5 +86,9 @@ export class ProjectDetailComponent {
 
   onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
     this.subtaskStatusChanged.emit(event);
+  }
+
+  onSubtaskReorder(items: { taskId: number; displayOrder: number }[]) {
+    this.subtaskReorderRequested.emit(items);
   }
 }

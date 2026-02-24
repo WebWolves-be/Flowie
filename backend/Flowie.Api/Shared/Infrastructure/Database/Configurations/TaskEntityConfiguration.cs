@@ -15,14 +15,13 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
             .IsRequired()
             .HasMaxLength(200);
             
-        builder.Property(e => e.Description)
-            .HasMaxLength(4000);
+        builder.Property(e => e.Description);
             
         builder.Property(e => e.Status)
             .HasConversion<string>();
             
         builder.Property(e => e.DueDate)
-            .IsRequired();
+            .IsRequired(false);
         
         builder.HasOne(t => t.Project)
             .WithMany(p => p.Tasks)
@@ -46,6 +45,6 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
             .WithMany(e => e.AssignedTasks)
             .HasForeignKey(t => t.EmployeeId)
             .OnDelete(DeleteBehavior.NoAction)
-            .IsRequired();
+            .IsRequired(false);
     }
 }

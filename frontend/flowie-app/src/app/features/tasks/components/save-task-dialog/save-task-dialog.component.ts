@@ -9,6 +9,7 @@ import { NotificationService } from "../../../../core/services/notification.serv
 import { HttpErrorResponse } from "@angular/common/http";
 import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 import { catchError, EMPTY } from "rxjs";
+import { QuillEditorComponent } from "ngx-quill";
 
 export interface SaveTaskDialogData {
   mode: "create" | "update" | "create-subtask" | "update-subtask";
@@ -26,7 +27,7 @@ export interface SaveTaskDialogResult {
 @Component({
   selector: "app-save-task-dialog",
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, QuillEditorComponent],
   templateUrl: "./save-task-dialog.component.html",
   styleUrl: "./save-task-dialog.component.scss"
 })
@@ -46,11 +47,18 @@ export class SaveTaskDialogComponent implements OnInit {
 
   errorMessage = signal<string | null>(null);
 
+  editorModules = {
+    toolbar: [
+      ['bold', 'italic'],
+      [{ list: 'ordered' }, { list: 'bullet' }]
+    ]
+  };
+
   taskForm!: FormGroup<{
     title: FormControl<string>;
     description: FormControl<string>;
     taskTypeId: FormControl<number | null>;
-    dueDate: FormControl<string>;
+    dueDate: FormControl<string | null>;
     employeeId: FormControl<number | null>;
   }>;
 
@@ -65,11 +73,8 @@ export class SaveTaskDialogComponent implements OnInit {
       title: new FormControl(task?.title ?? "", { nonNullable: true, validators: [Validators.required] }),
       description: new FormControl(task?.description ?? "", { nonNullable: true }),
       taskTypeId: new FormControl<number | null>(task?.taskTypeId ?? null, { validators: [Validators.required] }),
-      dueDate: new FormControl(this.#normalizeDate(task?.dueDate), {
-        nonNullable: true,
-        validators: [Validators.required]
-      }),
-      employeeId: new FormControl<number | null>(task?.employeeId ?? null, { validators: [Validators.required] })
+      dueDate: new FormControl<string | null>(this.#normalizeDate(task?.dueDate)),
+      employeeId: new FormControl<number | null>(task?.employeeId ?? null)
     });
 
     if (this.#taskTypes().length === 0) {
@@ -140,8 +145,8 @@ export class SaveTaskDialogComponent implements OnInit {
       title: formValue.title!,
       description: formValue.description || undefined,
       taskTypeId: formValue.taskTypeId!,
-      dueDate: formValue.dueDate!,
-      employeeId: formValue.employeeId!,
+      dueDate: formValue.dueDate || undefined,
+      employeeId: formValue.employeeId ?? undefined,
       parentTaskId: this.isSubtask ? this.#dialogData.parentTaskId : undefined
     };
 
@@ -170,8 +175,8 @@ export class SaveTaskDialogComponent implements OnInit {
       title: formValue.title!,
       description: formValue.description || undefined,
       taskTypeId: this.hasSubtasks() ? task.taskTypeId : formValue.taskTypeId!,
-      dueDate: this.hasSubtasks() ? task.dueDate : formValue.dueDate!,
-      employeeId: this.hasSubtasks() ? task.employeeId : formValue.employeeId!,
+      dueDate: this.hasSubtasks() ? (task.dueDate ?? undefined) : (formValue.dueDate || undefined),
+      employeeId: this.hasSubtasks() ? (task.employeeId ?? undefined) : (formValue.employeeId ?? undefined),
       status: task.status
     };
 
@@ -204,8 +209,8 @@ export class SaveTaskDialogComponent implements OnInit {
       employeeIdControl?.clearValidators();
     } else {
       taskTypeControl?.setValidators([Validators.required]);
-      dueDateControl?.setValidators([Validators.required]);
-      employeeIdControl?.setValidators([Validators.required]);
+      dueDateControl?.clearValidators();
+      employeeIdControl?.clearValidators();
     }
 
     taskTypeControl?.updateValueAndValidity();

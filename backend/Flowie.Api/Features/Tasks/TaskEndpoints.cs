@@ -2,6 +2,7 @@ using Flowie.Api.Features.Tasks.CreateTask;
 using Flowie.Api.Features.Tasks.DeleteTask;
 using Flowie.Api.Features.Tasks.GetTaskById;
 using Flowie.Api.Features.Tasks.GetTasks;
+using Flowie.Api.Features.Tasks.ReorderTasks;
 using Flowie.Api.Features.Tasks.UpdateTask;
 using Flowie.Api.Features.Tasks.UpdateTaskStatus;
 
@@ -23,5 +24,6 @@ internal static class TaskEndpoints
         UpdateTaskEndpoint.Map(tasks);
         UpdateTaskStatusEndpoint.Map(tasks);
         DeleteTaskEndpoint.Map(tasks);
+        ReorderTasksEndpoint.Map(tasks);
     }
 }

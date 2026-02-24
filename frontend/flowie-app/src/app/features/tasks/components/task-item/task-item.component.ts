@@ -1,17 +1,18 @@
-import { Component, computed, input, output, signal } from "@angular/core";
+import { Component, computed, input, OnChanges, output, signal } from "@angular/core";
 import { DatePipe, NgClass } from "@angular/common";
 import { Task } from "../../models/task.model";
 import { Subtask } from "../../models/subtask.model";
 import { TaskStatus } from "../../models/task-status.enum";
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-task-item",
   standalone: true,
-  imports: [NgClass, DatePipe],
+  imports: [NgClass, DatePipe, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: "./task-item.component.html",
   styleUrl: "./task-item.component.scss"
 })
-export class TaskItemComponent {
+export class TaskItemComponent implements OnChanges {
   task = input.required<Task>();
   isLast = input<boolean>(false);
 
@@ -23,13 +24,27 @@ export class TaskItemComponent {
   subtaskUpdateRequested = output<number>();
   subtaskDeleteRequested = output<number>();
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
+  subtaskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
 
   showMenu = signal<boolean>(false);
   showSubtaskMenu = signal<number | null>(null);
+  orderedSubtasks = signal<Subtask[]>([]);
+
+  ngOnChanges() {
+    this.orderedSubtasks.set([...(this.task().subtasks ?? [])]);
+  }
+
+  onSubtaskDrop(event: CdkDragDrop<Subtask[]>) {
+    const subtasks = [...this.orderedSubtasks()];
+    moveItemInArray(subtasks, event.previousIndex, event.currentIndex);
+    this.orderedSubtasks.set(subtasks);
+    this.subtaskReorderRequested.emit(subtasks.map((s, i) => ({ taskId: s.taskId, displayOrder: i })));
+  }
 
   isPending = computed(() => this.task().status === TaskStatus.Pending);
   isOngoing = computed(() => this.task().status === TaskStatus.Ongoing);
   isDone = computed(() => this.task().status === TaskStatus.Done);
+  isWaitingOn = computed(() => this.task().status === TaskStatus.WaitingOn);
 
   taskProgress = computed(() => {
     const task = this.task();
@@ -46,6 +61,7 @@ export class TaskItemComponent {
     const status = this.task().status;
     if (status === TaskStatus.Done) return "progress-100";
     if (status === TaskStatus.Pending) return "progress-0";
+    if (status === TaskStatus.WaitingOn) return "progress-waiting";
     return "progress-default";
   });
 
@@ -53,6 +69,7 @@ export class TaskItemComponent {
     const status = this.task().status;
     if (status === TaskStatus.Done) return "fa-check";
     if (status === TaskStatus.Pending) return "fa-times";
+    if (status === TaskStatus.WaitingOn) return "fa-clock";
     return "fa-question";
   });
 
@@ -72,6 +89,10 @@ export class TaskItemComponent {
 
   isSubtaskOngoing(subtask: Subtask): boolean {
     return subtask.status === TaskStatus.Ongoing;
+  }
+
+  isSubtaskWaitingOn(subtask: Subtask): boolean {
+    return subtask.status === TaskStatus.WaitingOn;
   }
 
   isSubtaskOverdue(subtask: Subtask): boolean {
@@ -107,6 +128,10 @@ export class TaskItemComponent {
     this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Done });
   }
 
+  onWaitTask() {
+    this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.WaitingOn });
+  }
+
   onReopenTask() {
     this.taskStatusChanged.emit({ taskId: this.task().taskId, status: TaskStatus.Pending });
   }
@@ -117,6 +142,10 @@ export class TaskItemComponent {
 
   onCompleteSubtask(subtask: Subtask) {
     this.subtaskStatusChanged.emit({ taskId: subtask.taskId, status: TaskStatus.Done });
+  }
+
+  onWaitSubtask(subtask: Subtask) {
+    this.subtaskStatusChanged.emit({ taskId: subtask.taskId, status: TaskStatus.WaitingOn });
   }
 
   onReopenSubtask(subtask: Subtask) {
@@ -136,5 +165,22 @@ export class TaskItemComponent {
   onDeleteSubtask(subtask: Subtask) {
     this.showSubtaskMenu.set(null);
     this.subtaskDeleteRequested.emit(subtask.taskId);
+  }
+
+  waitingDays = computed(() => {
+    const since = this.task().waitingSince;
+    if (!since) return null;
+    return Math.floor((Date.now() - new Date(since).getTime()) / 86_400_000);
+  });
+
+  subtaskWaitingDays(subtask: Subtask): number | null {
+    if (!subtask.waitingSince) return null;
+    return Math.floor((Date.now() - new Date(subtask.waitingSince).getTime()) / 86_400_000);
+  }
+
+  daysAgo(date: string | Date): string {
+    const days = Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
+    if (days === 0) return "";
+    return `(${days}d)`;
   }
 }

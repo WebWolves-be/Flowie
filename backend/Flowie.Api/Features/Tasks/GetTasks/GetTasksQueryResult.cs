@@ -18,9 +18,11 @@ public record TaskDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? CompletedAt,
+    DateTimeOffset? WaitingSince,
     int SubtaskCount,
     int CompletedSubtaskCount,
-    IEnumerable<SubtaskDto> Subtasks);
+    IEnumerable<SubtaskDto> Subtasks,
+    int DisplayOrder);
 
 public record SubtaskDto(
     int TaskId,
@@ -35,5 +37,7 @@ public record SubtaskDto(
     string? EmployeeName,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt,
-    DateTimeOffset? CompletedAt
+    DateTimeOffset? CompletedAt,
+    DateTimeOffset? WaitingSince,
+    int DisplayOrder
 );

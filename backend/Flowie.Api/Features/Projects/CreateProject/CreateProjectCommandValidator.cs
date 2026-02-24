@@ -33,7 +33,7 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
 
         RuleFor(x => x.Company)
             .IsInEnum()
-            .WithMessage("Bedrijf moet 'Immoseed' of 'Novara' zijn.");
+            .WithMessage("Ongeldig bedrijf.");
     }
 
     private Func<string, CancellationToken, Task<bool>> TitleIsUnique()

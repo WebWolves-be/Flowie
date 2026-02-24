@@ -27,16 +27,25 @@ internal class UpdateTaskStatusCommandHandler(
         {
             task.StartedAt = null;
             task.CompletedAt = null;
+            task.WaitingSince = null;
         }
         else if (request.Status == TaskStatus.Ongoing)
         {
             task.StartedAt = timeProvider.GetUtcNow();
             task.CompletedAt = null;
+            task.WaitingSince = null;
         }
         else if (request.Status is TaskStatus.Done)
         {
             task.StartedAt ??= timeProvider.GetUtcNow();
             task.CompletedAt = timeProvider.GetUtcNow();
+            task.WaitingSince = null;
+        }
+        else if (request.Status == TaskStatus.WaitingOn)
+        {
+            task.StartedAt ??= timeProvider.GetUtcNow();
+            task.CompletedAt = null;
+            task.WaitingSince = timeProvider.GetUtcNow();
         }
 
         // Update parent task status if this is a subtask
@@ -64,7 +73,7 @@ internal class UpdateTaskStatusCommandHandler(
         {
             parentTask.Status = TaskStatus.Done;
         }
-        else if (subtasks.Any(t => t.Status == TaskStatus.Ongoing))
+        else if (subtasks.Any(t => t.Status == TaskStatus.Ongoing || t.Status == TaskStatus.WaitingOn))
         {
             parentTask.Status = TaskStatus.Ongoing;
         }

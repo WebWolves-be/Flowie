@@ -13,20 +13,31 @@
         </div>
         <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
       </div>
-      <p class="text-sm text-gray-500 mb-3">{{ task().description }}</p>
+      @if (task().description) {
+        <div class="text-sm text-gray-900 mb-3 description-content"
+             [innerHTML]="task().description">
+        </div>
+      }
       @if (!task().subtasks || task().subtasks!.length === 0) {
-        <div class="flex items-center text-sm text-black">
+        <div id="task-metadata-row" class="flex items-center text-sm text-black">
           <span>{{ task().taskTypeName }}</span>
+          @if (task().employeeName) {
+            <span class="text-blue-600 font-bold mx-3">|</span>
+            <span class="inline-flex items-center">
+              {{ task().employeeName }}
+            </span>
+          }
           <span class="text-blue-600 font-bold mx-3">|</span>
           <span
-            [class.text-red-600]="isTaskOverdue()"
-            [class.font-semibold]="isTaskOverdue()">
-            Deadline: {{ task().dueDate | date:'d MMMM y':'':'nl-NL' }}
+            [class.text-red-600]="isTaskOverdue()">
+            Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
           <span class="text-blue-600 font-bold mx-3">|</span>
-          <span class="inline-flex items-center">
-            {{ task().employeeName }}
-          </span>
+          <span>Aangemaakt: {{ task().createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(task().createdAt) }}</span>
+          @if (isWaitingOn()) {
+            <span class="text-blue-600 font-bold mx-3">|</span>
+            <span>Wachten sinds {{ waitingDays() === 0 ? 'vandaag' : waitingDays() + 'd' }}</span>
+          }
         </div>
       }
       @if (task().subtasks && task().subtasks!.length > 0) {
@@ -34,15 +45,24 @@
           <h4 class="text-sm font-medium text-gray-700 mb-2">
             Subtaken ({{ taskProgress() }}% voltooid)
           </h4>
-          <div class="space-y-3">
-            @for (subtask of task().subtasks!; track $index) {
+          <div
+            class="space-y-3"
+            cdkDropList
+            (cdkDropListDropped)="onSubtaskDrop($event)">
+            @for (subtask of orderedSubtasks(); track subtask.taskId) {
               <div
-                class="px-3 py-2 rounded-r"
+                cdkDrag
+                class="px-3 py-2 rounded-r relative"
                 [class.border-l-4]="true"
                 [class.border-green-400]="isSubtaskDone(subtask)"
                 [class.bg-green-50]="isSubtaskDone(subtask)"
                 [class.border-gray-300]="!isSubtaskDone(subtask)"
                 [class.bg-white]="!isSubtaskDone(subtask)">
+                <div cdkDragHandle class="cursor-grab active:cursor-grabbing absolute right-1 bottom-1 text-gray-300 hover:text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg>
+                </div>
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center justify-between mb-1">
@@ -54,24 +74,31 @@
                       </span>
                     </div>
                     @if (subtask.description) {
-                      <p
-                        class="text-xs text-gray-500 mb-3"
-                        [class.text-gray-400]="isSubtaskDone(subtask)">
-                        {{ subtask.description }}
-                      </p>
+                      <div
+                        class="text-xs text-gray-900 mb-3 description-content"
+                        [class.text-gray-400]="isSubtaskDone(subtask)"
+                        [innerHTML]="subtask.description">
+                      </div>
                     }
                     <div class="flex items-center gap-2 text-xs mb-3">
                       <span class="text-gray-700">{{ subtask.taskTypeName }}</span>
+                      @if (subtask.employeeName) {
+                        <span class="text-blue-600 font-bold">|</span>
+                        <span class="text-gray-700">{{ subtask.employeeName }}</span>
+                      }
                       <span class="text-blue-600 font-bold">|</span>
                       <span
                         class="font-medium"
                         [class.text-gray-600]="isSubtaskDone(subtask)"
                         [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
-                        [class.font-semibold]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
-                      >Deadline: {{ subtask.dueDate | date:'d MMMM y':'':'nl-NL' }}</span>
+                      >Deadline: {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}</span>
                       <span class="text-blue-600 font-bold">|</span>
-                      <span class="text-gray-700">{{ subtask.employeeName }}</span>
+                      <span class="text-gray-700">Aangemaakt: {{ subtask.createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(subtask.createdAt) }}</span>
+                      @if (isSubtaskWaitingOn(subtask)) {
+                        <span class="text-blue-600 font-bold">|</span>
+                        <span class="text-gray-700">Wachten sinds {{ subtaskWaitingDays(subtask) === 0 ? 'vandaag' : subtaskWaitingDays(subtask) + 'd' }}</span>
+                      }
                     </div>
                     <div class="flex items-center gap-2">
                       @if (isSubtaskPending(subtask)) {
@@ -89,6 +116,29 @@
                           onmouseover="this.style.backgroundColor='#D1FAE5'"
                           onmouseout="this.style.backgroundColor='transparent'">
                           Klaar
+                        </button>
+                        <button
+                          (click)="onWaitSubtask(subtask)"
+                          class="border px-3 py-1 rounded text-sm bg-transparent"
+                          style="border-color: #D97706; color: #D97706;"
+                          onmouseover="this.style.backgroundColor='#FEF3C7'"
+                          onmouseout="this.style.backgroundColor='transparent'">
+                          Wachten Op
+                        </button>
+                      }
+                      @if (isSubtaskWaitingOn(subtask)) {
+                        <button
+                          (click)="onCompleteSubtask(subtask)"
+                          class="border px-3 py-1 rounded text-sm bg-transparent"
+                          style="border-color: #10B981; color: #10B981;"
+                          onmouseover="this.style.backgroundColor='#D1FAE5'"
+                          onmouseout="this.style.backgroundColor='transparent'">
+                          Klaar
+                        </button>
+                        <button
+                          (click)="onReopenSubtask(subtask)"
+                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          Heropenen
                         </button>
                       }
                       @if (isSubtaskDone(subtask)) {
@@ -136,30 +186,55 @@
         </div>
       }
       @if (!task().subtasks || task().subtasks!.length === 0) {
-        @if (isPending()) {
-          <button
-            (click)="onStartTask()"
-            class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
-            Beginnen
-          </button>
-        }
-        @if (isOngoing()) {
-          <button
-            (click)="onCompleteTask()"
-            class="border px-3 py-1 rounded text-sm bg-transparent mt-3"
-            style="border-color: #10B981; color: #10B981;"
-            onmouseover="this.style.backgroundColor='#D1FAE5'"
-            onmouseout="this.style.backgroundColor='transparent'">
-            Klaar
-          </button>
-        }
-        @if (isDone()) {
-          <button
-            (click)="onReopenTask()"
-            class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50 mt-3">
-            Openzetten
-          </button>
-        }
+        <div class="flex items-center gap-2 mt-3">
+          @if (isPending()) {
+            <button
+              (click)="onStartTask()"
+              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              Beginnen
+            </button>
+          }
+          @if (isOngoing()) {
+            <button
+              (click)="onCompleteTask()"
+              class="border px-3 py-1 rounded text-sm bg-transparent"
+              style="border-color: #10B981; color: #10B981;"
+              onmouseover="this.style.backgroundColor='#D1FAE5'"
+              onmouseout="this.style.backgroundColor='transparent'">
+              Klaar
+            </button>
+            <button
+              (click)="onWaitTask()"
+              class="border px-3 py-1 rounded text-sm bg-transparent"
+              style="border-color: #D97706; color: #D97706;"
+              onmouseover="this.style.backgroundColor='#FEF3C7'"
+              onmouseout="this.style.backgroundColor='transparent'">
+              Wachten Op
+            </button>
+          }
+          @if (isWaitingOn()) {
+            <button
+              (click)="onCompleteTask()"
+              class="border px-3 py-1 rounded text-sm bg-transparent"
+              style="border-color: #10B981; color: #10B981;"
+              onmouseover="this.style.backgroundColor='#D1FAE5'"
+              onmouseout="this.style.backgroundColor='transparent'">
+              Klaar
+            </button>
+            <button
+              (click)="onReopenTask()"
+              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              Heropenen
+            </button>
+          }
+          @if (isDone()) {
+            <button
+              (click)="onReopenTask()"
+              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              Openzetten
+            </button>
+          }
+        </div>
       }
     </div>
 

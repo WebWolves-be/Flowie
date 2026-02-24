@@ -233,7 +233,8 @@ export class TasksPage implements OnInit {
     const statusMessages = {
       [TaskStatus.Ongoing]: "Taak gestart",
       [TaskStatus.Done]: "Taak voltooid",
-      [TaskStatus.Pending]: "Taak heropend"
+      [TaskStatus.Pending]: "Taak heropend",
+      [TaskStatus.WaitingOn]: "Taak in wacht gezet"
     };
 
     this.#taskFacade
@@ -254,11 +255,20 @@ export class TasksPage implements OnInit {
       });
   }
 
+  onTaskReorder(items: { taskId: number; displayOrder: number }[]) {
+    this.#taskFacade.reorderTasks(items).subscribe();
+  }
+
+  onSubtaskReorder(items: { taskId: number; displayOrder: number }[]) {
+    this.#taskFacade.reorderTasks(items).subscribe();
+  }
+
   onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
     const statusMessages = {
       [TaskStatus.Ongoing]: "Subtaak gestart",
       [TaskStatus.Done]: "Subtaak voltooid",
-      [TaskStatus.Pending]: "Subtaak heropend"
+      [TaskStatus.Pending]: "Subtaak heropend",
+      [TaskStatus.WaitingOn]: "Subtaak in wacht gezet"
     };
 
     this.#taskFacade
@@ -335,7 +345,8 @@ export class TasksPage implements OnInit {
       completedAt: subtask.completedAt,
       subtaskCount: 0,
       completedSubtaskCount: 0,
-      subtasks: []
+      subtasks: [],
+      displayOrder: subtask.displayOrder
     };
 
     this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
@@ -374,7 +385,8 @@ export class TasksPage implements OnInit {
       completedAt: subtask.completedAt,
       subtaskCount: 0,
       completedSubtaskCount: 0,
-      subtasks: []
+      subtasks: [],
+      displayOrder: subtask.displayOrder
     };
 
     const dialogRef = this.#dialog.open<boolean>(DeleteTaskDialogComponent, {

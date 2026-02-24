@@ -34,6 +34,26 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
+    public void Validate_ShouldPass_WhenEmployeeIdIsNull()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            ProjectId: 1,
+            Title: "Valid Task Title",
+            TaskTypeId: 1,
+            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            EmployeeId: null
+        );
+
+        // Act
+        var result = _validator.Validate(command);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
     public void Validate_ShouldPass_WhenDescriptionIsNull()
     {
         // Arrange
@@ -260,6 +280,26 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         // Assert
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Description");
+    }
+
+    [Fact]
+    public void Validate_ShouldPass_WhenDueDateIsNull()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            ProjectId: 1,
+            Title: "Valid Task Title",
+            TaskTypeId: 1,
+            DueDate: null,
+            EmployeeId: 1
+        );
+
+        // Act
+        var result = _validator.Validate(command);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
     }
 
     [Fact]

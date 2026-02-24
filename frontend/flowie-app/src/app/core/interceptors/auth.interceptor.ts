@@ -26,9 +26,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !isAuthEndpoint) {
         if (router.url !== "/login") {
-          sessionStorage.removeItem("access_token");
-          sessionStorage.removeItem("refresh_token");
-          sessionStorage.removeItem("expires_at");
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("expires_at");
           router.navigate(["/login"]);
         }
       }

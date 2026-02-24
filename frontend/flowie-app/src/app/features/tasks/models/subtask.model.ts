@@ -7,11 +7,13 @@ export interface Subtask {
   description?: string | null;
   taskTypeId: number;
   taskTypeName: string;
-  dueDate: string;
+  dueDate?: string | null;
   status: TaskStatus;
-  employeeId: number;
-  employeeName: string;
+  employeeId?: number | null;
+  employeeName?: string | null;
   createdAt: string;
   updatedAt?: string | null;
   completedAt?: string | null;
+  waitingSince?: string | null;
+  displayOrder: number;
 }

@@ -335,6 +335,227 @@ public class UpdateTaskStatusCommandHandlerTests : BaseTestClass
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldUpdateTaskToWaitingOn_AndSetStartedAt()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            Status = TaskStatus.Ongoing,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id,
+            StartedAt = DateTimeOffset.UtcNow.AddHours(-1)
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        var existingStartedAt = task.StartedAt;
+        var currentTime = DateTimeOffset.UtcNow;
+        A.CallTo(() => _timeProvider.GetUtcNow()).Returns(currentTime);
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.WaitingOn);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Equal(TaskStatus.WaitingOn, updatedTask.Status);
+        Assert.Equal(existingStartedAt, updatedTask.StartedAt);
+        Assert.Null(updatedTask.CompletedAt);
+        Assert.Equal(currentTime, updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldClearWaitingSince_WhenTransitioningToDone()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            Status = TaskStatus.WaitingOn,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            WaitingSince = DateTimeOffset.UtcNow.AddDays(-2)
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.Done);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldClearWaitingSince_WhenTransitioningToPending()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            Status = TaskStatus.WaitingOn,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            WaitingSince = DateTimeOffset.UtcNow.AddDays(-1)
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.Pending);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldClearWaitingSince_WhenTransitioningToOngoing()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            Status = TaskStatus.WaitingOn,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            WaitingSince = DateTimeOffset.UtcNow.AddDays(-3)
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        A.CallTo(() => _timeProvider.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.Ongoing);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldNotSetWaitingSince_WhenTransitioningToOngoing()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        A.CallTo(() => _timeProvider.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.Ongoing);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldNotSetWaitingSince_WhenTransitioningToDone()
+    {
+        // Arrange
+        var task = new Shared.Domain.Entities.Task
+        {
+            Title = "Test Task",
+            Status = TaskStatus.Ongoing,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            StartedAt = DateTimeOffset.UtcNow.AddHours(-1)
+        };
+        DatabaseContext.Tasks.Add(task);
+        await DatabaseContext.SaveChangesAsync();
+
+        A.CallTo(() => _timeProvider.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
+        var command = new UpdateTaskStatusCommand(task.Id, TaskStatus.Done);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedTask = await DatabaseContext.Tasks.FindAsync(task.Id);
+        Assert.NotNull(updatedTask);
+        Assert.Null(updatedTask.WaitingSince);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldKeepParentTaskOngoing_WhenAnySubtaskIsWaitingOn()
+    {
+        // Arrange
+        var parentTask = new Shared.Domain.Entities.Task
+        {
+            Title = "Parent Task",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id
+        };
+        DatabaseContext.Tasks.Add(parentTask);
+        await DatabaseContext.SaveChangesAsync();
+
+        var subtask1 = new Shared.Domain.Entities.Task
+        {
+            Title = "Subtask 1",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
+            Status = TaskStatus.Pending,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id,
+            ParentTaskId = parentTask.Id
+        };
+
+        var subtask2 = new Shared.Domain.Entities.Task
+        {
+            Title = "Subtask 2",
+            DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+            Status = TaskStatus.Ongoing,
+            ProjectId = _project.Id,
+            TaskTypeId = _taskType.Id,
+            EmployeeId = _employee.Id,
+            ParentTaskId = parentTask.Id
+        };
+
+        DatabaseContext.Tasks.AddRange(subtask1, subtask2);
+        await DatabaseContext.SaveChangesAsync();
+
+        var currentTime = DateTimeOffset.UtcNow;
+        A.CallTo(() => _timeProvider.GetUtcNow()).Returns(currentTime);
+
+        var command = new UpdateTaskStatusCommand(subtask2.Id, TaskStatus.WaitingOn);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedParentTask = await DatabaseContext.Tasks.FindAsync(parentTask.Id);
+        Assert.NotNull(updatedParentTask);
+        Assert.Equal(TaskStatus.Ongoing, updatedParentTask.Status);
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldKeepParentTaskOngoing_WhenSubtasksHaveMixedStatus()
     {
         // Arrange

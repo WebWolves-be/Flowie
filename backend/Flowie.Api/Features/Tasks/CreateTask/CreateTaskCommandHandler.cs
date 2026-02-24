@@ -10,6 +10,10 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
 {
     public async Task<Unit> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
+        var maxDisplayOrder = await databaseContext.Tasks
+            .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == request.ParentTaskId)
+            .MaxAsync(t => (int?)t.DisplayOrder, cancellationToken) ?? -1;
+
         var task = new Task
         {
             Title = request.Title,
@@ -19,7 +23,8 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
             ProjectId = request.ProjectId,
             TaskTypeId = request.TaskTypeId,
             EmployeeId = request.EmployeeId,
-            ParentTaskId = request.ParentTaskId
+            ParentTaskId = request.ParentTaskId,
+            DisplayOrder = maxDisplayOrder + 1
         };
 
         databaseContext.Tasks.Add(task);
@@ -44,7 +49,7 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
             .Where(t => t.ParentTaskId == parentTaskId)
             .MaxAsync(t => (DateOnly?)t.DueDate, cancellationToken);
 
-        if (maxSubtaskDueDate.HasValue && maxSubtaskDueDate.Value > parentTask.DueDate)
+        if (maxSubtaskDueDate.HasValue && (!parentTask.DueDate.HasValue || maxSubtaskDueDate.Value > parentTask.DueDate.Value))
         {
             parentTask.DueDate = maxSubtaskDueDate.Value;
         }

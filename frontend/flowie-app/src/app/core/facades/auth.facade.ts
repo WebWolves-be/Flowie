@@ -51,7 +51,7 @@ export class AuthFacade {
   }
 
   logout(): Observable<void> {
-    const refreshToken = sessionStorage.getItem("refresh_token");
+    const refreshToken = localStorage.getItem("refresh_token");
 
     if (refreshToken) {
       const request: LogoutRequest = { refreshToken };
@@ -74,7 +74,7 @@ export class AuthFacade {
   }
 
   refreshToken(): Observable<void> {
-    const refreshToken = sessionStorage.getItem("refresh_token");
+    const refreshToken = localStorage.getItem("refresh_token");
 
     if (!refreshToken) {
       this.#clearAuthState();
@@ -97,13 +97,13 @@ export class AuthFacade {
   }
 
   getAccessToken(): string | null {
-    return sessionStorage.getItem("access_token");
+    return localStorage.getItem("access_token");
   }
 
   #storeTokens(response: TokenResponse): void {
-    sessionStorage.setItem("access_token", response.accessToken);
-    sessionStorage.setItem("refresh_token", response.refreshToken);
-    sessionStorage.setItem("expires_at", response.expiresAt);
+    localStorage.setItem("access_token", response.accessToken);
+    localStorage.setItem("refresh_token", response.refreshToken);
+    localStorage.setItem("expires_at", response.expiresAt);
   }
 
   #updateAuthState(response: TokenResponse): void {
@@ -116,8 +116,8 @@ export class AuthFacade {
   }
 
   #restoreAuthState(): void {
-    const accessToken = sessionStorage.getItem("access_token");
-    const expiresAt = sessionStorage.getItem("expires_at");
+    const accessToken = localStorage.getItem("access_token");
+    const expiresAt = localStorage.getItem("expires_at");
 
     if (!accessToken || !expiresAt) {
       return;
@@ -145,9 +145,9 @@ export class AuthFacade {
       this.#refreshTimerId = null;
     }
 
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("refresh_token");
-    sessionStorage.removeItem("expires_at");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("expires_at");
 
     this.#currentUser.set(null);
     this.#isAuthenticated.set(false);

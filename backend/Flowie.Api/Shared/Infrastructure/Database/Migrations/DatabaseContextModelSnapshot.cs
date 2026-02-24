@@ -33,6 +33,9 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("CalendarFeedToken")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -59,6 +62,10 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CalendarFeedToken")
+                        .IsUnique()
+                        .HasFilter("[CalendarFeedToken] IS NOT NULL");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -240,10 +247,13 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<DateOnly>("DueDate")
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("DueDate")
                         .HasColumnType("date");
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<int?>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -271,6 +281,9 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("WaitingSince")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
@@ -476,8 +489,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                     b.HasOne("Flowie.Api.Shared.Domain.Entities.Employee", "Employee")
                         .WithMany("AssignedTasks")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Flowie.Api.Shared.Domain.Entities.Task", "ParentTask")
                         .WithMany("Subtasks")

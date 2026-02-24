@@ -1,4 +1,5 @@
 using Flowie.Api.Features.Auth;
+using Flowie.Api.Features.Calendar;
 using Flowie.Api.Features.Employees;
 using Flowie.Api.Features.Projects;
 using Flowie.Api.Features.Tasks;
@@ -134,6 +135,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health");
 
 app.MapAuthEndpoints();
+app.MapCalendarEndpoints();
 app.MapEmployeeEndpoints();
 app.MapProjectEndpoints();
 app.MapTaskEndpoints();
