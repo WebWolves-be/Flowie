@@ -1,0 +1,9 @@
+{
+  "browser": {
+    "ignoreHTTPSErrors": true
+  },
+  "ignoreHTTPSErrors": true,
+  "contextOptions": {
+    "ignoreHTTPSErrors": true
+  }
+}

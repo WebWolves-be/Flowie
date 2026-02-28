@@ -314,3 +314,34 @@ dotnet ef database update
 ```
 
 Migrations are applied automatically on startup via `db.Database.Migrate()`.
+
+---
+
+## Self-Validation: API Testing
+
+After modifying endpoints, validation, or data logic, **always verify via API calls**.
+Backend runs at `http://localhost:5229`. Swagger UI at `http://localhost:5229/swagger`.
+
+### Authenticate
+
+```bash
+curl -X POST http://localhost:5229/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"claude.code@testing.be\",\"password\":\"iK845)%%U$UYdn25\"}"
+```
+
+Save the `accessToken` from the response for subsequent requests.
+
+### Call Authenticated Endpoints
+
+```bash
+curl http://localhost:5229/api/projects ^
+  -H "Authorization: Bearer <accessToken>"
+```
+
+### What to Verify
+
+1. **New endpoint** → Call it, check status code and response shape
+2. **Validation change** → Send invalid data, verify 400 response with correct Dutch error messages
+3. **Query change** → Call GET, verify returned data matches expectations
+4. **Delete/soft-delete** → Delete, then GET to confirm it's gone (or filtered)

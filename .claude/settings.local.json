@@ -14,7 +14,22 @@
       "WebFetch(domain:www.npmjs.com)",
       "Bash(npm install:*)",
       "Bash(npm view:*)",
-      "Bash(npx ng build:*)"
+      "Bash(npx ng build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(findstr:*)",
+      "Bash(Select-String -Pattern \"Failed|Assert|Exception|Expected|Error Message\")",
+      "Bash(Select-Object -First 30)",
+      "Bash(playwright-cli open:*)",
+      "Bash(playwright-cli goto:*)",
+      "Bash(playwright-cli close:*)",
+      "Bash(git -C \"C:\\\\Users\\\\Web Wolves\\\\Projects\\\\Github\\\\Flowie\" log --oneline -20)",
+      "Bash(playwright-cli run-code:*)",
+      "Bash(where:*)",
+      "Skill(playwright-cli)",
+      "Bash(npx playwright-cli:*)",
+      "Bash(powershell -Command \"$content = Get-Content ''.playwright/test-task-creation.js'' -Raw; npx playwright-cli run-code $content\")",
+      "Bash(git -C C:UsersWeb WolvesProjectsGithubFlowie diff --name-only)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
