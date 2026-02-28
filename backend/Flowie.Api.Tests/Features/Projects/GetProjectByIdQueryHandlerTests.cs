@@ -79,4 +79,26 @@ public class GetProjectByIdQueryHandlerTests : BaseTestClass
         Assert.Null(result.Description);
         Assert.Equal(Company.NovaraRealEstate, result.Company);
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldLoadSections_WhenProjectHasSections()
+    {
+        // Arrange
+        var project = new Project { Title = "Project With Sections", Company = Company.Immoseed };
+        DatabaseContext.Projects.Add(project);
+        await DatabaseContext.SaveChangesAsync();
+
+        var section = new Section { Title = "Test Section", ProjectId = project.Id, DisplayOrder = 0 };
+        DatabaseContext.Sections.Add(section);
+        await DatabaseContext.SaveChangesAsync();
+
+        var query = new GetProjectByIdQuery(project.Id);
+
+        // Act
+        var result = await _sut.Handle(query, CancellationToken.None);
+
+        // Assert - verify the query doesn't throw (sections are eagerly loaded via Include)
+        Assert.NotNull(result);
+        Assert.Equal(project.Id, result.ProjectId);
+    }
 }

@@ -17,7 +17,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -38,7 +38,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -58,7 +58,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -79,7 +79,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -100,7 +100,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -121,7 +121,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "AB",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -141,7 +141,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "ABC",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -162,7 +162,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         // Arrange
         var title = new string('A', 200);
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: title,
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -183,7 +183,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         // Arrange
         var title = new string('A', 201);
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: title,
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -203,7 +203,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: null!,
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -223,7 +223,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -244,7 +244,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         // Arrange
         var description = new string('A', 4000);
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
@@ -265,7 +265,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: null,
@@ -285,7 +285,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today),
@@ -305,7 +305,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
@@ -325,7 +325,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            ProjectId: 1,
+            SectionId: 1,
             Title: "Valid Task Title",
             TaskTypeId: 1,
             DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),

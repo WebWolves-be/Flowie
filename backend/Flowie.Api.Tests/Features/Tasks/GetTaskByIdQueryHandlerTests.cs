@@ -11,6 +11,7 @@ public class GetTaskByIdQueryHandlerTests : BaseTestClass
 {
     private readonly GetTaskByIdQueryHandler _sut;
     private readonly Project _project;
+    private readonly Section _section;
     private readonly TaskType _taskType;
     private readonly Employee _employee;
 
@@ -30,6 +31,15 @@ public class GetTaskByIdQueryHandlerTests : BaseTestClass
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);
         DatabaseContext.SaveChanges();
+
+        _section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = _project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(_section);
+        DatabaseContext.SaveChanges();
     }
 
 
@@ -43,7 +53,7 @@ public class GetTaskByIdQueryHandlerTests : BaseTestClass
             Description = "Test Description",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -84,7 +94,7 @@ public class GetTaskByIdQueryHandlerTests : BaseTestClass
             Description = null,
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Ongoing,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -101,3 +111,4 @@ public class GetTaskByIdQueryHandlerTests : BaseTestClass
         Assert.Null(result.Description);
     }
 }
+

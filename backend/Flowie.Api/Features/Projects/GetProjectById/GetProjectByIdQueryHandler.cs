@@ -13,7 +13,7 @@ internal class GetProjectByIdQueryHandler(IDatabaseContext databaseContext) : IR
         var project = await databaseContext
             .Projects
             .AsNoTracking()
-            .Include(p => p.Tasks)
+            .Include(p => p.Sections)
             .FirstOrDefaultAsync(p => p.Id == request.ProjectId, cancellationToken);
 
         if (project is null)

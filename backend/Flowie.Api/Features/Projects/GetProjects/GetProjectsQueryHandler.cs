@@ -14,7 +14,7 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
         var query = databaseContext
             .Projects
             .AsNoTracking()
-            .Include(p => p.Tasks)
+            .Include(p => p.Sections).ThenInclude(s => s.Tasks)
             .AsQueryable();
 
         if (request.Company is not null)
@@ -30,8 +30,8 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
                     p.Title,
                     p.Description,
                     p.Company,
-                    p.Tasks.Count,
-                    p.Tasks.Count(t => t.Status == TaskStatus.Done)
+                    p.Sections.SelectMany(s => s.Tasks).Count(),
+                    p.Sections.SelectMany(s => s.Tasks).Count(t => t.Status == TaskStatus.Done)
                 ))
             .ToListAsync(cancellationToken);
 

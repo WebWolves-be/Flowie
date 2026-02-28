@@ -15,13 +15,14 @@ internal class GetTasksQueryHandler(
         var query = dbContext
             .Tasks
             .AsNoTracking()
+            .Include(t => t.Section)
             .Include(t => t.TaskType)
             .Include(t => t.Employee)
             .Include(t => t.Subtasks)
             .ThenInclude(st => st.Employee)
             .Include(t => t.Subtasks)
             .ThenInclude(st => st.TaskType)
-            .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == null);
+            .Where(t => t.Section.ProjectId == request.ProjectId && t.ParentTaskId == null);
 
         if (request.OnlyShowMyTasks)
         {
@@ -42,7 +43,7 @@ internal class GetTasksQueryHandler(
                 .Select(t =>
                     new TaskDto(
                         TaskId: t.Id,
-                        ProjectId: t.ProjectId,
+                        SectionId: t.SectionId,
                         Title: t.Title,
                         Description: t.Description,
                         TaskTypeId: t.TaskTypeId,

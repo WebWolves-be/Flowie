@@ -57,10 +57,19 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         await DatabaseContext.SaveChangesAsync();
 
+        var section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(section);
+        await DatabaseContext.SaveChangesAsync();
+
         var task = new Flowie.Api.Shared.Domain.Entities.Task
         {
             Title = "Test Task",
-            ProjectId = project.Id,
+            SectionId = section.Id,
             TaskTypeId = taskType.Id,
             EmployeeId = employee.Id,
             DueDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -117,10 +126,19 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         await DatabaseContext.SaveChangesAsync();
 
+        var section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(section);
+        await DatabaseContext.SaveChangesAsync();
+
         var task1 = new Flowie.Api.Shared.Domain.Entities.Task
         {
             Title = "Test Task 1",
-            ProjectId = project.Id,
+            SectionId = section.Id,
             TaskTypeId = taskType.Id,
             EmployeeId = employee.Id,
             DueDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -128,7 +146,7 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
         var task2 = new Flowie.Api.Shared.Domain.Entities.Task
         {
             Title = "Test Task 2",
-            ProjectId = project.Id,
+            SectionId = section.Id,
             TaskTypeId = taskType.Id,
             EmployeeId = employee.Id,
             DueDate = DateOnly.FromDateTime(DateTime.Today.AddDays(2))
@@ -172,10 +190,19 @@ public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 
         await DatabaseContext.SaveChangesAsync();
 
+        var section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(section);
+        await DatabaseContext.SaveChangesAsync();
+
         var task = new Flowie.Api.Shared.Domain.Entities.Task
         {
             Title = "Test Task",
-            ProjectId = project.Id,
+            SectionId = section.Id,
             TaskTypeId = taskType2.Id,
             EmployeeId = employee.Id,
             DueDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))

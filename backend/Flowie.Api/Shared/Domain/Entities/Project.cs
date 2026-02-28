@@ -12,5 +12,5 @@ public class Project : BaseEntity
 
     public Company Company { get; set; }
     
-    public ICollection<Task> Tasks { get; } = [];
+    public ICollection<Section> Sections { get; } = [];
 }
