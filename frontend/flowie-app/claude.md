@@ -156,6 +156,10 @@ export class MyDialogComponent {
 ## Self-Validation: Frontend E2E Testing
 
 After modifying UI, forms, or user flows, **always verify in the browser**.
+
+> **TIP:** Use `/test-frontend` skill for automated E2E testing with SSL pre-configured.
+> Playwright CLI and Chrome DevTools MCP details below are for manual debugging or custom scenarios.
+
 Two tools are available: **Playwright CLI** (skill) and **Chrome DevTools MCP**.
 
 ### Option A: Playwright CLI (full E2E flows)

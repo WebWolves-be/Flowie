@@ -307,6 +307,9 @@ No additional DI registration needed — validators and handlers are auto-discov
 
 ## Database Migrations
 
+> **TIP:** Use `/migrate name:MigrationName` skill to create migrations with proper project paths.
+> Manual commands below are available for debugging or custom scenarios.
+
 ```bash
 # From the Flowie.Api directory
 dotnet ef migrations add MigrationName
@@ -419,6 +422,9 @@ public class CreateSectionCommandValidatorTests : BaseTestClass
 ```
 
 ### Running Tests
+
+> **TIP:** Use `/test-backend` skill for automated test execution with formatted results.
+> Manual commands below are available for debugging or filtering specific tests.
 
 ```bash
 # Run all tests

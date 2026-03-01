@@ -1,7 +1,8 @@
-import { Component, input, OnChanges, output, signal } from "@angular/core";
+import { Component, computed, input, OnChanges, output, signal } from "@angular/core";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
 import { Project } from "../../models/project.model";
+import { Section } from "../../models/section.model";
 import { Task } from "../../models/task.model";
 import { TaskStatus } from "../../models/task-status.enum";
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from "@angular/cdk/drag-drop";
@@ -13,10 +14,12 @@ import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from "@angular/cdk
   templateUrl: "./project-detail.component.html",
   styleUrl: "./project-detail.component.scss"
 })
-export class ProjectDetailComponent implements OnChanges {
+export class ProjectDetailComponent {
   readonly Company = Company;
 
   project = input.required<Project>();
+  sections = input<Section[]>([]);
+  isLoadingSections = input<boolean>(false);
   tasks = input<Task[]>([]);
   isLoadingTasks = input<boolean>(false);
   isDetailLoading = input<boolean>(false);
@@ -24,7 +27,10 @@ export class ProjectDetailComponent implements OnChanges {
 
   taskFilterToggled = output<boolean>();
   projectUpdateRequested = output<void>();
-  taskCreateRequested = output<void>();
+  sectionCreateRequested = output<void>();
+  sectionUpdateRequested = output<number>();
+  sectionDeleteRequested = output<number>();
+  taskCreateRequested = output<number>();
   taskUpdateRequested = output<number>();
   taskDeleteRequested = output<number>();
   taskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
@@ -35,17 +41,31 @@ export class ProjectDetailComponent implements OnChanges {
   taskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
   subtaskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
 
-  orderedTasks = signal<Task[]>([]);
+  expandedSections = signal<Set<number>>(new Set());
+  orderedSections = computed(() => {
+    return [...this.sections()].sort((a, b) => a.displayOrder - b.displayOrder);
+  });
 
-  ngOnChanges() {
-    this.orderedTasks.set([...this.tasks()]);
+  getTasksForSection(sectionId: number): Task[] {
+    return this.tasks().filter(t => t.sectionId === sectionId)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
   }
 
-  onTaskDrop(event: CdkDragDrop<Task[]>) {
-    const tasks = [...this.orderedTasks()];
-    moveItemInArray(tasks, event.previousIndex, event.currentIndex);
-    this.orderedTasks.set(tasks);
-    this.taskReorderRequested.emit(tasks.map((t, i) => ({ taskId: t.taskId, displayOrder: i })));
+  toggleSection(sectionId: number): void {
+    const expanded = new Set(this.expandedSections());
+    if (expanded.has(sectionId)) {
+      expanded.delete(sectionId);
+    } else {
+      expanded.add(sectionId);
+    }
+    this.expandedSections.set(expanded);
+  }
+
+  onTaskDrop(event: CdkDragDrop<Task[]>, sectionId: number) {
+    const sectionTasks = this.getTasksForSection(sectionId);
+    const reorderedTasks = [...sectionTasks];
+    moveItemInArray(reorderedTasks, event.previousIndex, event.currentIndex);
+    this.taskReorderRequested.emit(reorderedTasks.map((t, i) => ({ taskId: t.taskId, displayOrder: i })));
   }
 
   onToggleTaskFilter(val: boolean) {
@@ -56,8 +76,21 @@ export class ProjectDetailComponent implements OnChanges {
     this.projectUpdateRequested.emit();
   }
 
-  onCreateTask() {
-    this.taskCreateRequested.emit();
+  onCreateSection() {
+    this.sectionCreateRequested.emit();
+  }
+
+  onUpdateSection(sectionId: number) {
+    this.sectionUpdateRequested.emit(sectionId);
+  }
+
+  onDeleteSection(sectionId: number) {
+    this.sectionDeleteRequested.emit(sectionId);
+  }
+
+  onCreateTaskInSection(event: Event, sectionId: number) {
+    event.stopPropagation();
+    this.taskCreateRequested.emit(sectionId);
   }
 
   onTaskUpdate(id: number) {

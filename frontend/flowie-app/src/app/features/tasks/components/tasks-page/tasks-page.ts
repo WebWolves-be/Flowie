@@ -13,6 +13,12 @@ import {
   SaveProjectDialogResult
 } from "../save-project-dialog/save-project-dialog.component";
 import {
+  SaveSectionDialogComponent,
+  SaveSectionDialogData
+} from "../save-section-dialog/save-section-dialog.component";
+import { DeleteSectionDialogComponent } from "../delete-section-dialog/delete-section-dialog.component";
+import { DeleteSectionDialogData } from "../../models/delete-section-dialog-data.model";
+import {
   SaveTaskDialogComponent,
   SaveTaskDialogData,
   SaveTaskDialogResult
@@ -51,6 +57,9 @@ export class TasksPage implements OnInit {
 
   projects = this.#taskFacade.projects;
   isLoadingProjects = this.#taskFacade.isLoadingProjects;
+
+  sections = this.#taskFacade.sections;
+  isLoadingSections = this.#taskFacade.isLoadingSections;
 
   tasks = this.#taskFacade.tasks;
   #facadeIsLoadingTasks = this.#taskFacade.isLoadingTasks;
@@ -105,8 +114,10 @@ export class TasksPage implements OnInit {
         this.selectedProjectId.set(idNum);
         this.showOnlyMyTasks.set(false);
 
+        this.#taskFacade.getSections(idNum);
         this.#loadTasksWithDelay(idNum, false);
       } else {
+        this.#taskFacade.clearSections();
         this.#taskFacade.clearTasks();
 
         this.selectedProjectId.set(null);
@@ -176,7 +187,57 @@ export class TasksPage implements OnInit {
     }
   }
 
-  onOpenCreateTaskDialog() {
+  onOpenCreateSectionDialog() {
+    const selectedProject = this.selectedProject();
+
+    if (!selectedProject) {
+      return;
+    }
+
+    this.#dialog.open(SaveSectionDialogComponent, {
+      data: { mode: "create", projectId: selectedProject.projectId } as SaveSectionDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+  }
+
+  onOpenUpdateSectionDialog(sectionId: number) {
+    const section = this.sections().find(s => s.sectionId === sectionId);
+    const selectedProject = this.selectedProject();
+
+    if (!section || !selectedProject) {
+      return;
+    }
+
+    this.#dialog.open(SaveSectionDialogComponent, {
+      data: { mode: "update", projectId: selectedProject.projectId, section } as SaveSectionDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+  }
+
+  onOpenDeleteSectionDialog(sectionId: number) {
+    const section = this.sections().find(s => s.sectionId === sectionId);
+    const selectedProject = this.selectedProject();
+
+    if (!section || !selectedProject) {
+      return;
+    }
+
+    const dialogRef = this.#dialog.open<boolean>(DeleteSectionDialogComponent, {
+      data: { section, projectId: selectedProject.projectId } as DeleteSectionDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+
+    dialogRef.closed.subscribe(result => {
+      if (result) {
+        this.#taskFacade.getProjects();
+      }
+    });
+  }
+
+  onOpenCreateTaskDialog(sectionId: number) {
     const selectedProject = this.selectedProject();
 
     if (!selectedProject) {
@@ -184,7 +245,7 @@ export class TasksPage implements OnInit {
     }
 
     this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
-      data: { mode: "create", projectId: selectedProject.projectId } as SaveTaskDialogData,
+      data: { mode: "create", projectId: selectedProject.projectId, sectionId } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
@@ -199,7 +260,7 @@ export class TasksPage implements OnInit {
     }
 
     this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
-      data: { mode: "update", projectId: selectedProject.projectId, task } as SaveTaskDialogData,
+      data: { mode: "update", projectId: selectedProject.projectId, sectionId: task.sectionId, task } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
@@ -222,6 +283,7 @@ export class TasksPage implements OnInit {
       if (result) {
         const projectId = this.selectedProjectId();
         if (projectId) {
+          this.#taskFacade.getSections(projectId);
           this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
           this.#taskFacade.getProjects();
         }
@@ -331,7 +393,7 @@ export class TasksPage implements OnInit {
 
     const taskData = {
       taskId: subtask.taskId,
-      projectId: selectedProject.projectId,
+      sectionId: subtask.sectionId,
       title: subtask.title,
       description: subtask.description,
       taskTypeId: subtask.taskTypeId,
@@ -343,6 +405,7 @@ export class TasksPage implements OnInit {
       createdAt: subtask.createdAt,
       updatedAt: subtask.updatedAt,
       completedAt: subtask.completedAt,
+      waitingSince: subtask.waitingSince,
       subtaskCount: 0,
       completedSubtaskCount: 0,
       subtasks: [],
@@ -350,7 +413,7 @@ export class TasksPage implements OnInit {
     };
 
     this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
-      data: { mode: "update-subtask", projectId: selectedProject.projectId, task: taskData } as SaveTaskDialogData,
+      data: { mode: "update-subtask", projectId: selectedProject.projectId, sectionId: subtask.sectionId, task: taskData } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
     });
@@ -371,7 +434,7 @@ export class TasksPage implements OnInit {
 
     const taskData = {
       taskId: subtask.taskId,
-      projectId: this.selectedProject()!.projectId,
+      sectionId: subtask.sectionId,
       title: subtask.title,
       description: subtask.description,
       taskTypeId: subtask.taskTypeId,
@@ -383,6 +446,7 @@ export class TasksPage implements OnInit {
       createdAt: subtask.createdAt,
       updatedAt: subtask.updatedAt,
       completedAt: subtask.completedAt,
+      waitingSince: subtask.waitingSince,
       subtaskCount: 0,
       completedSubtaskCount: 0,
       subtasks: [],
@@ -399,6 +463,7 @@ export class TasksPage implements OnInit {
       if (result) {
         const projectId = this.selectedProjectId();
         if (projectId) {
+          this.#taskFacade.getSections(projectId);
           this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
           this.#taskFacade.getProjects();
         }
