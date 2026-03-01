@@ -24,7 +24,7 @@ public class SectionEntityConfiguration : BaseEntityConfiguration<Section>
         builder.HasOne(s => s.Project)
             .WithMany(p => p.Sections)
             .HasForeignKey(s => s.ProjectId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasQueryFilter(e => !e.IsDeleted);
     }
