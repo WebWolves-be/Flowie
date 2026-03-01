@@ -2,6 +2,7 @@ using Flowie.Api.Features.Auth;
 using Flowie.Api.Features.Calendar;
 using Flowie.Api.Features.Employees;
 using Flowie.Api.Features.Projects;
+using Flowie.Api.Features.Sections;
 using Flowie.Api.Features.Tasks;
 using Flowie.Api.Features.TaskTypes;
 using Flowie.Api.Shared.Infrastructure.Behaviors;
@@ -138,6 +139,7 @@ app.MapAuthEndpoints();
 app.MapCalendarEndpoints();
 app.MapEmployeeEndpoints();
 app.MapProjectEndpoints();
+app.MapSectionEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskTypeEndpoints();
 

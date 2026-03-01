@@ -317,6 +317,136 @@ Migrations are applied automatically on startup via `db.Database.Migrate()`.
 
 ---
 
+## Unit Testing
+
+**CRITICAL:** Always create unit tests for new features. Tests go in `Flowie.Api.Tests/Features/[Feature]/`.
+
+### Test Class Pattern
+
+ALL test classes MUST inherit from `BaseTestClass`:
+
+```csharp
+public class CreateSectionCommandHandlerTests : BaseTestClass
+{
+    private readonly CreateSectionCommandHandler _sut;
+    private readonly Project _project;
+    private readonly Section _section;
+
+    public CreateSectionCommandHandlerTests()
+    {
+        _sut = new CreateSectionCommandHandler(DatabaseContext);
+
+        // Setup test data
+        _project = new Project { Title = "Test Project", Company = Company.Immoseed };
+        DatabaseContext.Projects.Add(_project);
+        DatabaseContext.SaveChanges();
+
+        _section = new Section { Title = "Test Section", ProjectId = _project.Id, DisplayOrder = 0 };
+        DatabaseContext.Sections.Add(_section);
+        DatabaseContext.SaveChanges();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Handle_ValidCommand_CreatesSection()
+    {
+        // Arrange
+        var command = new CreateSectionCommand(_project.Id, "New Section", null);
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var section = await DatabaseContext.Sections.FirstOrDefaultAsync(s => s.Title == "New Section");
+        Assert.NotNull(section);
+    }
+}
+```
+
+### Key Rules
+
+**Database Context:**
+- Use `DatabaseContext` property from `BaseTestClass`
+- NEVER use `DatabaseHelper.CreateInMemoryContext()` directly
+- Each test gets a fresh in-memory database
+
+**Test Data:**
+- Use `Company.Immoseed` for test projects (NOT `Company.Immo`)
+- TaskType: `new TaskType { Name = "Type", Active = true }` (has `Active`, not `Company`)
+- Subtasks are Tasks with `ParentTaskId` set (no separate Subtask entity)
+
+**Test Method Signatures:**
+```csharp
+[Fact]
+public async System.Threading.Tasks.Task MethodName_Scenario_ExpectedBehavior()
+```
+- Use full type name `System.Threading.Tasks.Task` to avoid ambiguity with domain `Task` entity
+- Or add `using Task = System.Threading.Tasks.Task;` at the top
+
+**Enum Values:**
+- `TaskStatus.Pending` (NOT `TaskStatus.Todo`)
+- `TaskStatus.Ongoing`
+- `TaskStatus.Done`
+- `TaskStatus.WaitingOn`
+
+**Validator Tests:**
+```csharp
+public class CreateSectionCommandValidatorTests : BaseTestClass
+{
+    private readonly CreateSectionCommandValidator _validator;
+
+    public CreateSectionCommandValidatorTests()
+    {
+        _validator = new CreateSectionCommandValidator(DatabaseContext);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Validate_ValidCommand_PassesValidation()
+    {
+        var command = new CreateSectionCommand(1, "Valid Title", null);
+        var result = await _validator.TestValidateAsync(command);
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Validate_EmptyTitle_FailsValidation()
+    {
+        var command = new CreateSectionCommand(1, "", null);
+        var result = await _validator.TestValidateAsync(command);
+        result.ShouldHaveValidationErrorFor(x => x.Title)
+            .WithErrorMessage("Titel is verplicht.");
+    }
+}
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+dotnet test Flowie.Api.Tests/Flowie.Api.Tests.csproj
+
+# Run specific feature tests
+dotnet test --filter "FullyQualifiedName~Sections"
+
+# Run with minimal output
+dotnet test --verbosity minimal
+```
+
+### What to Test
+
+For each new feature, create tests for:
+1. **Handler tests** - Valid commands, edge cases, exceptions
+2. **Validator tests** - Required fields, length limits, uniqueness, invalid data
+3. **Query tests** - Correct data returned, filtering, ordering, deleted items excluded
+
+**Minimum coverage per feature:**
+- CreateCommand: 2-3 tests (valid, edge cases)
+- UpdateCommand: 2-3 tests (valid, not found, edge cases)
+- DeleteCommand: 2-3 tests (valid, not found, cascade deletes)
+- GetQuery: 3-5 tests (empty, multiple items, filtering, ordering, soft-delete)
+- Validators: 5-8 tests (all validation rules + edge cases)
+
+---
+
 ## Self-Validation: API Testing
 
 After modifying endpoints, validation, or data logic, **always verify via API calls**.
