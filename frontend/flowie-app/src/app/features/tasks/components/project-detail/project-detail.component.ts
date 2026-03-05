@@ -5,12 +5,12 @@ import { Project } from "../../models/project.model";
 import { Section } from "../../models/section.model";
 import { Task } from "../../models/task.model";
 import { TaskStatus } from "../../models/task-status.enum";
-import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from "@angular/cdk/drag-drop";
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-project-detail",
   standalone: true,
-  imports: [TaskItemComponent, CdkDropList, CdkDrag],
+  imports: [TaskItemComponent, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: "./project-detail.component.html",
   styleUrl: "./project-detail.component.scss"
 })
@@ -40,6 +40,7 @@ export class ProjectDetailComponent {
   subtaskStatusChanged = output<{ taskId: number; status: TaskStatus }>();
   taskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
   subtaskReorderRequested = output<{ taskId: number; displayOrder: number }[]>();
+  sectionReorderRequested = output<{ sectionId: number; displayOrder: number }[]>();
 
   expandedSections = signal<Set<number>>(new Set());
   orderedSections = computed(() => {
@@ -59,6 +60,12 @@ export class ProjectDetailComponent {
       expanded.add(sectionId);
     }
     this.expandedSections.set(expanded);
+  }
+
+  onSectionDrop(event: CdkDragDrop<Section[]>) {
+    const reorderedSections = [...this.orderedSections()];
+    moveItemInArray(reorderedSections, event.previousIndex, event.currentIndex);
+    this.sectionReorderRequested.emit(reorderedSections.map((s, i) => ({ sectionId: s.sectionId, displayOrder: i })));
   }
 
   onTaskDrop(event: CdkDragDrop<Task[]>, sectionId: number) {
