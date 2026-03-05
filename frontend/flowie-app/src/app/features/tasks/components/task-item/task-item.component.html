@@ -22,20 +22,20 @@
         <div id="task-metadata-row" class="flex items-center text-sm text-black">
           <span>{{ task().taskTypeName }}</span>
           @if (task().employeeName) {
-            <span class="text-blue-600 font-bold mx-3">|</span>
+            <span class="text-teal-600 font-bold mx-3">|</span>
             <span class="inline-flex items-center">
               {{ task().employeeName }}
             </span>
           }
-          <span class="text-blue-600 font-bold mx-3">|</span>
+          <span class="text-teal-600 font-bold mx-3">|</span>
           <span
             [class.text-red-600]="isTaskOverdue()">
             Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
-          <span class="text-blue-600 font-bold mx-3">|</span>
+          <span class="text-teal-600 font-bold mx-3">|</span>
           <span>Aangemaakt: {{ task().createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(task().createdAt) }}</span>
           @if (isWaitingOn()) {
-            <span class="text-blue-600 font-bold mx-3">|</span>
+            <span class="text-teal-600 font-bold mx-3">|</span>
             <span>Wachten sinds {{ waitingDays() === 0 ? 'vandaag' : waitingDays() + 'd' }}</span>
           }
         </div>
@@ -83,20 +83,20 @@
                     <div class="flex items-center gap-2 text-xs mb-3">
                       <span class="text-gray-700">{{ subtask.taskTypeName }}</span>
                       @if (subtask.employeeName) {
-                        <span class="text-blue-600 font-bold">|</span>
+                        <span class="text-teal-600 font-bold">|</span>
                         <span class="text-gray-700">{{ subtask.employeeName }}</span>
                       }
-                      <span class="text-blue-600 font-bold">|</span>
+                      <span class="text-teal-600 font-bold">|</span>
                       <span
                         class="font-medium"
                         [class.text-gray-600]="isSubtaskDone(subtask)"
                         [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
                         [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
                       >Deadline: {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}</span>
-                      <span class="text-blue-600 font-bold">|</span>
+                      <span class="text-teal-600 font-bold">|</span>
                       <span class="text-gray-700">Aangemaakt: {{ subtask.createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(subtask.createdAt) }}</span>
                       @if (isSubtaskWaitingOn(subtask)) {
-                        <span class="text-blue-600 font-bold">|</span>
+                        <span class="text-teal-600 font-bold">|</span>
                         <span class="text-gray-700">Wachten sinds {{ subtaskWaitingDays(subtask) === 0 ? 'vandaag' : subtaskWaitingDays(subtask) + 'd' }}</span>
                       }
                     </div>
@@ -104,7 +104,7 @@
                       @if (isSubtaskPending(subtask)) {
                         <button
                           (click)="onStartSubtask(subtask)"
-                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
                           Beginnen
                         </button>
                       }
@@ -137,14 +137,14 @@
                         </button>
                         <button
                           (click)="onReopenSubtask(subtask)"
-                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
                           Heropenen
                         </button>
                       }
                       @if (isSubtaskDone(subtask)) {
                         <button
                           (click)="onReopenSubtask(subtask)"
-                          class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+                          class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
                           Openzetten
                         </button>
                       }
@@ -190,7 +190,7 @@
           @if (isPending()) {
             <button
               (click)="onStartTask()"
-              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
               Beginnen
             </button>
           }
@@ -223,14 +223,14 @@
             </button>
             <button
               (click)="onReopenTask()"
-              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
               Heropenen
             </button>
           }
           @if (isDone()) {
             <button
               (click)="onReopenTask()"
-              class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-blue-50">
+              class="border border-teal-600 text-teal-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-teal-50">
               Openzetten
             </button>
           }

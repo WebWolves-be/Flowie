@@ -14,7 +14,7 @@ import { NotificationService } from "../../services/notification.service";
           [ngClass]="{
             'bg-red-50 border-red-200': notification.type === 'error',
             'bg-green-50 border-green-200': notification.type === 'success',
-            'bg-blue-50 border-blue-200': notification.type === 'info',
+            'bg-teal-50 border-teal-200': notification.type === 'info',
             'bg-yellow-50 border-yellow-200': notification.type === 'warning'
           }">
 
@@ -32,7 +32,7 @@ import { NotificationService } from "../../services/notification.service";
                       clip-rule="evenodd" />
               </svg>
             } @else if (notification.type === 'info') {
-              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
                       d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                       clip-rule="evenodd" />
@@ -52,7 +52,7 @@ import { NotificationService } from "../../services/notification.service";
               [ngClass]="{
                 'text-red-800': notification.type === 'error',
                 'text-green-800': notification.type === 'success',
-                'text-blue-800': notification.type === 'info',
+                'text-teal-800': notification.type === 'info',
                 'text-yellow-800': notification.type === 'warning'
               }">
               {{ notification.title }}
@@ -63,7 +63,7 @@ import { NotificationService } from "../../services/notification.service";
                 [ngClass]="{
                   'text-red-700': notification.type === 'error',
                   'text-green-700': notification.type === 'success',
-                  'text-blue-700': notification.type === 'info',
+                  'text-teal-700': notification.type === 'info',
                   'text-yellow-700': notification.type === 'warning'
                 }">
                 {{ notification.message }}
