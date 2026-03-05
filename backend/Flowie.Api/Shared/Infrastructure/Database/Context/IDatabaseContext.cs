@@ -8,7 +8,9 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Context;
 public interface IDatabaseContext
 {
     DbSet<Project> Projects { get; set; }
-    
+
+    DbSet<Section> Sections { get; set; }
+
     DbSet<Task> Tasks { get; set; }
     
     DbSet<TaskType> TaskTypes { get; set; }

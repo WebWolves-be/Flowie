@@ -11,6 +11,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
 {
     private readonly UpdateTaskCommandHandler _sut;
     private readonly Project _project;
+    private readonly Section _section;
     private readonly TaskType _taskType;
     private readonly Employee _employee;
 
@@ -30,6 +31,15 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);
         DatabaseContext.SaveChanges();
+
+        _section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = _project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(_section);
+        DatabaseContext.SaveChanges();
     }
 
 
@@ -43,7 +53,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             Description = "Original Description",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -100,7 +110,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             Description = "Original Description",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -137,7 +147,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             Description = "Original Description",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -173,7 +183,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             Title = "Parent Task",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -185,7 +195,7 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
             Title = "Subtask",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id,
             ParentTaskId = parentTask.Id
@@ -213,3 +223,4 @@ public class UpdateTaskCommandHandlerTests : BaseTestClass
         Assert.Equal(newDueDate, updatedParentTask.DueDate);
     }
 }
+

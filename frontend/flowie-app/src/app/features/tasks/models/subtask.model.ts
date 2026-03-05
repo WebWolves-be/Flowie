@@ -2,6 +2,7 @@ import { TaskStatus } from "./task-status.enum";
 
 export interface Subtask {
   taskId: number;
+  sectionId: number;
   parentTaskId?: number | null;
   title: string;
   description?: string | null;

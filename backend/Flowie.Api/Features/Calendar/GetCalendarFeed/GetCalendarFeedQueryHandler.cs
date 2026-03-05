@@ -18,7 +18,7 @@ internal class GetCalendarFeedQueryHandler(IDatabaseContext db)
             ?? throw new EntityNotFoundException($"Calendar feed not found for token {request.Token}");
 
         var tasks = await db.Tasks
-            .Include(t => t.Project)
+            .Include(t => t.Section).ThenInclude(s => s.Project)
             .AsNoTracking()
             .Where(t =>
                 t.EmployeeId == employee.Id &&
@@ -54,7 +54,7 @@ internal class GetCalendarFeedQueryHandler(IDatabaseContext db)
                 ical.AppendLine($"DESCRIPTION:{EscapeICalText(task.Description)}");
             }
 
-            ical.AppendLine($"CATEGORIES:{EscapeICalText(task.Project.Title)}");
+            ical.AppendLine($"CATEGORIES:{EscapeICalText(task.Section.Project.Title)}");
             ical.AppendLine("END:VEVENT");
         }
 

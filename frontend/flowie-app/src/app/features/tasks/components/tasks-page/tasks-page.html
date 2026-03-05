@@ -5,16 +5,16 @@
         <h1 class="text-lg font-semibold text-gray-900">Projecten</h1>
         <button
           (click)="onOpenCreateProjectDialog()"
-          class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition-colors">
           <i class="fas fa-plus mr-1"></i> Nieuw
         </button>
       </div>
       <div class="flex space-x-2">
         <button
           (click)="onFilterProjectsByCompany('ALL')"
-          [class.bg-blue-600]="companyFilter() === 'ALL'"
+          [class.bg-teal-600]="companyFilter() === 'ALL'"
           [class.text-white]="companyFilter() === 'ALL'"
-          [class.hover:bg-blue-700]="companyFilter() === 'ALL'"
+          [class.hover:bg-teal-700]="companyFilter() === 'ALL'"
           [class.bg-gray-200]="companyFilter() !== 'ALL'"
           [class.text-gray-700]="companyFilter() !== 'ALL'"
           [class.hover:bg-gray-300]="companyFilter() !== 'ALL'"
@@ -22,9 +22,9 @@
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Immoseed)"
-          [class.bg-blue-600]="companyFilter() === Company.Immoseed"
+          [class.bg-teal-600]="companyFilter() === Company.Immoseed"
           [class.text-white]="companyFilter() === Company.Immoseed"
-          [class.hover:bg-blue-700]="companyFilter() === Company.Immoseed"
+          [class.hover:bg-teal-700]="companyFilter() === Company.Immoseed"
           [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
           [class.text-gray-700]="companyFilter() !== Company.Immoseed"
           [class.hover:bg-gray-300]="companyFilter() !== Company.Immoseed"
@@ -32,9 +32,9 @@
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.NovaraRealEstate)"
-          [class.bg-blue-600]="companyFilter() === Company.NovaraRealEstate"
+          [class.bg-teal-600]="companyFilter() === Company.NovaraRealEstate"
           [class.text-white]="companyFilter() === Company.NovaraRealEstate"
-          [class.hover:bg-blue-700]="companyFilter() === Company.NovaraRealEstate"
+          [class.hover:bg-teal-700]="companyFilter() === Company.NovaraRealEstate"
           [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
           [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
           [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
@@ -42,9 +42,9 @@
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Algemeen)"
-          [class.bg-blue-600]="companyFilter() === Company.Algemeen"
+          [class.bg-teal-600]="companyFilter() === Company.Algemeen"
           [class.text-white]="companyFilter() === Company.Algemeen"
-          [class.hover:bg-blue-700]="companyFilter() === Company.Algemeen"
+          [class.hover:bg-teal-700]="companyFilter() === Company.Algemeen"
           [class.bg-gray-200]="companyFilter() !== Company.Algemeen"
           [class.text-gray-700]="companyFilter() !== Company.Algemeen"
           [class.hover:bg-gray-300]="companyFilter() !== Company.Algemeen"
@@ -68,29 +68,34 @@
       <app-project-detail
         class="flex-1 flex flex-col overflow-hidden h-full"
         [project]="selectedProject()!"
+        [sections]="sections()"
+        [isLoadingSections]="isLoadingSections()"
         [tasks]="tasks()"
         [isLoadingTasks]="isLoadingTasks()"
         [isDetailLoading]="isLoadingTasks()"
         [showOnlyMyTasks]="showOnlyMyTasks()"
         (taskFilterToggled)="onTaskFilterChanges($event)"
-        (taskClicked)="onOpenUpdateTaskDialog($event)"
+        (projectUpdateRequested)="onOpenUpdateProjectDialog()"
+        (sectionCreateRequested)="onOpenCreateSectionDialog()"
+        (sectionUpdateRequested)="onOpenUpdateSectionDialog($event)"
+        (sectionDeleteRequested)="onOpenDeleteSectionDialog($event)"
+        (taskCreateRequested)="onOpenCreateTaskDialog($event)"
         (taskUpdateRequested)="onOpenUpdateTaskDialog($event)"
         (taskDeleteRequested)="onOpenDeleteTaskDialog($event)"
-        (projectUpdateRequested)="onOpenUpdateProjectDialog()"
-        (taskCreateRequested)="onOpenCreateTaskDialog()"
         (taskStatusChanged)="onTaskStatusChanged($event)"
         (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
         (subtaskCreateRequested)="onOpenCreateSubtaskDialog($event)"
         (subtaskUpdateRequested)="onOpenUpdateSubtaskDialog($event)"
         (subtaskDeleteRequested)="onOpenDeleteSubtaskDialog($event)"
+        (sectionReorderRequested)="onSectionReorder($event)"
         (taskReorderRequested)="onTaskReorder($event)"
         (subtaskReorderRequested)="onSubtaskReorder($event)">
       </app-project-detail>
     } @else {
       <div class="flex-1 flex items-center justify-center bg-gray-50">
         <div class="text-center max-w-md px-6">
-          <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-blue-100 mb-6">
-            <svg class="h-12 w-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-teal-100 mb-6">
+            <svg class="h-12 w-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>

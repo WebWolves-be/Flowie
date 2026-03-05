@@ -5,10 +5,14 @@ import { Company } from "./models/company.enum";
 import { finalize, Observable } from "rxjs";
 import { Project } from "./models/project.model";
 import { Task } from "./models/task.model";
+import { Section } from "./models/section.model";
 import { GetProjectsResponse } from "./models/get-projects-response.model";
 import { GetTasksResponse } from "./models/get-tasks-response.model";
+import { GetSectionsResponse } from "./models/get-sections-response.model";
 import { CreateProjectRequest } from "./models/create-project-request.model";
 import { UpdateProjectRequest } from "./models/update-project-request.model";
+import { CreateSectionRequest } from "./models/create-section-request.model";
+import { UpdateSectionRequest } from "./models/update-section-request.model";
 import { CreateTaskRequest } from "./models/create-task-request.model";
 import { UpdateTaskRequest } from "./models/update-task-request.model";
 import { UpdateTaskStatusRequest } from "./models/update-task-status-request.model";
@@ -24,12 +28,18 @@ export class TaskFacade {
   #isLoadingProjects = signal<boolean>(false);
   #companyFilter = signal<"ALL" | Company>("ALL");
 
+  #sections = signal<Section[]>([]);
+  #isLoadingSections = signal<boolean>(false);
+
   #tasks = signal<Task[]>([]);
   #isLoadingTasks = signal<boolean>(false);
 
   projects = this.#projects.asReadonly();
   isLoadingProjects = this.#isLoadingProjects.asReadonly();
   companyFilter = this.#companyFilter.asReadonly();
+
+  sections = this.#sections.asReadonly();
+  isLoadingSections = this.#isLoadingSections.asReadonly();
 
   tasks = this.#tasks.asReadonly();
   isLoadingTasks = this.#isLoadingTasks.asReadonly();
@@ -68,6 +78,23 @@ export class TaskFacade {
       });
   }
 
+  getSections(projectId: number): void {
+    this.#isLoadingSections.set(true);
+
+    let params = new HttpParams().set("projectId", projectId.toString());
+
+    this.#http
+      .get<GetSectionsResponse>(`${this.#apiUrl}/api/sections`, { params })
+      .pipe(finalize(() => this.#isLoadingSections.set(false)))
+      .subscribe(response => {
+        this.#sections.set(response.sections);
+      });
+  }
+
+  clearSections(): void {
+    this.#sections.set([]);
+  }
+
   clearTasks(): void {
     this.#tasks.set([]);
   }
@@ -83,6 +110,22 @@ export class TaskFacade {
 
   updateProject(projectId: number, request: UpdateProjectRequest): Observable<void> {
     return this.#http.put<void>(`${this.#apiUrl}/api/projects/${projectId}`, request);
+  }
+
+  createSection(request: CreateSectionRequest): Observable<void> {
+    return this.#http.post<void>(`${this.#apiUrl}/api/sections`, request);
+  }
+
+  updateSection(sectionId: number, request: UpdateSectionRequest): Observable<void> {
+    return this.#http.put<void>(`${this.#apiUrl}/api/sections/${sectionId}`, request);
+  }
+
+  deleteSection(sectionId: number): Observable<void> {
+    return this.#http.delete<void>(`${this.#apiUrl}/api/sections/${sectionId}`);
+  }
+
+  reorderSections(items: { sectionId: number; displayOrder: number }[]): Observable<void> {
+    return this.#http.patch<void>(`${this.#apiUrl}/api/sections/reorder`, { items });
   }
 
   createTask(request: CreateTaskRequest): Observable<void> {

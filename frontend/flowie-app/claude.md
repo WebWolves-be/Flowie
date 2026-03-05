@@ -134,10 +134,10 @@ export class MyDialogComponent {
 ## Styling (Tailwind)
 
 - **Dialog**: `w-[25rem] bg-white rounded-xl shadow-xl p-6` + `role="dialog" aria-modal="true"`
-- **Primary button**: `px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50`
+- **Primary button**: `px-4 py-2 text-sm rounded-lg bg-teal-600 text-white hover:bg-teal-500 disabled:opacity-50`
 - **Secondary button**: `border border-gray-300 text-gray-700 hover:bg-gray-50`
 - **Input base**: `w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`
-- **Input valid**: `border border-gray-300 focus:ring-blue-500 focus:border-blue-500`
+- **Input valid**: `border border-gray-300 focus:ring-teal-500 focus:border-teal-500`
 - **Input invalid**: `border-2 border-red-500 focus:ring-red-500 focus:border-red-500`
 - **Error box**: `bg-red-50 border border-red-200 text-red-800`
 - **Icons**: Use inline SVG (not icon fonts)
@@ -156,6 +156,10 @@ export class MyDialogComponent {
 ## Self-Validation: Frontend E2E Testing
 
 After modifying UI, forms, or user flows, **always verify in the browser**.
+
+> **TIP:** Use `/test-frontend` skill for automated E2E testing with SSL pre-configured.
+> Playwright CLI and Chrome DevTools MCP details below are for manual debugging or custom scenarios.
+
 Two tools are available: **Playwright CLI** (skill) and **Chrome DevTools MCP**.
 
 ### Option A: Playwright CLI (full E2E flows)

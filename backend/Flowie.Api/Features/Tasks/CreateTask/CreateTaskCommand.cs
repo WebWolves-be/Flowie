@@ -3,8 +3,8 @@ using MediatR;
 namespace Flowie.Api.Features.Tasks.CreateTask;
 
 public record CreateTaskCommand(
-    int ProjectId, 
-    string Title, 
+    int SectionId,
+    string Title,
     int TaskTypeId,
     DateOnly? DueDate,
     int? EmployeeId,

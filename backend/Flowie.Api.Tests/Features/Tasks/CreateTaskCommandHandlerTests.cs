@@ -11,6 +11,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
 {
     private readonly CreateTaskCommandHandler _sut;
     private readonly Project _project;
+    private readonly Section _section;
     private readonly TaskType _taskType;
     private readonly Employee _employee;
 
@@ -30,6 +31,15 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);
         DatabaseContext.SaveChanges();
+
+        _section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = _project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(_section);
+        DatabaseContext.SaveChanges();
     }
 
 
@@ -38,7 +48,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            _project.Id,
+            _section.Id,
             "Test Task",
             _taskType.Id,
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
@@ -56,7 +66,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         Assert.Equal("Test Task", task.Title);
         Assert.Equal("Test Description", task.Description);
         Assert.Equal(TaskStatus.Pending, task.Status);
-        Assert.Equal(_project.Id, task.ProjectId);
+        Assert.Equal(_section.Id, task.SectionId);
         Assert.Equal(_taskType.Id, task.TaskTypeId);
         Assert.Equal(_employee.Id, task.EmployeeId);
         Assert.Null(task.ParentTaskId);
@@ -67,7 +77,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            _project.Id,
+            _section.Id,
             "Test Task",
             _taskType.Id,
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
@@ -90,7 +100,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            _project.Id,
+            _section.Id,
             "Test Task",
             _taskType.Id,
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
@@ -114,7 +124,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
     {
         // Arrange
         var command = new CreateTaskCommand(
-            _project.Id,
+            _section.Id,
             "Test Task",
             _taskType.Id,
             null,
@@ -141,7 +151,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
             Title = "Parent Task",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -149,7 +159,7 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         await DatabaseContext.SaveChangesAsync();
 
         var command = new CreateTaskCommand(
-            _project.Id,
+            _section.Id,
             "Sub Task",
             _taskType.Id,
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
@@ -169,3 +179,4 @@ public class CreateTaskCommandHandlerTests : BaseTestClass
         Assert.Equal(parentTask.Id, subTask.ParentTaskId);
     }
 }
+

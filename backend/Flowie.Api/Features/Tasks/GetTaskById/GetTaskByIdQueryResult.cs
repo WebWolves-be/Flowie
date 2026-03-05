@@ -4,7 +4,7 @@ namespace Flowie.Api.Features.Tasks.GetTaskById;
 
 public record GetTaskByIdQueryResult(
     int TaskId,
-    int ProjectId,
+    int SectionId,
     int? ParentTaskId,
     string Title,
     string? Description,

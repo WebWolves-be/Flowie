@@ -3,7 +3,7 @@ import { Subtask } from "./subtask.model";
 
 export interface Task {
   taskId: number;
-  projectId: number;
+  sectionId: number;
   title: string;
   description?: string | null;
   taskTypeId: number;

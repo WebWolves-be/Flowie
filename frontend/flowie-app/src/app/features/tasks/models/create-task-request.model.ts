@@ -1,5 +1,5 @@
 export interface CreateTaskRequest {
-  projectId: number;
+  sectionId: number;
   title: string;
   description?: string;
   taskTypeId: number;

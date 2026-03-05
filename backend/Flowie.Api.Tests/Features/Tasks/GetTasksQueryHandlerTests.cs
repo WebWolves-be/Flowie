@@ -13,6 +13,7 @@ public class GetTasksQueryHandlerTests : BaseTestClass
     private readonly ICurrentUserService _currentUserService;
     private readonly GetTasksQueryHandler _sut;
     private readonly Project _project;
+    private readonly Section _section;
     private readonly TaskType _taskType;
     private readonly Employee _employee;
 
@@ -33,6 +34,15 @@ public class GetTasksQueryHandlerTests : BaseTestClass
         DatabaseContext.TaskTypes.Add(_taskType);
         DatabaseContext.Employees.Add(_employee);
         DatabaseContext.SaveChanges();
+
+        _section = new Section
+        {
+            Title = "Test Section",
+            ProjectId = _project.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(_section);
+        DatabaseContext.SaveChanges();
     }
 
 
@@ -45,7 +55,7 @@ public class GetTasksQueryHandlerTests : BaseTestClass
             Title = "Task 1",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -54,7 +64,7 @@ public class GetTasksQueryHandlerTests : BaseTestClass
             Title = "Task 2",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             Status = TaskStatus.Ongoing,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -95,12 +105,21 @@ public class GetTasksQueryHandlerTests : BaseTestClass
         DatabaseContext.Projects.Add(project2);
         await DatabaseContext.SaveChangesAsync();
 
+        var section2 = new Section
+        {
+            Title = "Section in Project 2",
+            ProjectId = project2.Id,
+            DisplayOrder = 0
+        };
+        DatabaseContext.Sections.Add(section2);
+        await DatabaseContext.SaveChangesAsync();
+
         var taskInProject1 = new Shared.Domain.Entities.Task
         {
             Title = "Task in Project 1",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             Status = TaskStatus.Pending,
-            ProjectId = _project.Id,
+            SectionId = _section.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -109,7 +128,7 @@ public class GetTasksQueryHandlerTests : BaseTestClass
             Title = "Task in Project 2",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             Status = TaskStatus.Pending,
-            ProjectId = project2.Id,
+            SectionId = section2.Id,
             TaskTypeId = _taskType.Id,
             EmployeeId = _employee.Id
         };
@@ -121,8 +140,11 @@ public class GetTasksQueryHandlerTests : BaseTestClass
         // Act
         var result = await _sut.Handle(query, CancellationToken.None);
 
-        // Assert
+        // Assert - should only return task from project 1, filtering through Section.ProjectId
         Assert.NotNull(result);
-        Assert.Single(result.Tasks);
+        var task = Assert.Single(result.Tasks);
+        Assert.Equal("Task in Project 1", task.Title);
+        Assert.Equal(_section.Id, task.SectionId);
     }
 }
+

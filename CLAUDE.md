@@ -32,6 +32,16 @@ Flowie/
 
 After implementing or modifying code, **always validate your work**. Do not consider a task complete until you have verified it works.
 
+### Quick Testing Skills
+
+- `/test-backend` - Run backend unit tests with summary
+- `/test-frontend` - Run E2E tests with SSL configured automatically
+- `/test-all` - Run full test suite (backend + frontend)
+- `/test-all quick` - Fast iteration mode (skip E2E)
+- `/migrate name:MigrationName` - Create database migration
+
+### Manual Testing
+
 - **Backend change?** → Test via curl / Swagger. See `backend/CLAUDE.md` for details.
 - **Frontend change?** → Test via Playwright CLI or Chrome DevTools MCP. See `frontend/flowie-app/CLAUDE.md` for details.
 - **Full-stack change?** → Test both.

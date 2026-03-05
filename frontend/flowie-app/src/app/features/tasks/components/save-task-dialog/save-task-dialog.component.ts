@@ -14,6 +14,7 @@ import { QuillEditorComponent } from "ngx-quill";
 export interface SaveTaskDialogData {
   mode: "create" | "update" | "create-subtask" | "update-subtask";
   projectId: number;
+  sectionId: number;
   task?: Task;
   parentTaskId?: number;
   parentTaskTitle?: string;
@@ -141,7 +142,7 @@ export class SaveTaskDialogComponent implements OnInit {
     const formValue = this.taskForm.value;
 
     const request = {
-      projectId: this.#dialogData.projectId,
+      sectionId: this.#dialogData.sectionId,
       title: formValue.title!,
       description: formValue.description || undefined,
       taskTypeId: formValue.taskTypeId!,
@@ -160,6 +161,7 @@ export class SaveTaskDialogComponent implements OnInit {
         })
       )
       .subscribe(() => {
+        this.#taskFacade.getSections(this.#dialogData.projectId);
         this.#taskFacade.getTasks(this.#dialogData.projectId);
         this.#taskFacade.getProjects();
         this.#notificationService.showSuccess(successMessage);
@@ -190,6 +192,7 @@ export class SaveTaskDialogComponent implements OnInit {
         })
       )
       .subscribe(() => {
+        this.#taskFacade.getSections(this.#dialogData.projectId);
         this.#taskFacade.getTasks(this.#dialogData.projectId);
         this.#taskFacade.getProjects();
         this.#notificationService.showSuccess(successMessage);

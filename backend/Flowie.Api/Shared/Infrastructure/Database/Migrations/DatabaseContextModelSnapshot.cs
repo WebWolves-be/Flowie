@@ -229,6 +229,47 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Section", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId", "Title")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("Sections");
+                });
+
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Task", b =>
                 {
                     b.Property<int>("Id")
@@ -244,8 +285,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
@@ -262,7 +302,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                     b.Property<int?>("ParentTaskId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("SectionId")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset?>("StartedAt")
@@ -292,7 +332,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
 
                     b.HasIndex("ParentTaskId");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("SectionId");
 
                     b.HasIndex("TaskTypeId");
 
@@ -484,6 +524,17 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Section", b =>
+                {
+                    b.HasOne("Flowie.Api.Shared.Domain.Entities.Project", "Project")
+                        .WithMany("Sections")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Task", b =>
                 {
                     b.HasOne("Flowie.Api.Shared.Domain.Entities.Employee", "Employee")
@@ -496,9 +547,9 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                         .HasForeignKey("ParentTaskId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Flowie.Api.Shared.Domain.Entities.Project", "Project")
+                    b.HasOne("Flowie.Api.Shared.Domain.Entities.Section", "Section")
                         .WithMany("Tasks")
-                        .HasForeignKey("ProjectId")
+                        .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -512,7 +563,7 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
 
                     b.Navigation("ParentTask");
 
-                    b.Navigation("Project");
+                    b.Navigation("Section");
 
                     b.Navigation("TaskType");
                 });
@@ -582,6 +633,11 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Migrations
                 });
 
             modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Project", b =>
+                {
+                    b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Flowie.Api.Shared.Domain.Entities.Section", b =>
                 {
                     b.Navigation("Tasks");
                 });

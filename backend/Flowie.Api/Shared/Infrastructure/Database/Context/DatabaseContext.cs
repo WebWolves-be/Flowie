@@ -10,7 +10,9 @@ namespace Flowie.Api.Shared.Infrastructure.Database.Context;
 public class DatabaseContext(DbContextOptions<DatabaseContext> options) : IdentityDbContext<User>(options), IDatabaseContext
 {
     public DbSet<Project> Projects { get; set; } = null!;
-    
+
+    public DbSet<Section> Sections { get; set; } = null!;
+
     public DbSet<Task> Tasks { get; set; } = null!;
     
     public DbSet<TaskType> TaskTypes { get; set; } = null!;
@@ -27,6 +29,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
 
         // Global query filters for soft delete
         builder.Entity<Project>().HasQueryFilter(p => !p.IsDeleted);
+        builder.Entity<Section>().HasQueryFilter(s => !s.IsDeleted);
         builder.Entity<Task>().HasQueryFilter(t => !t.IsDeleted);
     }
 }

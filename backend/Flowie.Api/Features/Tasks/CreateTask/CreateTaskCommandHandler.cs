@@ -11,7 +11,7 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
     public async Task<Unit> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         var maxDisplayOrder = await databaseContext.Tasks
-            .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == request.ParentTaskId)
+            .Where(t => t.SectionId == request.SectionId && t.ParentTaskId == request.ParentTaskId)
             .MaxAsync(t => (int?)t.DisplayOrder, cancellationToken) ?? -1;
 
         var task = new Task
@@ -20,7 +20,7 @@ internal class CreateTaskCommandHandler(IDatabaseContext databaseContext) : IReq
             Description = request.Description,
             DueDate = request.DueDate,
             Status = TaskStatus.Pending,
-            ProjectId = request.ProjectId,
+            SectionId = request.SectionId,
             TaskTypeId = request.TaskTypeId,
             EmployeeId = request.EmployeeId,
             ParentTaskId = request.ParentTaskId,

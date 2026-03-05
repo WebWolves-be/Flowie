@@ -26,7 +26,7 @@ internal class GetTaskByIdQueryHandler(DatabaseContext dbContext)
         return new GetTaskByIdQueryResult
         (
             task.Id,
-            task.ProjectId,
+            task.SectionId,
             task.ParentTaskId,
             task.Title,
             task.Description,

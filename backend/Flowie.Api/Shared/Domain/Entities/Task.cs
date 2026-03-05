@@ -9,9 +9,9 @@ public class Task : BaseEntity
     public string? Description { get; set; }
     
     public int? ParentTaskId { get; set; }
-    
-    public required int ProjectId { get; set; }
-    
+
+    public required int SectionId { get; set; }
+
     public required int TaskTypeId { get; set; }
 
     public int? EmployeeId { get; set; }
@@ -30,8 +30,8 @@ public class Task : BaseEntity
 
     public int DisplayOrder { get; set; }
 
-    public Project Project { get; set; } = null!;
-    
+    public Section Section { get; set; } = null!;
+
     public TaskType TaskType { get; set; } = null!;
 
     public Employee? Employee { get; set; }

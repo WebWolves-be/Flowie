@@ -23,9 +23,9 @@ public class TaskEntityConfiguration : BaseEntityConfiguration<Entities_Task>
         builder.Property(e => e.DueDate)
             .IsRequired(false);
         
-        builder.HasOne(t => t.Project)
-            .WithMany(p => p.Tasks)
-            .HasForeignKey(t => t.ProjectId)
+        builder.HasOne(t => t.Section)
+            .WithMany(s => s.Tasks)
+            .HasForeignKey(t => t.SectionId)
             .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasOne(t => t.ParentTask)

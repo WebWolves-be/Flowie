@@ -6,7 +6,7 @@ public record GetTasksQueryResult(IReadOnlyCollection<TaskDto> Tasks);
 
 public record TaskDto(
     int TaskId,
-    int ProjectId,
+    int SectionId,
     string Title,
     string? Description,
     int TaskTypeId,
