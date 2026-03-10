@@ -1,6 +1,6 @@
-<div class="flex h-screen bg-gray-50 overflow-hidden">
+<div class="flex h-screen bg-gray-50 overflow-hidden pb-16 md:pb-0">
   @if (isAuthenticated()) {
-    <aside class="flex flex-col w-56 bg-blue-800 text-white border-r border-blue-900/40 flex-shrink-0">
+    <aside class="hidden lg:flex flex-col w-56 bg-blue-800 text-white border-r border-blue-900/40 flex-shrink-0">
       <div class="px-4 py-5 flex-shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-extrabold">F
@@ -58,6 +58,9 @@
   <div class="flex-1 overflow-hidden">
     <router-outlet></router-outlet>
   </div>
+  @if (isAuthenticated()) {
+    <app-bottom-nav></app-bottom-nav>
+  }
 </div>
 
 <app-notification-container></app-notification-container>
