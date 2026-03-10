@@ -317,6 +317,10 @@ export class TasksPage implements OnInit {
       });
   }
 
+  onSectionReorder(items: { sectionId: number; displayOrder: number }[]) {
+    this.#taskFacade.reorderSections(items).subscribe();
+  }
+
   onTaskReorder(items: { taskId: number; displayOrder: number }[]) {
     this.#taskFacade.reorderTasks(items).subscribe();
   }
