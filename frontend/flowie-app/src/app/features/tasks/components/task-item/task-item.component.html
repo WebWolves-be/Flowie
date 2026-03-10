@@ -19,23 +19,23 @@
         </div>
       }
       @if (!task().subtasks || task().subtasks!.length === 0) {
-        <div id="task-metadata-row" class="flex items-center text-sm text-black">
+        <div id="task-metadata-row" class="flex flex-col md:flex-row md:items-center gap-1 md:gap-0 text-sm text-black">
           <span>{{ task().taskTypeName }}</span>
           @if (task().employeeName) {
-            <span class="text-teal-600 font-bold mx-3">|</span>
+            <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
             <span class="inline-flex items-center">
               {{ task().employeeName }}
             </span>
           }
-          <span class="text-teal-600 font-bold mx-3">|</span>
+          <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
           <span
             [class.text-red-600]="isTaskOverdue()">
             Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
-          <span class="text-teal-600 font-bold mx-3">|</span>
+          <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
           <span>Aangemaakt: {{ task().createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(task().createdAt) }}</span>
           @if (isWaitingOn()) {
-            <span class="text-teal-600 font-bold mx-3">|</span>
+            <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
             <span>Wachten sinds {{ waitingDays() === 0 ? 'vandaag' : waitingDays() + 'd' }}</span>
           }
         </div>

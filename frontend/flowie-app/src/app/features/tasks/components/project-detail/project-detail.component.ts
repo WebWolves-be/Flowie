@@ -24,7 +24,9 @@ export class ProjectDetailComponent {
   isLoadingTasks = input<boolean>(false);
   isDetailLoading = input<boolean>(false);
   showOnlyMyTasks = input<boolean>(false);
+  isMobile = input<boolean>(false);
 
+  backToList = output<void>();
   taskFilterToggled = output<boolean>();
   projectUpdateRequested = output<void>();
   sectionCreateRequested = output<void>();

@@ -19,16 +19,16 @@ export class BreakpointService {
 
   isMobile = computed(() => {
     const state = this.#breakpoints();
-    return state.breakpoints["(max-width: 767px)"] ?? false;
+    return (state.breakpoints as Record<string, boolean>)["(max-width: 767px)"] ?? false;
   });
 
   isTablet = computed(() => {
     const state = this.#breakpoints();
-    return state.breakpoints["(min-width: 768px) and (max-width: 1023px)"] ?? false;
+    return (state.breakpoints as Record<string, boolean>)["(min-width: 768px) and (max-width: 1023px)"] ?? false;
   });
 
   isDesktop = computed(() => {
     const state = this.#breakpoints();
-    return state.breakpoints["(min-width: 1024px)"] ?? false;
+    return (state.breakpoints as Record<string, boolean>)["(min-width: 1024px)"] ?? false;
   });
 }
