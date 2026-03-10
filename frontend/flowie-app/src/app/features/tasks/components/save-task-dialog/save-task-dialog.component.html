@@ -1,8 +1,8 @@
-<div class="w-screen h-screen md:w-auto md:h-auto md:max-w-[32rem] md:max-h-[90vh] flex flex-col overflow-y-auto bg-white rounded-none md:rounded-xl shadow-xl p-4 md:p-6" role="dialog" aria-modal="true">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4 flex-shrink-0">{{ titleLabel() }}</h2>
+<div class="w-screen h-screen md:w-auto md:h-auto md:max-w-[32rem] md:max-h-[90vh] flex flex-col overflow-y-auto bg-white rounded-none md:rounded-xl shadow-xl p-0 md:p-6" role="dialog" aria-modal="true">
+  <h2 class="text-lg font-semibold text-gray-900 mb-4 flex-shrink-0 px-4 pt-4 md:px-0 md:pt-0">{{ titleLabel() }}</h2>
 
   @if (isSubtask && parentTaskTitle()) {
-    <div class="mb-4 bg-teal-50 border border-teal-200 rounded-lg p-3 flex-shrink-0">
+    <div class="mb-4 bg-teal-50 border border-teal-200 rounded-lg p-3 flex-shrink-0 mx-4 md:mx-0">
       <div class="flex items-start">
         <svg class="h-5 w-5 text-teal-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd"
@@ -20,7 +20,7 @@
   }
 
   @if (errorMessage()) {
-    <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 flex-shrink-0">
+    <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 flex-shrink-0 mx-4 md:mx-0">
       <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -31,7 +31,7 @@
   }
 
   <form [formGroup]="taskForm" class="flex-1 flex flex-col md:block" (ngSubmit)="onSubmit()">
-    <div class="flex-1 md:flex-none overflow-y-auto space-y-4">
+    <div class="flex-1 md:flex-none overflow-y-auto space-y-4 px-4 md:px-0">
       <div>
         <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
           Titel <span class="text-red-600">*</span>
@@ -110,7 +110,7 @@
       }
     </div>
 
-    <div class="flex flex-col-reverse md:flex-row md:justify-end gap-3 flex-shrink-0 pt-4 md:pt-0">
+    <div class="flex flex-col-reverse md:flex-row md:justify-end gap-3 flex-shrink-0 pt-4 px-4 pb-4 md:pt-0 md:px-0 md:pb-0">
       <button type="button" (click)="onCancel()"
               class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         Annuleren
