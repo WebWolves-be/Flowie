@@ -10,10 +10,12 @@ internal class DeleteSectionCommandHandler(IDatabaseContext db)
 {
     public async Task<Unit> Handle(DeleteSectionCommand request, CancellationToken ct)
     {
-        var section = await db.Sections
-            .Include(s => s.Tasks)
-            .ThenInclude(t => t.Subtasks)
-            .FirstOrDefaultAsync(s => s.Id == request.SectionId, ct)
+        var section =
+            await db
+                .Sections
+                .Include(s => s.Tasks)
+                .ThenInclude(t => t.Subtasks)
+                .FirstOrDefaultAsync(s => s.Id == request.SectionId, ct)
             ?? throw new EntityNotFoundException("Section", request.SectionId);
 
         section.IsDeleted = true;
@@ -21,6 +23,7 @@ internal class DeleteSectionCommandHandler(IDatabaseContext db)
         foreach (var task in section.Tasks)
         {
             task.IsDeleted = true;
+            
             foreach (var subtask in task.Subtasks)
             {
                 subtask.IsDeleted = true;
@@ -28,6 +31,7 @@ internal class DeleteSectionCommandHandler(IDatabaseContext db)
         }
 
         await db.SaveChangesAsync(ct);
+        
         return Unit.Value;
     }
 }
