@@ -45,6 +45,7 @@ export class ProjectDetailComponent {
   sectionReorderRequested = output<{ sectionId: number; displayOrder: number }[]>();
 
   expandedSections = signal<Set<number>>(new Set());
+  showSectionMenu = signal<number | null>(null);
   orderedSections = computed(() => {
     return [...this.sections()].sort((a, b) => a.displayOrder - b.displayOrder);
   });
@@ -62,6 +63,11 @@ export class ProjectDetailComponent {
       expanded.add(sectionId);
     }
     this.expandedSections.set(expanded);
+  }
+
+  toggleSectionMenu(event: Event, sectionId: number): void {
+    event.stopPropagation();
+    this.showSectionMenu.update(current => current === sectionId ? null : sectionId);
   }
 
   onSectionDrop(event: CdkDragDrop<Section[]>) {

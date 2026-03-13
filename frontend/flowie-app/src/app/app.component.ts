@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NotificationContainerComponent } from './core/components/notification-container/notification-container.component';
 import { BottomNavComponent } from './core/components/bottom-nav/bottom-nav.component';
+import { MobileHeaderComponent } from './core/components/mobile-header/mobile-header.component';
 import { AuthFacade } from './core/facades/auth.facade';
 import { NotificationService } from './core/services/notification.service';
 import { catchError, EMPTY } from 'rxjs';
@@ -9,7 +10,7 @@ import { catchError, EMPTY } from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationContainerComponent, BottomNavComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationContainerComponent, BottomNavComponent, MobileHeaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

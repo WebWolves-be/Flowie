@@ -7,10 +7,10 @@ import { NotificationService } from "../../services/notification.service";
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 space-y-2 max-w-md">
+    <div class="fixed top-0 left-0 right-0 md:bottom-4 md:top-auto md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 md:max-w-md">
       @for (notification of notifications(); track notification.id) {
         <div
-          class="rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-in border"
+          class="rounded-none md:rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-in border border-b-0 md:border-b last:border-b md:mb-2"
           [ngClass]="{
             'bg-red-50 border-red-200': notification.type === 'error',
             'bg-green-50 border-green-200': notification.type === 'success',
