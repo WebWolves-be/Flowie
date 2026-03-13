@@ -48,6 +48,10 @@ export class SaveProjectDialogComponent {
     company: new FormControl(
       this.#dialogData.project?.company ?? Company.Immoseed,
       { validators: [Validators.required], nonNullable: true }
+    ),
+    code: new FormControl(
+      this.#dialogData.project?.code?.trim() ?? "",
+      { validators: [Validators.required, Validators.maxLength(5)], nonNullable: true }
     )
   });
 
@@ -83,11 +87,14 @@ export class SaveProjectDialogComponent {
 
     const trimmedDescription = this.form.value.description!.trim();
 
+    const trimmedCode = this.form.value.code!.trim().toUpperCase() || undefined;
+
     if (this.isUpdate && this.#dialogData.project) {
       this.#facade.updateProject(this.#dialogData.project.projectId, {
         title: trimmedTitle,
         description: trimmedDescription || undefined,
-        company: this.form.value.company!
+        company: this.form.value.company!,
+        code: trimmedCode
       })
         .pipe(
           catchError((error: HttpErrorResponse) => {
@@ -104,7 +111,8 @@ export class SaveProjectDialogComponent {
       this.#facade.createProject({
         title: trimmedTitle,
         description: trimmedDescription || undefined,
-        company: this.form.value.company!
+        company: this.form.value.company!,
+        code: trimmedCode
       })
         .pipe(
           catchError((error: HttpErrorResponse) => {

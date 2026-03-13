@@ -34,6 +34,20 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
         RuleFor(x => x.Company)
             .IsInEnum()
             .WithMessage("Ongeldig bedrijf.");
+
+        RuleFor(x => x.Code)
+            .Must(code => !string.IsNullOrWhiteSpace(code))
+            .WithMessage("Code is verplicht.");
+
+        RuleFor(x => x.Code)
+            .MaximumLength(5)
+            .When(x => !string.IsNullOrWhiteSpace(x.Code))
+            .WithMessage("Code mag maximaal 5 tekens zijn.");
+
+        RuleFor(x => x)
+            .MustAsync(CodeIsUniqueExcludingCurrentProject())
+            .When(x => !string.IsNullOrWhiteSpace(x.Code))
+            .WithMessage(x => $"Project met code '{x.Code}' bestaat al.");
     }
 
     private Func<UpdateProjectCommand, CancellationToken, Task<bool>> TitleIsUniqueExcludingCurrentProject()
@@ -41,6 +55,14 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
         return async (command, cancellationToken) =>
             !await _dbContext.Projects.AnyAsync(
                 p => p.Title == command.Title && p.Id != command.ProjectId && !p.IsDeleted,
+                cancellationToken);
+    }
+
+    private Func<UpdateProjectCommand, CancellationToken, Task<bool>> CodeIsUniqueExcludingCurrentProject()
+    {
+        return async (command, cancellationToken) =>
+            !await _dbContext.Projects.AnyAsync(
+                p => p.Code == command.Code!.ToUpperInvariant() && p.Id != command.ProjectId && !p.IsDeleted,
                 cancellationToken);
     }
 }

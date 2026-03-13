@@ -47,7 +47,10 @@ internal class GetCalendarFeedQueryHandler(IDatabaseContext db)
             ical.AppendLine($"DTEND;VALUE=DATE:{nextDay:yyyyMMdd}");
             ical.AppendLine($"DTSTAMP:{lastModified:yyyyMMddTHHmmssZ}");
             ical.AppendLine($"LAST-MODIFIED:{lastModified:yyyyMMddTHHmmssZ}");
-            ical.AppendLine($"SUMMARY:{EscapeICalText(task.Title)}");
+            var summaryPrefix = !string.IsNullOrWhiteSpace(task.Section.Project.Code)
+                ? $"{task.Section.Project.Code} | "
+                : string.Empty;
+            ical.AppendLine($"SUMMARY:{EscapeICalText($"{summaryPrefix}{task.Title}")}");
 
             if (!string.IsNullOrWhiteSpace(task.Description))
             {

@@ -18,7 +18,7 @@ public class CreateProjectCommandHandlerTests : BaseTestClass
     public async System.Threading.Tasks.Task Handle_ShouldCreateProject_WhenValidCommandProvided()
     {
         // Arrange
-        var command = new CreateProjectCommand("Test Project", "Test Description", Company.Immoseed);
+        var command = new CreateProjectCommand("Test Project", "Test Description", Company.Immoseed, "TST");
 
         // Act
         await _sut.Handle(command, CancellationToken.None);
@@ -36,7 +36,7 @@ public class CreateProjectCommandHandlerTests : BaseTestClass
     public async System.Threading.Tasks.Task Handle_ShouldCreateProject_WithoutDescription()
     {
         // Arrange
-        var command = new CreateProjectCommand("Test Project", null, Company.Immoseed);
+        var command = new CreateProjectCommand("Test Project", null, Company.Immoseed, "TST");
 
         // Act
         await _sut.Handle(command, CancellationToken.None);
@@ -50,11 +50,26 @@ public class CreateProjectCommandHandlerTests : BaseTestClass
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldPersistCodeUppercased_WhenCodeProvided()
+    {
+        // Arrange
+        var command = new CreateProjectCommand("Test Project", null, Company.Immoseed, "tst");
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var project = await DatabaseContext.Projects.FirstOrDefaultAsync();
+        Assert.NotNull(project);
+        Assert.Equal("TST", project.Code);
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldCreateMultipleProjects()
     {
         // Arrange
-        var command1 = new CreateProjectCommand("Project 1", "Description 1", Company.Immoseed);
-        var command2 = new CreateProjectCommand("Project 2", "Description 2", Company.NovaraRealEstate);
+        var command1 = new CreateProjectCommand("Project 1", "Description 1", Company.Immoseed, "P1");
+        var command2 = new CreateProjectCommand("Project 2", "Description 2", Company.NovaraRealEstate, "P2");
 
         // Act
         await _sut.Handle(command1, CancellationToken.None);

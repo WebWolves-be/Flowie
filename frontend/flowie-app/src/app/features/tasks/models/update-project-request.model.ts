@@ -4,4 +4,5 @@ export interface UpdateProjectRequest {
   title: string;
   description?: string;
   company: Company;
+  code?: string;
 }

@@ -13,7 +13,8 @@ internal class CreateProjectCommandHandler(IDatabaseContext databaseContext) : I
             {
                 Title = request.Title,
                 Description = request.Description,
-                Company = request.Company
+                Company = request.Company,
+                Code = request.Code?.ToUpperInvariant()
             });
 
         await databaseContext.SaveChangesAsync(cancellationToken);

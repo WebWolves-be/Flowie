@@ -7,4 +7,5 @@ public record UpdateProjectCommand(
     int ProjectId,
     string Title,
     string? Description,
-    Company Company) : IRequest<Unit>;
+    Company Company,
+    string? Code) : IRequest<Unit>;

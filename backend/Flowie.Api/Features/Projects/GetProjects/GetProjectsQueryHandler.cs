@@ -31,7 +31,8 @@ internal class GetProjectsQueryHandler(IDatabaseContext databaseContext)
                     p.Description,
                     p.Company,
                     p.Sections.SelectMany(s => s.Tasks).Count(),
-                    p.Sections.SelectMany(s => s.Tasks).Count(t => t.Status == TaskStatus.Done)
+                    p.Sections.SelectMany(s => s.Tasks).Count(t => t.Status == TaskStatus.Done),
+                    p.Code
                 ))
             .ToListAsync(cancellationToken);
 
