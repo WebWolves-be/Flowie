@@ -77,7 +77,8 @@ builder.Services.AddCors(options =>
         var allowedOrigins = new List<string>
         {
             "http://localhost:4200",
-            "https://localhost:4200"
+            "https://localhost:4200",
+            "capacitor://localhost"
         };
 
         var environment = builder.Environment.EnvironmentName;
