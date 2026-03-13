@@ -30,6 +30,7 @@ export class ProjectDetailComponent {
   backToList = output<void>();
   taskFilterToggled = output<boolean>();
   projectUpdateRequested = output<void>();
+  projectDeleteRequested = output<void>();
   sectionCreateRequested = output<void>();
   sectionUpdateRequested = output<number>();
   sectionDeleteRequested = output<number>();
@@ -114,6 +115,10 @@ export class ProjectDetailComponent {
 
   onUpdateProject() {
     this.projectUpdateRequested.emit();
+  }
+
+  onDeleteProject() {
+    this.projectDeleteRequested.emit();
   }
 
   onCreateSection() {

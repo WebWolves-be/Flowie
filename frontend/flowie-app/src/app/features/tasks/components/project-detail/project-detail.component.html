@@ -65,6 +65,12 @@
                   <i class="fas fa-edit mr-2 w-4"></i>
                   Project bewerken
                 </button>
+                <button
+                  (click)="onDeleteProject(); showProjectMenu.set(false)"
+                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center">
+                  <i class="fas fa-trash mr-2 w-4"></i>
+                  Project verwijderen
+                </button>
               </div>
             }
           </div>
@@ -77,6 +83,10 @@
           <button (click)="onUpdateProject()"
                   class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm md:text-base">
             <i class="fas fa-edit mr-2"></i>Project bewerken
+          </button>
+          <button (click)="onDeleteProject()"
+                  class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base">
+            <i class="fas fa-trash mr-2"></i>Project verwijderen
           </button>
         </div>
       </div>

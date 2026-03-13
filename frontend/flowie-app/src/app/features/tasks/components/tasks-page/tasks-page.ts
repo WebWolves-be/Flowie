@@ -25,6 +25,8 @@ import {
 } from "../save-task-dialog/save-task-dialog.component";
 import { DeleteTaskDialogComponent } from "../delete-task-dialog/delete-task-dialog.component";
 import { DeleteTaskDialogData } from "../../models/delete-task-dialog-data.model";
+import { DeleteProjectDialogComponent } from "../delete-project-dialog/delete-project-dialog.component";
+import { DeleteProjectDialogData } from "../../models/delete-project-dialog-data.model";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
 import { EmployeeFacade } from "../../../../core/facades/employee.facade";
@@ -198,6 +200,26 @@ export class TasksPage implements OnInit {
       data: { mode: "update", project: proj } as SaveProjectDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+  }
+
+  onOpenDeleteProjectDialog() {
+    const project = this.selectedProject();
+
+    if (!project) {
+      return;
+    }
+
+    const dialogRef = this.#dialog.open<boolean>(DeleteProjectDialogComponent, {
+      data: { project } as DeleteProjectDialogData,
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
+
+    dialogRef.closed.subscribe(result => {
+      if (result) {
+        void this.#router.navigate(["/taken"]);
+      }
     });
   }
 

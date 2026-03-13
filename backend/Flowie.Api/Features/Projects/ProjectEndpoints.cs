@@ -1,4 +1,5 @@
 using Flowie.Api.Features.Projects.CreateProject;
+using Flowie.Api.Features.Projects.DeleteProject;
 using Flowie.Api.Features.Projects.GetProjectById;
 using Flowie.Api.Features.Projects.GetProjects;
 using Flowie.Api.Features.Projects.UpdateProject;
@@ -19,5 +20,6 @@ internal static class ProjectEndpoints
         GetProjectByIdEndpoint.Map(projects);
         CreateProjectEndpoint.Map(projects);
         UpdateProjectEndpoint.Map(projects);
+        DeleteProjectEndpoint.Map(projects);
     }
 }
