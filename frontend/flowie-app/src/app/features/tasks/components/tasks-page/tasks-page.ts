@@ -29,6 +29,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { TaskTypeFacade } from "../../../settings/facade/task-type.facade";
 import { EmployeeFacade } from "../../../../core/facades/employee.facade";
 import { NotificationService } from "../../../../core/services/notification.service";
+import { BreakpointService } from "../../../../core/services/breakpoint.service";
 import { catchError, EMPTY } from "rxjs";
 import { HttpErrorResponse } from "@angular/common/http";
 import { extractErrorMessage } from "../../../../core/utils/error-message.util";
@@ -45,6 +46,7 @@ export class TasksPage implements OnInit {
   #taskTypeFacade = inject(TaskTypeFacade);
   #employeeFacade = inject(EmployeeFacade);
   #notificationService = inject(NotificationService);
+  #breakpointService = inject(BreakpointService);
   #router = inject(Router);
   #route = inject(ActivatedRoute);
   #dialog = inject(Dialog);
@@ -69,10 +71,23 @@ export class TasksPage implements OnInit {
 
   selectedProjectId = signal<number | null>(null);
   showOnlyMyTasks = signal<boolean>(false);
+  mobileView = signal<'list' | 'detail'>('list');
+
+  isMobile = this.#breakpointService.isMobile;
 
   selectedProject = computed(() => {
     const id = this.selectedProjectId();
     return id ? this.projects().find(p => p.projectId === id) : undefined;
+  });
+
+  showProjectList = computed(() => {
+    if (!this.isMobile()) return true;
+    return this.mobileView() === 'list';
+  });
+
+  showProjectDetail = computed(() => {
+    if (!this.isMobile()) return true;
+    return this.mobileView() === 'detail' && this.selectedProjectId() !== null;
   });
 
   constructor() {
@@ -147,6 +162,14 @@ export class TasksPage implements OnInit {
 
   onProjectSelected(projectId: number) {
     void this.#router.navigate(["/taken/project", projectId]);
+    if (this.isMobile()) {
+      this.mobileView.set('detail');
+    }
+  }
+
+  onBackToProjectList() {
+    this.mobileView.set('list');
+    void this.#router.navigate(["/taken"]);
   }
 
   onFilterProjectsByCompany(filter: "ALL" | Company) {
@@ -318,15 +341,30 @@ export class TasksPage implements OnInit {
   }
 
   onSectionReorder(items: { sectionId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderSections(items).subscribe();
+    this.#taskFacade.reorderSections(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onTaskReorder(items: { taskId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderTasks(items).subscribe();
+    this.#taskFacade.reorderTasks(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onSubtaskReorder(items: { taskId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderTasks(items).subscribe();
+    this.#taskFacade.reorderTasks(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {

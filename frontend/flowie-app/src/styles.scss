@@ -11,6 +11,25 @@ html, body {
   height: 100%;
 }
 
+.cdk-drag-preview {
+  box-sizing: border-box;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
 .app-container {
   @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50;
+}
+
+.safe-area-bottom {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.dialog-panel {
 }
