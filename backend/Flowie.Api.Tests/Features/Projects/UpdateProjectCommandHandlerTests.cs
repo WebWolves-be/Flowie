@@ -29,7 +29,7 @@ public class UpdateProjectCommandHandlerTests : BaseTestClass
         DatabaseContext.Projects.Add(project);
         await DatabaseContext.SaveChangesAsync();
 
-        var command = new UpdateProjectCommand(project.Id, "Updated Title", "Updated Description", Company.NovaraRealEstate);
+        var command = new UpdateProjectCommand(project.Id, "Updated Title", "Updated Description", Company.NovaraRealEstate, "UPD");
 
         // Act
         await _sut.Handle(command, CancellationToken.None);
@@ -42,10 +42,33 @@ public class UpdateProjectCommandHandlerTests : BaseTestClass
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Handle_ShouldUpdateCodeUppercased_WhenCodeProvided()
+    {
+        // Arrange
+        var project = new Project
+        {
+            Title = "Original Title",
+            Company = Company.Immoseed
+        };
+        DatabaseContext.Projects.Add(project);
+        await DatabaseContext.SaveChangesAsync();
+
+        var command = new UpdateProjectCommand(project.Id, "Original Title", null, Company.Immoseed, "upd");
+
+        // Act
+        await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedProject = await DatabaseContext.Projects.FindAsync(project.Id);
+        Assert.NotNull(updatedProject);
+        Assert.Equal("UPD", updatedProject.Code);
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task Handle_ShouldThrowEntityNotFoundException_WhenProjectDoesNotExist()
     {
         // Arrange
-        var command = new UpdateProjectCommand(999, "Updated Title", "Updated Description", Company.Immoseed);
+        var command = new UpdateProjectCommand(999, "Updated Title", "Updated Description", Company.Immoseed, "UPD");
 
         // Act & Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(
@@ -66,7 +89,7 @@ public class UpdateProjectCommandHandlerTests : BaseTestClass
         DatabaseContext.Projects.Add(project);
         await DatabaseContext.SaveChangesAsync();
 
-        var command = new UpdateProjectCommand(project.Id, "Updated Title", string.Empty, Company.NovaraRealEstate);
+        var command = new UpdateProjectCommand(project.Id, "Updated Title", string.Empty, Company.NovaraRealEstate, "UPD");
 
         // Act
         await _sut.Handle(command, CancellationToken.None);

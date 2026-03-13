@@ -18,6 +18,13 @@ public class ProjectEntityConfiguration : BaseEntityConfiguration<Project>
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
 
+        builder.Property(e => e.Code)
+            .HasMaxLength(5);
+
+        builder.HasIndex(e => e.Code)
+            .IsUnique()
+            .HasFilter("[Code] IS NOT NULL");
+
         builder.Property(e => e.Description)
             .HasMaxLength(4000);
 

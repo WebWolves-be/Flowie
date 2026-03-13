@@ -7,5 +7,6 @@ export interface Project {
   company: Company;
   taskCount: number;
   completedTaskCount: number;
+  code: string | null;
 }
 

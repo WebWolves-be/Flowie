@@ -20,6 +20,7 @@ internal class UpdateProjectCommandHandler(IDatabaseContext databaseContext) : I
         project.Title = request.Title;
         project.Description = request.Description;
         project.Company = request.Company;
+        project.Code = request.Code?.ToUpperInvariant();
 
         await databaseContext.SaveChangesAsync(cancellationToken);
 

@@ -30,6 +30,7 @@ export class ProjectDetailComponent {
   backToList = output<void>();
   taskFilterToggled = output<boolean>();
   projectUpdateRequested = output<void>();
+  projectDeleteRequested = output<void>();
   sectionCreateRequested = output<void>();
   sectionUpdateRequested = output<number>();
   sectionDeleteRequested = output<number>();
@@ -53,7 +54,12 @@ export class ProjectDetailComponent {
 
   constructor() {
     effect(() => {
-      this.orderedSections.set([...this.sections()].sort((a, b) => a.displayOrder - b.displayOrder));
+      this.orderedSections.set([...this.sections()].sort((a, b) => {
+        const aDone = a.taskCount > 0 && a.taskCount === a.completedTaskCount;
+        const bDone = b.taskCount > 0 && b.taskCount === b.completedTaskCount;
+        if (aDone !== bDone) return aDone ? 1 : -1;
+        return a.displayOrder - b.displayOrder;
+      }));
     });
     effect(() => {
       const map = new Map<number, Task[]>();
@@ -114,6 +120,10 @@ export class ProjectDetailComponent {
 
   onUpdateProject() {
     this.projectUpdateRequested.emit();
+  }
+
+  onDeleteProject() {
+    this.projectDeleteRequested.emit();
   }
 
   onCreateSection() {

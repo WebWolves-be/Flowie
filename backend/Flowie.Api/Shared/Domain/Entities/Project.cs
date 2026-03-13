@@ -10,6 +10,8 @@ public class Project : BaseEntity
 
     public bool IsDeleted { get; set; }
 
+    public string? Code { get; set; }
+
     public Company Company { get; set; }
     
     public ICollection<Section> Sections { get; } = [];

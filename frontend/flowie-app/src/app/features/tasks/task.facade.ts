@@ -112,6 +112,10 @@ export class TaskFacade {
     return this.#http.put<void>(`${this.#apiUrl}/api/projects/${projectId}`, request);
   }
 
+  deleteProject(projectId: number): Observable<void> {
+    return this.#http.delete<void>(`${this.#apiUrl}/api/projects/${projectId}`);
+  }
+
   createSection(request: CreateSectionRequest): Observable<void> {
     return this.#http.post<void>(`${this.#apiUrl}/api/sections`, request);
   }

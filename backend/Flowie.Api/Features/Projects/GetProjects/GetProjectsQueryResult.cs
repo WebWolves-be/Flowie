@@ -10,4 +10,5 @@ internal record ProjectDto(
     string? Description,
     Company Company,
     int TaskCount,
-    int CompletedTaskCount);
+    int CompletedTaskCount,
+    string? Code);
