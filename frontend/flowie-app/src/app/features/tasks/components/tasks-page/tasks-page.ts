@@ -341,15 +341,30 @@ export class TasksPage implements OnInit {
   }
 
   onSectionReorder(items: { sectionId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderSections(items).subscribe();
+    this.#taskFacade.reorderSections(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onTaskReorder(items: { taskId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderTasks(items).subscribe();
+    this.#taskFacade.reorderTasks(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onSubtaskReorder(items: { taskId: number; displayOrder: number }[]) {
-    this.#taskFacade.reorderTasks(items).subscribe();
+    this.#taskFacade.reorderTasks(items)
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.#notificationService.showError(extractErrorMessage(error));
+        return EMPTY;
+      }))
+      .subscribe(() => this.#notificationService.showSuccess("Volgorde opgeslagen"));
   }
 
   onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {

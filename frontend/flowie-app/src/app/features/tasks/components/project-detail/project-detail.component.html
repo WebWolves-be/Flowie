@@ -1,5 +1,5 @@
-<div class="flex flex-col h-full overflow-hidden">
-  <div class="bg-white border-b border-gray-200 p-4 md:p-6 flex-shrink-0">
+<div class="flex flex-col h-full min-h-0">
+  <div class="bg-white border-b border-gray-200 px-3 py-3 md:p-6 flex-shrink-0">
     @if (isMobile()) {
       <button
         (click)="backToList.emit()"
@@ -22,27 +22,54 @@
       </div>
     } @else {
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex-1">
-          <div class="flex flex-wrap items-center gap-2 mb-2">
-            <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().title }}</h2>
-            <span
-              [class.bg-amber-100]="project().company === Company.Immoseed"
-              [class.text-amber-800]="project().company === Company.Immoseed"
-              [class.bg-purple-100]="project().company === Company.NovaraRealEstate"
-              [class.text-purple-800]="project().company === Company.NovaraRealEstate"
-              [class.bg-teal-100]="project().company === Company.Algemeen"
-              [class.text-teal-800]="project().company === Company.Algemeen"
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
-              {{ project().company === Company.NovaraRealEstate ? 'Novara' : project().company }}
-            </span>
-          </div>
-          @if (project().description) {
-            <div class="text-sm text-gray-500 mb-3 max-w-2xl description-content"
-                 [innerHTML]="project().description">
+        <div class="flex items-start justify-between md:block">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().title }}</h2>
+              <span
+                [class.bg-amber-100]="project().company === Company.Immoseed"
+                [class.text-amber-800]="project().company === Company.Immoseed"
+                [class.bg-purple-100]="project().company === Company.NovaraRealEstate"
+                [class.text-purple-800]="project().company === Company.NovaraRealEstate"
+                [class.bg-teal-100]="project().company === Company.Algemeen"
+                [class.text-teal-800]="project().company === Company.Algemeen"
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                {{ project().company === Company.NovaraRealEstate ? 'Novara' : project().company }}
+              </span>
             </div>
-          }
+            @if (project().description) {
+              <div class="text-sm text-gray-500 mb-3 max-w-2xl description-content"
+                   [innerHTML]="project().description">
+              </div>
+            }
+          </div>
+
+          <div class="md:hidden relative ml-3 mt-1">
+            <button
+              (click)="toggleProjectMenu($event)"
+              class="bg-teal-600 hover:bg-teal-700 text-white p-2 rounded-full focus:outline-none"
+              title="Acties">
+              <i class="fas fa-ellipsis-vertical"></i>
+            </button>
+            @if (showProjectMenu()) {
+              <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+                <button
+                  (click)="onCreateSection(); showProjectMenu.set(false)"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                  <i class="fas fa-plus mr-2 w-4"></i>
+                  Sectie Toevoegen
+                </button>
+                <button
+                  (click)="onUpdateProject(); showProjectMenu.set(false)"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                  <i class="fas fa-edit mr-2 w-4"></i>
+                  Project bewerken
+                </button>
+              </div>
+            }
+          </div>
         </div>
-        <div class="flex flex-col md:flex-row gap-3">
+        <div class="hidden md:flex flex-col md:flex-row gap-3">
           <button (click)="onCreateSection()"
                   class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors text-sm md:text-base">
             <i class="fas fa-plus mr-2"></i>Sectie Toevoegen
@@ -56,7 +83,7 @@
     }
   </div>
   @if (!isDetailLoading() && (sections().length > 0 || tasks().length > 0)) {
-    <div class="bg-gray-50 border-b border-gray-200 px-4 md:px-6 py-3 flex-shrink-0">
+    <div class="bg-gray-50 border-b border-gray-200 px-3 md:px-6 py-3 flex-shrink-0">
       <div class="flex flex-wrap gap-2">
         <button
           (click)="onToggleTaskFilter(false)"
@@ -83,7 +110,7 @@
       </div>
     </div>
   }
-  <div class="flex-1 p-4 md:p-6 overflow-y-auto bg-gray-50">
+  <div class="flex-1 px-0 py-4 md:p-6 overflow-y-auto bg-gray-50" cdkScrollable>
     @if (isDetailLoading() || isLoadingSections()) {
       <div class="space-y-4 animate-pulse">
         <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -202,7 +229,7 @@
                     <p class="text-sm text-gray-500 text-center py-4">Geen taken in deze sectie</p>
                   } @else {
                     <div
-                      class="space-y-3"
+                      class="space-y-3 pl-5"
                       cdkDropList
                       (cdkDropListDropped)="onTaskDrop($event, section.sectionId)">
                       @for (task of getTasksForSection(section.sectionId); track task.taskId) {

@@ -9,7 +9,14 @@
 
 html, body {
   height: 100%;
-  overflow-x: hidden;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 body {
@@ -21,9 +28,8 @@ body {
 }
 
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
 
 .dialog-panel {
-  @apply p-4 md:p-6;
 }

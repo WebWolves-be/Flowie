@@ -19,24 +19,39 @@
         </div>
       }
       @if (!task().subtasks || task().subtasks!.length === 0) {
-        <div id="task-metadata-row" class="flex flex-col md:flex-row md:items-center gap-1 md:gap-0 text-sm text-black">
-          <span>{{ task().taskTypeName }}</span>
+        <div id="task-metadata-row" class="flex flex-wrap md:flex-nowrap md:items-center gap-x-0 gap-y-1.5 md:gap-0 text-sm text-black">
+          <span class="flex items-center gap-1 mr-3 md:mr-0">
+            <i class="fas fa-tag text-teal-600 text-xs md:hidden"></i>
+            {{ task().taskTypeName }}
+          </span>
           @if (task().employeeName) {
             <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
-            <span class="inline-flex items-center">
+            <span class="flex items-center gap-1 mr-3 md:mr-0">
+              <i class="fas fa-user text-teal-600 text-xs md:hidden"></i>
               {{ task().employeeName }}
             </span>
           }
           <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
           <span
+            class="flex items-center gap-1 mr-3 md:mr-0"
             [class.text-red-600]="isTaskOverdue()">
-            Deadline: {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
+            <i
+              class="fas fa-calendar-day text-xs md:hidden"
+              [class.text-red-600]="isTaskOverdue()"
+              [class.text-teal-600]="!isTaskOverdue()"></i>
+            {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
           <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
-          <span>Aangemaakt: {{ task().createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(task().createdAt) }}</span>
+          <span class="flex items-center gap-1 mr-3 md:mr-0">
+            <i class="fas fa-clock text-teal-600 text-xs md:hidden"></i>
+            Aangemaakt: {{ task().createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(task().createdAt) }}
+          </span>
           @if (isWaitingOn()) {
             <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
-            <span>Wachten sinds {{ waitingDays() === 0 ? 'vandaag' : waitingDays() + 'd' }}</span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-hourglass-half text-amber-500 text-xs md:hidden"></i>
+              {{ waitingDays() === 0 ? 'vandaag' : waitingDays() + 'd' }}
+            </span>
           }
         </div>
       }
@@ -80,24 +95,41 @@
                         [innerHTML]="subtask.description">
                       </div>
                     }
-                    <div class="flex items-center gap-2 text-xs mb-3">
-                      <span class="text-gray-700">{{ subtask.taskTypeName }}</span>
+                    <div class="flex flex-wrap md:flex-nowrap md:items-center gap-x-0 gap-y-1.5 md:gap-2 text-xs mb-3">
+                      <span class="flex items-center gap-1 mr-3 md:mr-0 text-gray-700">
+                        <i class="fas fa-tag text-teal-600 md:hidden"></i>
+                        {{ subtask.taskTypeName }}
+                      </span>
                       @if (subtask.employeeName) {
-                        <span class="text-teal-600 font-bold">|</span>
-                        <span class="text-gray-700">{{ subtask.employeeName }}</span>
+                        <span class="hidden md:inline text-teal-600 font-bold">|</span>
+                        <span class="flex items-center gap-1 mr-3 md:mr-0 text-gray-700">
+                          <i class="fas fa-user text-teal-600 md:hidden"></i>
+                          {{ subtask.employeeName }}
+                        </span>
                       }
-                      <span class="text-teal-600 font-bold">|</span>
+                      <span class="hidden md:inline text-teal-600 font-bold">|</span>
                       <span
-                        class="font-medium"
+                        class="flex items-center gap-1 mr-3 md:mr-0 font-medium"
                         [class.text-gray-600]="isSubtaskDone(subtask)"
                         [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
-                        [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)"
-                      >Deadline: {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}</span>
-                      <span class="text-teal-600 font-bold">|</span>
-                      <span class="text-gray-700">Aangemaakt: {{ subtask.createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(subtask.createdAt) }}</span>
+                        [class.text-gray-600]="!isSubtaskDone(subtask) && !isSubtaskOverdue(subtask)">
+                        <i
+                          class="fas fa-calendar-day md:hidden"
+                          [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)"
+                          [class.text-teal-600]="isSubtaskDone(subtask) || !isSubtaskOverdue(subtask)"></i>
+                        {{ subtask.dueDate ? (subtask.dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
+                      </span>
+                      <span class="hidden md:inline text-teal-600 font-bold">|</span>
+                      <span class="flex items-center gap-1 mr-3 md:mr-0 text-gray-700">
+                        <i class="fas fa-clock text-teal-600 md:hidden"></i>
+                        Aangemaakt: {{ subtask.createdAt | date:'dd-MM-yyyy' }} {{ daysAgo(subtask.createdAt) }}
+                      </span>
                       @if (isSubtaskWaitingOn(subtask)) {
-                        <span class="text-teal-600 font-bold">|</span>
-                        <span class="text-gray-700">Wachten sinds {{ subtaskWaitingDays(subtask) === 0 ? 'vandaag' : subtaskWaitingDays(subtask) + 'd' }}</span>
+                        <span class="hidden md:inline text-teal-600 font-bold">|</span>
+                        <span class="flex items-center gap-1 text-gray-700">
+                          <i class="fas fa-hourglass-half text-amber-500 md:hidden"></i>
+                          {{ subtaskWaitingDays(subtask) === 0 ? 'vandaag' : subtaskWaitingDays(subtask) + 'd' }}
+                        </span>
                       }
                     </div>
                     <div class="flex items-center gap-2">

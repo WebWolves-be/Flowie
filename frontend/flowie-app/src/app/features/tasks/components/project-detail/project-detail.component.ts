@@ -1,4 +1,4 @@
-import { Component, computed, input, OnChanges, output, signal } from "@angular/core";
+import { Component, effect, input, output, signal } from "@angular/core";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
 import { Project } from "../../models/project.model";
@@ -6,11 +6,12 @@ import { Section } from "../../models/section.model";
 import { Task } from "../../models/task.model";
 import { TaskStatus } from "../../models/task-status.enum";
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from "@angular/cdk/drag-drop";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 
 @Component({
   selector: "app-project-detail",
   standalone: true,
-  imports: [TaskItemComponent, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [TaskItemComponent, CdkDropList, CdkDrag, CdkDragHandle, CdkScrollable],
   templateUrl: "./project-detail.component.html",
   styleUrl: "./project-detail.component.scss"
 })
@@ -46,13 +47,34 @@ export class ProjectDetailComponent {
 
   expandedSections = signal<Set<number>>(new Set());
   showSectionMenu = signal<number | null>(null);
-  orderedSections = computed(() => {
-    return [...this.sections()].sort((a, b) => a.displayOrder - b.displayOrder);
-  });
+  showProjectMenu = signal<boolean>(false);
+  orderedSections = signal<Section[]>([]);
+  #orderedTasksBySectionId = signal<Map<number, Task[]>>(new Map());
+
+  constructor() {
+    effect(() => {
+      this.orderedSections.set([...this.sections()].sort((a, b) => a.displayOrder - b.displayOrder));
+    });
+    effect(() => {
+      const map = new Map<number, Task[]>();
+      for (const section of this.sections()) {
+        map.set(
+          section.sectionId,
+          this.tasks().filter(t => t.sectionId === section.sectionId)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+        );
+      }
+      this.#orderedTasksBySectionId.set(map);
+    });
+  }
+
+  toggleProjectMenu(event: Event): void {
+    event.stopPropagation();
+    this.showProjectMenu.update(v => !v);
+  }
 
   getTasksForSection(sectionId: number): Task[] {
-    return this.tasks().filter(t => t.sectionId === sectionId)
-      .sort((a, b) => a.displayOrder - b.displayOrder);
+    return this.#orderedTasksBySectionId().get(sectionId) ?? [];
   }
 
   toggleSection(sectionId: number): void {
@@ -71,16 +93,19 @@ export class ProjectDetailComponent {
   }
 
   onSectionDrop(event: CdkDragDrop<Section[]>) {
-    const reorderedSections = [...this.orderedSections()];
-    moveItemInArray(reorderedSections, event.previousIndex, event.currentIndex);
-    this.sectionReorderRequested.emit(reorderedSections.map((s, i) => ({ sectionId: s.sectionId, displayOrder: i })));
+    const reordered = [...this.orderedSections()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    this.orderedSections.set(reordered);
+    this.sectionReorderRequested.emit(reordered.map((s, i) => ({ sectionId: s.sectionId, displayOrder: i })));
   }
 
   onTaskDrop(event: CdkDragDrop<Task[]>, sectionId: number) {
-    const sectionTasks = this.getTasksForSection(sectionId);
-    const reorderedTasks = [...sectionTasks];
-    moveItemInArray(reorderedTasks, event.previousIndex, event.currentIndex);
-    this.taskReorderRequested.emit(reorderedTasks.map((t, i) => ({ taskId: t.taskId, displayOrder: i })));
+    const reordered = [...this.getTasksForSection(sectionId)];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    const newMap = new Map(this.#orderedTasksBySectionId());
+    newMap.set(sectionId, reordered);
+    this.#orderedTasksBySectionId.set(newMap);
+    this.taskReorderRequested.emit(reordered.map((t, i) => ({ taskId: t.taskId, displayOrder: i })));
   }
 
   onToggleTaskFilter(val: boolean) {

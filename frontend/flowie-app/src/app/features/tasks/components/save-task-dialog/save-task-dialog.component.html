@@ -1,37 +1,44 @@
-<div class="w-screen h-screen md:w-auto md:h-auto md:max-w-[32rem] md:max-h-[90vh] flex flex-col overflow-y-auto bg-white rounded-none md:rounded-xl shadow-xl p-0 md:p-6" role="dialog" aria-modal="true">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4 flex-shrink-0 px-4 pt-4 md:px-0 md:pt-0">{{ titleLabel() }}</h2>
-
-  @if (isSubtask && parentTaskTitle()) {
-    <div class="mb-4 bg-teal-50 border border-teal-200 rounded-lg p-3 flex-shrink-0 mx-4 md:mx-0">
-      <div class="flex items-start">
-        <svg class="h-5 w-5 text-teal-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clip-rule="evenodd" />
-        </svg>
-        <div>
-          <p class="text-sm font-medium text-teal-800 mb-1">
-            Taak:
-            <span class="text-teal-900 font-semibold">{{ parentTaskTitle() }}</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  }
-
-  @if (errorMessage()) {
-    <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 flex-shrink-0 mx-4 md:mx-0">
-      <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd" />
+<div class="flex flex-col w-screen h-screen md:w-auto md:h-auto md:max-w-[32rem] md:max-h-[90vh] bg-white rounded-none md:rounded-xl shadow-xl" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-between flex-shrink-0 px-4 py-4 md:px-6 md:pt-6 md:pb-0 border-b border-gray-200 md:border-b-0">
+    <h2 class="text-lg font-semibold text-gray-900">{{ titleLabel() }}</h2>
+    <button type="button" (click)="onCancel()" class="md:hidden p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
       </svg>
-      {{ errorMessage() }}
-    </div>
-  }
+    </button>
+  </div>
 
-  <form [formGroup]="taskForm" class="flex-1 flex flex-col md:block" (ngSubmit)="onSubmit()">
-    <div class="flex-1 md:flex-none overflow-y-auto space-y-4 px-4 md:px-0">
+  <form [formGroup]="taskForm" class="flex-1 flex flex-col min-h-0" (ngSubmit)="onSubmit()">
+    <div class="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-4 space-y-4">
+      @if (isSubtask && parentTaskTitle()) {
+        <div class="bg-teal-50 border border-teal-200 rounded-lg p-3">
+          <div class="flex items-start">
+            <svg class="h-5 w-5 text-teal-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd" />
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-teal-800 mb-1">
+                Taak:
+                <span class="text-teal-900 font-semibold">{{ parentTaskTitle() }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
+          <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd" />
+          </svg>
+          {{ errorMessage() }}
+        </div>
+      }
+
       <div>
         <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
           Titel <span class="text-red-600">*</span>
@@ -110,7 +117,7 @@
       }
     </div>
 
-    <div class="flex flex-col-reverse md:flex-row md:justify-end gap-3 flex-shrink-0 pt-4 px-4 pb-4 md:pt-0 md:px-0 md:pb-0">
+    <div class="flex-shrink-0 flex flex-col-reverse md:flex-row md:justify-end gap-3 px-4 py-6 md:px-6 md:pb-8 md:pt-4 border-t border-gray-200 md:border-t-0 safe-area-bottom">
       <button type="button" (click)="onCancel()"
               class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         Annuleren
