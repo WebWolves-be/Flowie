@@ -133,7 +133,7 @@ export class MyDialogComponent {
 
 ## Styling (Tailwind)
 
-- **Dialog**: `w-[25rem] bg-white rounded-xl shadow-xl p-6` + `role="dialog" aria-modal="true"`
+- **Dialog**: `w-screen h-screen md:h-auto md:w-[32rem] md:min-w-[500px] md:max-h-[90vh] bg-white rounded-none md:rounded-xl shadow-xl` + `role="dialog" aria-modal="true"`
 - **Primary button**: `px-4 py-2 text-sm rounded-lg bg-teal-600 text-white hover:bg-teal-500 disabled:opacity-50`
 - **Secondary button**: `border border-gray-300 text-gray-700 hover:bg-gray-50`
 - **Input base**: `w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`
