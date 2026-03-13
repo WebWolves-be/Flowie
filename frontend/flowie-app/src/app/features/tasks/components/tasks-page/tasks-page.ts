@@ -59,10 +59,24 @@ export class TasksPage implements OnInit {
 
   readonly Company = Company;
 
-  projects = this.#taskFacade.projects;
+  projects = computed(() =>
+    [...this.#taskFacade.projects()].sort((a, b) => {
+      const aDone = a.taskCount > 0 && a.taskCount === a.completedTaskCount;
+      const bDone = b.taskCount > 0 && b.taskCount === b.completedTaskCount;
+      if (aDone !== bDone) return aDone ? 1 : -1;
+      return 0;
+    })
+  );
   isLoadingProjects = this.#taskFacade.isLoadingProjects;
 
-  sections = this.#taskFacade.sections;
+  sections = computed(() =>
+    [...this.#taskFacade.sections()].sort((a, b) => {
+      const aDone = a.taskCount > 0 && a.taskCount === a.completedTaskCount;
+      const bDone = b.taskCount > 0 && b.taskCount === b.completedTaskCount;
+      if (aDone !== bDone) return aDone ? 1 : -1;
+      return a.displayOrder - b.displayOrder;
+    })
+  );
   isLoadingSections = this.#taskFacade.isLoadingSections;
 
   tasks = this.#taskFacade.tasks;
