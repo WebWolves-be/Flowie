@@ -7,7 +7,7 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 namespace Flowie.Api.Features.Tasks.UpdateTaskStatus;
 
 internal class UpdateTaskStatusCommandHandler(
-    DatabaseContext dbContext,
+    IDatabaseContext dbContext,
     TimeProvider timeProvider) : IRequestHandler<UpdateTaskStatusCommand, Unit>
 {
     public async Task<Unit> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
@@ -48,7 +48,6 @@ internal class UpdateTaskStatusCommandHandler(
             task.WaitingSince = timeProvider.GetUtcNow();
         }
 
-        // Update parent task status if this is a subtask
         if (task.ParentTaskId.HasValue)
         {
             await UpdateParentTaskStatus(task.ParentTaskId.Value, cancellationToken);
@@ -68,7 +67,6 @@ internal class UpdateTaskStatusCommandHandler(
             .Where(t => t.ParentTaskId == parentTaskId)
             .ToListAsync(cancellationToken);
 
-        // Update parent task status based on subtasks
         if (subtasks.All(t => t.Status == TaskStatus.Done))
         {
             parentTask.Status = TaskStatus.Done;

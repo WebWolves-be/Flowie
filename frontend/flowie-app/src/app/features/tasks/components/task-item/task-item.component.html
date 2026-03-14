@@ -9,7 +9,12 @@
         <div
           class="progress-circle flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold mr-2.5"
           [ngClass]="progressClass()">
-          <i class="fas" [ngClass]="statusIcon()"></i>
+          <i class="fas" [ngClass]="{
+            'fa-check': statusIcon() === 'check',
+            'fa-bolt': statusIcon() === 'ongoing',
+            'fa-clock': statusIcon() === 'waiting',
+            'fa-circle-dot': statusIcon() === 'pending'
+          }"></i>
         </div>
         <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
       </div>
@@ -35,10 +40,7 @@
           <span
             class="flex items-center gap-1 mr-3 md:mr-0"
             [class.text-red-600]="isTaskOverdue()">
-            <i
-              class="fas fa-calendar-day text-xs md:hidden"
-              [class.text-red-600]="isTaskOverdue()"
-              [class.text-teal-600]="!isTaskOverdue()"></i>
+            <i class="fas fa-calendar-day text-xs md:hidden" [class.text-red-600]="isTaskOverdue()" [class.text-teal-600]="!isTaskOverdue()"></i>
             {{ task().dueDate ? (task().dueDate | date:'d MMMM y':'':'nl-NL') : 'Geen' }}
           </span>
           <span class="hidden md:inline text-teal-600 font-bold mx-3">|</span>
@@ -143,28 +145,19 @@
                       @if (isSubtaskOngoing(subtask)) {
                         <button
                           (click)="onCompleteSubtask(subtask)"
-                          class="border px-3 py-1 rounded text-sm bg-transparent"
-                          style="border-color: #10B981; color: #10B981;"
-                          onmouseover="this.style.backgroundColor='#D1FAE5'"
-                          onmouseout="this.style.backgroundColor='transparent'">
+                          class="border border-green-600 text-green-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-green-50">
                           Klaar
                         </button>
                         <button
                           (click)="onWaitSubtask(subtask)"
-                          class="border px-3 py-1 rounded text-sm bg-transparent"
-                          style="border-color: #D97706; color: #D97706;"
-                          onmouseover="this.style.backgroundColor='#FEF3C7'"
-                          onmouseout="this.style.backgroundColor='transparent'">
-                          Wachten Op
+                          class="border border-amber-600 text-amber-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-amber-50">
+                          Wachten op
                         </button>
                       }
                       @if (isSubtaskWaitingOn(subtask)) {
                         <button
                           (click)="onCompleteSubtask(subtask)"
-                          class="border px-3 py-1 rounded text-sm bg-transparent"
-                          style="border-color: #10B981; color: #10B981;"
-                          onmouseover="this.style.backgroundColor='#D1FAE5'"
-                          onmouseout="this.style.backgroundColor='transparent'">
+                          class="border border-green-600 text-green-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-green-50">
                           Klaar
                         </button>
                         <button
@@ -195,14 +188,14 @@
                           class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
                           <button
                             (click)="onUpdateSubtask(subtask)"
-                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                             <i class="fas fa-edit mr-2 w-4"></i>
                             Bewerken
                           </button>
                           @if (isSubtaskPending(subtask)) {
                             <button
                               (click)="onDeleteSubtask(subtask)"
-                              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
+                              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                               <i class="fas fa-trash mr-2 w-4"></i>
                               Verwijderen
                             </button>
@@ -229,28 +222,19 @@
           @if (isOngoing()) {
             <button
               (click)="onCompleteTask()"
-              class="border px-3 py-1 rounded text-sm bg-transparent"
-              style="border-color: #10B981; color: #10B981;"
-              onmouseover="this.style.backgroundColor='#D1FAE5'"
-              onmouseout="this.style.backgroundColor='transparent'">
+              class="border border-green-600 text-green-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-green-50">
               Klaar
             </button>
             <button
               (click)="onWaitTask()"
-              class="border px-3 py-1 rounded text-sm bg-transparent"
-              style="border-color: #D97706; color: #D97706;"
-              onmouseover="this.style.backgroundColor='#FEF3C7'"
-              onmouseout="this.style.backgroundColor='transparent'">
-              Wachten Op
+              class="border border-amber-600 text-amber-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-amber-50">
+              Wachten op
             </button>
           }
           @if (isWaitingOn()) {
             <button
               (click)="onCompleteTask()"
-              class="border px-3 py-1 rounded text-sm bg-transparent"
-              style="border-color: #10B981; color: #10B981;"
-              onmouseover="this.style.backgroundColor='#D1FAE5'"
-              onmouseout="this.style.backgroundColor='transparent'">
+              class="border border-green-600 text-green-600 px-3 py-1 rounded text-sm bg-transparent hover:bg-green-50">
               Klaar
             </button>
             <button
@@ -282,20 +266,20 @@
           <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
             <button
               (click)="onCreateSubtask()"
-              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
               <i class="fas fa-plus mr-2 w-4"></i>
               Subtaak toevoegen
             </button>
             <button
               (click)="onUpdateTask()"
-              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
               <i class="fas fa-edit mr-2 w-4"></i>
               Bewerken
             </button>
             @if (isPending()) {
               <button
                 (click)="onDeleteTask()"
-                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
+                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                 <i class="fas fa-trash mr-2 w-4"></i>
                 Verwijderen
               </button>
@@ -306,4 +290,3 @@
     }
   </div>
 </div>
-

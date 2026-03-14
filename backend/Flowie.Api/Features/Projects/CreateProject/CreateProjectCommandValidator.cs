@@ -2,13 +2,14 @@ using Flowie.Api.Shared.Infrastructure.Database.Context;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Flowie.Api.Features.Projects.CreateProject;
 
 public class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
-    private readonly DatabaseContext _dbContext;
+    private readonly IDatabaseContext _dbContext;
 
-    public CreateProjectCommandValidator(DatabaseContext dbContext)
+    public CreateProjectCommandValidator(IDatabaseContext dbContext)
     {
         _dbContext = dbContext;
 

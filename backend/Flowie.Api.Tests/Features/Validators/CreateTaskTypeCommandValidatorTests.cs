@@ -86,7 +86,7 @@ public class CreateTaskTypeCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Validate_ShouldPass_WhenNameIsNull()
+    public async System.Threading.Tasks.Task Validate_ShouldFail_WhenNameIsNull_RequiredRuleAdded()
     {
         // Arrange
         var command = new CreateTaskTypeCommand(null!);
@@ -95,12 +95,12 @@ public class CreateTaskTypeCommandValidatorTests : BaseTestClass
         var result = await _validator.ValidateAsync(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Name" && e.ErrorMessage == "Naam is verplicht.");
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Validate_ShouldPass_WhenNameIsEmpty()
+    public async System.Threading.Tasks.Task Validate_ShouldFail_WhenNameIsEmpty()
     {
         // Arrange
         var command = new CreateTaskTypeCommand("");
@@ -109,12 +109,12 @@ public class CreateTaskTypeCommandValidatorTests : BaseTestClass
         var result = await _validator.ValidateAsync(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Name" && e.ErrorMessage == "Naam is verplicht.");
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Validate_ShouldPass_WhenNameIsWhitespace()
+    public async System.Threading.Tasks.Task Validate_ShouldFail_WhenNameIsWhitespace()
     {
         // Arrange
         var command = new CreateTaskTypeCommand("   ");
@@ -123,8 +123,8 @@ public class CreateTaskTypeCommandValidatorTests : BaseTestClass
         var result = await _validator.ValidateAsync(command);
 
         // Assert
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "Name" && e.ErrorMessage == "Naam is verplicht.");
     }
 
     [Fact]

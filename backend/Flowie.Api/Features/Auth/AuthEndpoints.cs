@@ -78,8 +78,8 @@ public static class AuthEndpoints
         if (existingUser != null)
         {
             return Results.Problem(
-                title: "Registration failed",
-                detail: "A user with this email already exists",
+                title: "Registratie mislukt",
+                detail: "Een gebruiker met dit e-mailadres bestaat al",
                 statusCode: 409);
         }
 
@@ -98,7 +98,7 @@ public static class AuthEndpoints
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             
             return Results.Problem(
-                title: "Registration failed",
+                title: "Registratie mislukt",
                 detail: errors,
                 statusCode: 400);
         }
@@ -156,8 +156,8 @@ public static class AuthEndpoints
         if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
         {
             return Results.Problem(
-                title: "Authentication failed",
-                detail: "Invalid email or password",
+                title: "Authenticatie mislukt",
+                detail: "Ongeldig e-mailadres of wachtwoord",
                 statusCode: 401);
         }
 
@@ -170,8 +170,8 @@ public static class AuthEndpoints
         if (employee == null)
         {
             return Results.Problem(
-                title: "Authentication failed",
-                detail: "Employee record not found for this user",
+                title: "Authenticatie mislukt",
+                detail: "Geen medewerkerrecord gevonden voor deze gebruiker",
                 statusCode: 401);
         }
 
@@ -190,7 +190,7 @@ public static class AuthEndpoints
 
         dbContext.RefreshTokens.Add(refreshTokenEntity);
         await dbContext.SaveChangesAsync();
-        
+
         var logger = loggerFactory.CreateLogger("Auth");
         logger.LogInformation("User {Email} logged in successfully with token version {TokenVersion}", user.Email, user.TokenVersion);
 
@@ -219,8 +219,8 @@ public static class AuthEndpoints
         if (refreshTokenEntity == null || !refreshTokenEntity.IsActive(timeProvider))
         {
             return Results.Problem(
-                title: "Invalid refresh token",
-                detail: "The refresh token is invalid or expired",
+                title: "Ongeldig vernieuwingstoken",
+                detail: "Het vernieuwingstoken is ongeldig of verlopen",
                 statusCode: 401);
         }
 
@@ -230,8 +230,8 @@ public static class AuthEndpoints
         if (currentUser == null || currentUser.LockoutEnd > timeProvider.GetUtcNow())
         {
             return Results.Problem(
-                title: "User account unavailable",
-                detail: "User account is locked or unavailable",
+                title: "Gebruikersaccount niet beschikbaar",
+                detail: "Het gebruikersaccount is vergrendeld of niet beschikbaar",
                 statusCode: 401);
         }
 
@@ -241,8 +241,8 @@ public static class AuthEndpoints
         if (employee == null)
         {
             return Results.Problem(
-                title: "Authentication failed",
-                detail: "Employee record not found for this user",
+                title: "Authenticatie mislukt",
+                detail: "Geen medewerkerrecord gevonden voor deze gebruiker",
                 statusCode: 401);
         }
 
@@ -287,8 +287,8 @@ public static class AuthEndpoints
         if (string.IsNullOrEmpty(userId))
         {
             return Results.Problem(
-                title: "Invalid request",
-                detail: "User ID not found in token",
+                title: "Ongeldig verzoek",
+                detail: "Gebruikers-ID niet gevonden in token",
                 statusCode: 400);
         }
 
@@ -314,8 +314,8 @@ public static class AuthEndpoints
             if (!result.Succeeded)
             {
                 return Results.Problem(
-                    title: "Logout failed",
-                    detail: "Failed to invalidate tokens",
+                    title: "Afmelden mislukt",
+                    detail: "Tokens konden niet worden ongeldig gemaakt",
                     statusCode: 500);
             }
         }

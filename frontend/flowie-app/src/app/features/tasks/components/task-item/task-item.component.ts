@@ -67,10 +67,10 @@ export class TaskItemComponent implements OnChanges {
 
   statusIcon = computed(() => {
     const status = this.task().status;
-    if (status === TaskStatus.Done) return "fa-check";
-    if (status === TaskStatus.Pending) return "fa-times";
-    if (status === TaskStatus.WaitingOn) return "fa-clock";
-    return "fa-question";
+    if (status === TaskStatus.Done) return "check";
+    if (status === TaskStatus.Pending) return "pending";
+    if (status === TaskStatus.WaitingOn) return "waiting";
+    return "ongoing";
   });
 
   isTaskOverdue = computed(() => {
