@@ -11,9 +11,9 @@
           [ngClass]="progressClass()">
           <i class="fas" [ngClass]="{
             'fa-check': statusIcon() === 'check',
-            'fa-bolt': statusIcon() === 'ongoing',
+            'fa-question': statusIcon() === 'ongoing',
             'fa-clock': statusIcon() === 'waiting',
-            'fa-circle-dot': statusIcon() === 'pending'
+            'fa-times': statusIcon() === 'pending'
           }"></i>
         </div>
         <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
