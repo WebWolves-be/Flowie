@@ -6,14 +6,22 @@ namespace Flowie.Api.Features.TaskTypes.CreateTaskType;
 
 public class CreateTaskTypeCommandValidator : AbstractValidator<CreateTaskTypeCommand>
 {
-    private readonly DatabaseContext _dbContext;
+    private readonly IDatabaseContext _dbContext;
 
-    public CreateTaskTypeCommandValidator(DatabaseContext dbContext)
+    public CreateTaskTypeCommandValidator(IDatabaseContext dbContext)
     {
         _dbContext = dbContext;
 
         RuleFor(x => x.Name)
+            .Must(n => !string.IsNullOrWhiteSpace(n))
+            .WithMessage("Naam is verplicht.");
+
+        RuleFor(x => x.Name)
             .MinimumLength(2)
+            .When(x => !string.IsNullOrWhiteSpace(x.Name))
+            .WithMessage("Naam moet tussen 2 en 50 tekens zijn.");
+
+        RuleFor(x => x.Name)
             .MaximumLength(50)
             .When(x => !string.IsNullOrWhiteSpace(x.Name))
             .WithMessage("Naam moet tussen 2 en 50 tekens zijn.");

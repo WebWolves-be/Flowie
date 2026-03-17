@@ -140,7 +140,7 @@ export class MyDialogComponent {
 - **Input valid**: `border border-gray-300 focus:ring-teal-500 focus:border-teal-500`
 - **Input invalid**: `border-2 border-red-500 focus:ring-red-500 focus:border-red-500`
 - **Error box**: `bg-red-50 border border-red-200 text-red-800`
-- **Icons**: Use inline SVG (not icon fonts)
+- **Icons**: Use Font Awesome via CDN (`<i class="fas fa-X"></i>`). Drag handles use inline SVG (no FA equivalent).
 
 ## Best Practices
 
