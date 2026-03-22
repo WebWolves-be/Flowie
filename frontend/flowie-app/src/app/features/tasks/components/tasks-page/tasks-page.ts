@@ -438,12 +438,23 @@ export class TasksPage implements OnInit {
 
     const parentTask = this.#taskFacade.tasks().find(t => t.taskId === parentTaskId);
 
+    if (!parentTask) {
+      this.#notificationService.showError("Bovenliggende taak niet gevonden");
+      return;
+    }
+
+    if (!parentTask.sectionId) {
+      this.#notificationService.showError("Bovenliggende taak heeft geen sectie");
+      return;
+    }
+
     this.#dialog.open<SaveTaskDialogResult>(SaveTaskDialogComponent, {
       data: {
         mode: "create-subtask",
         projectId: selectedProject.projectId,
+        sectionId: parentTask.sectionId,
         parentTaskId,
-        parentTaskTitle: parentTask?.title
+        parentTaskTitle: parentTask.title
       } as SaveTaskDialogData,
       backdropClass: ["fixed", "inset-0", "bg-black/40"],
       panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
