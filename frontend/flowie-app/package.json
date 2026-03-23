@@ -34,6 +34,7 @@
     "@angular/compiler-cli": "^20.0.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.2.0",
+    "@playwright/test": "^1.58.2",
     "@types/jasmine": "~5.1.0",
     "autoprefixer": "^10.4.20",
     "jasmine-core": "~5.1.0",

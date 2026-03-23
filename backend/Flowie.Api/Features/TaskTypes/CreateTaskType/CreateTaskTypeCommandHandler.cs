@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Flowie.Api.Features.TaskTypes.CreateTaskType;
 
-internal class CreateTaskTypeCommandHandler(DatabaseContext dbContext)
+internal class CreateTaskTypeCommandHandler(IDatabaseContext dbContext)
     : IRequestHandler<CreateTaskTypeCommand, Unit>
 {
     public async Task<Unit> Handle(CreateTaskTypeCommand request, CancellationToken cancellationToken)

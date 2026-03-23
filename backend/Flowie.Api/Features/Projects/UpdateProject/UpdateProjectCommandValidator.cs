@@ -6,9 +6,9 @@ namespace Flowie.Api.Features.Projects.UpdateProject;
 
 public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectCommand>
 {
-    private readonly DatabaseContext _dbContext;
+    private readonly IDatabaseContext _dbContext;
 
-    public UpdateProjectCommandValidator(DatabaseContext dbContext)
+    public UpdateProjectCommandValidator(IDatabaseContext dbContext)
     {
         _dbContext = dbContext;
 
@@ -28,7 +28,7 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
 
         RuleFor(x => x.Description)
             .MaximumLength(4000)
-            .When(x => !string.IsNullOrEmpty(x.Description))
+            .When(x => !string.IsNullOrWhiteSpace(x.Description))
             .WithMessage("Beschrijving mag niet langer dan 4000 tekens zijn.");
 
         RuleFor(x => x.Company)

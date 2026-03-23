@@ -7,7 +7,7 @@ using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 namespace Flowie.Api.Features.Tasks.GetTasks;
 
 internal class GetTasksQueryHandler(
-    DatabaseContext dbContext,
+    IDatabaseContext dbContext,
     ICurrentUserService currentUserService) : IRequestHandler<GetTasksQuery, GetTasksQueryResult>
 {
     public async Task<GetTasksQueryResult> Handle(GetTasksQuery request, CancellationToken cancellationToken)

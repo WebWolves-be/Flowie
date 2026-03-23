@@ -1,10 +1,8 @@
 <div class="flex flex-col w-screen h-screen md:h-auto md:w-[32rem] md:min-w-[500px] md:max-h-[90vh] bg-white rounded-none md:rounded-xl shadow-xl" role="dialog" aria-modal="true">
   <div class="flex items-center justify-between flex-shrink-0 px-4 py-4 md:px-6 md:pt-6 md:pb-0 border-b border-gray-200 md:border-b-0">
-    <h3 class="text-lg font-semibold text-gray-900">Taak type toevoegen</h3>
+    <h2 class="text-lg font-semibold text-gray-900">Taak type toevoegen</h2>
     <button type="button" (click)="onCancel()" class="md:hidden p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-      </svg>
+      <i class="fas fa-times"></i>
     </button>
   </div>
 
@@ -13,10 +11,7 @@
       @if (errorMessage()) {
         <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
           <div class="flex items-start">
-            <svg class="h-5 w-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <i class="fas fa-circle-exclamation text-red-600 mr-2 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-red-800">{{ errorMessage() }}</p>
           </div>
         </div>
