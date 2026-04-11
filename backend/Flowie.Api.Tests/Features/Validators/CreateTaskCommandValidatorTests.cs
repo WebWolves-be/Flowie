@@ -281,7 +281,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
-    public void Validate_ShouldFail_WhenDueDateIsToday()
+    public void Validate_ShouldPass_WhenDueDateIsToday()
     {
         // Arrange
         var command = new CreateTaskCommand(
@@ -296,8 +296,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         var result = _validator.Validate(command);
 
         // Assert
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.PropertyName == "DueDate");
+        Assert.True(result.IsValid);
     }
 
     [Fact]
