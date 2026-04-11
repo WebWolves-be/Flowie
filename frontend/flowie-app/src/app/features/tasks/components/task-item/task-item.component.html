@@ -5,20 +5,34 @@
   [class.border-gray-200]="!isLast()">
   <div class="flex items-start justify-between">
     <div class="flex-1">
-      <div class="flex items-center mb-3">
+      <div
+        class="flex items-center"
+        [class.mb-3]="expanded()"
+        [class.cursor-pointer]="isDone()"
+        (click)="toggleExpanded()">
         <div
           class="progress-circle flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold mr-2.5"
           [ngClass]="progressClass()">
           <i class="fas" [ngClass]="statusIcon()"></i>
         </div>
-        <h3 class="text-lg font-medium text-gray-900">{{ task().title }}</h3>
+        <h3 class="text-lg font-medium text-gray-900 flex-1">{{ task().title }}</h3>
+        @if (isDone()) {
+          <svg
+            class="w-4 h-4 ml-auto text-gray-400 transition-transform"
+            [class.rotate-90]="expanded()"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        }
       </div>
-      @if (task().description) {
+      @if (expanded() && task().description) {
         <div class="text-sm text-gray-900 mb-3 description-content"
              [innerHTML]="task().description">
         </div>
       }
-      @if (!task().subtasks || task().subtasks!.length === 0) {
+      @if (expanded() && (!task().subtasks || task().subtasks!.length === 0)) {
         <div id="task-metadata-row" class="flex flex-wrap md:flex-nowrap md:items-center gap-x-0 gap-y-1.5 md:gap-0 text-sm text-black">
           <span class="flex items-center gap-1 mr-3 md:mr-0">
             <i class="fas fa-tag text-teal-600 text-xs md:hidden"></i>
@@ -55,7 +69,7 @@
           }
         </div>
       }
-      @if (task().subtasks && task().subtasks!.length > 0) {
+      @if (expanded() && task().subtasks && task().subtasks!.length > 0) {
         <div class="mt-3">
           <h4 class="text-sm font-medium text-gray-700 mb-2">
             Subtaken ({{ taskProgress() }}% voltooid)
@@ -217,7 +231,7 @@
           </div>
         </div>
       }
-      @if (!task().subtasks || task().subtasks!.length === 0) {
+      @if (expanded() && (!task().subtasks || task().subtasks!.length === 0)) {
         <div class="flex items-center gap-2 mt-3">
           @if (isPending()) {
             <button
