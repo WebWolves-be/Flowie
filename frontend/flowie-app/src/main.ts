@@ -79,9 +79,10 @@ const routes: Routes = [
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideServiceWorker("ngsw-worker.js", {
+      enabled: !isDevMode(),
+      registrationStrategy: "registerWhenStable:30000",
+    }),
   ],
 }).catch((err) => console.error(err));
