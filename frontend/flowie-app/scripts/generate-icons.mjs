@@ -1,9 +1,10 @@
 import sharp from "sharp";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
+const publicDir = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+const outDir = join(publicDir, "icons");
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="112" fill="#0d9488"/>
@@ -29,3 +30,14 @@ await sharp(Buffer.from(svg))
   .png()
   .toFile(join(outDir, "apple-touch-icon.png"));
 console.log("wrote apple-touch-icon.png");
+
+await writeFile(join(publicDir, "favicon.svg"), svg);
+console.log("wrote favicon.svg");
+
+for (const size of [16, 32, 48]) {
+  await sharp(Buffer.from(svg))
+    .resize(size, size)
+    .png()
+    .toFile(join(publicDir, `favicon-${size}x${size}.png`));
+  console.log(`wrote favicon-${size}x${size}.png`);
+}
