@@ -11,6 +11,8 @@ import { authInterceptor } from "./app/core/interceptors/auth.interceptor";
 import { errorInterceptor } from "./app/core/interceptors/error.interceptor";
 import { authGuard } from "./app/core/guards/auth.guard";
 import { guestGuard } from "./app/core/guards/guest.guard";
+import { isDevMode } from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 
 registerLocaleData(localeNl);
 
@@ -78,5 +80,9 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideServiceWorker("ngsw-worker.js", {
+      enabled: !isDevMode(),
+      registrationStrategy: "registerWhenStable:30000",
+    }),
   ],
 }).catch((err) => console.error(err));
