@@ -1,9 +1,14 @@
 {
-  "name": "flowie-app",
-  "short_name": "flowie-app",
+  "name": "Flowie",
+  "short_name": "Flowie",
+  "lang": "nl",
+  "description": "Flowie - taak- en projectbeheer",
+  "theme_color": "#0d9488",
+  "background_color": "#0d9488",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
