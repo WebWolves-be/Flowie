@@ -1,6 +1,6 @@
-# Mobile E2E Testing + PWA Bug Fixes — Design
+# Full E2E Test Coverage, CI Gate & Agentic Workflow + PWA Bug Fixes — Design
 
-**Date:** 2026-07-25
+**Date:** 2026-07-25 (extended same day: full coverage, CI, agentic loop)
 **Branch:** mobile-strategy
 **Status:** Approved
 
@@ -15,10 +15,18 @@ There is no mobile test coverage. The only e2e artifact is `.playwright/e2e-test
 a plain Node script running at a 1280×720 desktop viewport with no retries, traces,
 or device emulation.
 
+The project is moving to an agentic coding workflow: Claude makes most changes, so
+the safety net must be automatic — full e2e feature coverage that gates PRs in CI
+and fast checks that run after each local change.
+
 ## Goals
 
-- A proper `@playwright/test` suite covering all app features on both a mobile
-  device profile and desktop.
+- A proper `@playwright/test` suite covering **every user-facing feature** on both
+  a mobile device profile and desktop.
+- A CI workflow that runs the full test suite (backend unit + e2e) on every PR and
+  feature-branch push; merging to `main` requires green CI.
+- An agentic local loop: fast checks run automatically after Claude's changes;
+  the full suite runs before commits/task completion.
 - A Claude-driven exploratory mobile test skill using Chrome DevTools MCP for
   visual issues scripted tests cannot assert.
 - Both known bugs reproduced by failing regression tests first, then fixed, so the
@@ -26,9 +34,10 @@ or device emulation.
 
 ## Non-Goals
 
-- CI pipeline integration (suite must be CI-ready, but wiring up CI is out of scope).
 - Real-device testing (emulation only).
-- Register-flow coverage beyond what already exists (account creation churn).
+- Frontend unit tests (Jest/Karma) — e2e feature coverage is the safety net;
+  backend keeps its existing unit test suite.
+- Changes to the existing deploy workflows beyond depending on green CI.
 
 ## 1. Playwright Suite
 
@@ -39,17 +48,27 @@ frontend/flowie-app/
 ├── playwright.config.ts
 └── e2e/
     ├── auth.setup.ts        # login once as e2e user, save storageState
-    ├── auth.spec.ts         # login page, bad credentials, logout
+    ├── auth.spec.ts         # login page, bad credentials, logout, register flow
     ├── dashboard.spec.ts    # loads, shows content, no console errors
-    ├── projects.spec.ts     # create, select via single tap, edit, delete
-    ├── tasks.spec.ts        # create (incl. Quill description), edit, complete, sections
-    ├── settings.spec.ts     # page loads, key settings visible
+    ├── projects.spec.ts     # create, select via single tap, edit, delete, validation errors
+    ├── tasks.spec.ts        # create (incl. Quill description), edit, complete, delete,
+    │                        # sections CRUD, drag-and-drop reorder, validation errors
+    ├── settings.spec.ts     # page loads, settings CRUD where applicable
     └── regressions.spec.ts  # double-tap bug, editor overflow bug
 ```
 
+Coverage principle: every route and every user-facing action (happy path + the
+visible error state) has at least one spec. New features must ship with specs —
+enforced via the workflow rules in §5.
+
+The register flow creates a unique throwaway user per run (needs the registration
+code, provided via env var `E2E_REGISTRATION_CODE`; in CI the DB is ephemeral, and
+locally the accounts are inert).
+
 ### Config
 
-- `baseURL: https://localhost:4200`, `ignoreHTTPSErrors: true` (self-signed cert).
+- `baseURL` from env `E2E_BASE_URL`, default `https://localhost:4200`;
+  `ignoreHTTPSErrors: true` (local self-signed cert; CI serves plain HTTP).
 - Projects:
   - **mobile** — Pixel 7 device profile (Chromium, touch enabled, mobile viewport,
     device pixel ratio).
@@ -111,12 +130,55 @@ debugging to confirm root cause → minimal fix → test green.
   `styles.scss`, covering both the task and section dialogs in one place. The
   per-dialog SCSS is not duplicated.
 
-## 4. Success Criteria
+## 4. CI Pipeline
 
-- `npm run e2e` passes on both device projects, including both regression tests
-  after the fixes land.
+New workflow `.github/workflows/ci.yml`, triggered on `pull_request` targeting
+`main` and on pushes to non-`main` branches:
+
+- **Job: backend-tests** — restore, build, `dotnet test` (EF InMemory, no
+  external services needed).
+- **Job: e2e** —
+  - SQL Server via GitHub Actions service container (`mcr.microsoft.com/mssql/server`).
+  - Backend started with `dotnet run` (`ASPNETCORE_ENVIRONMENT=Testing`-style CI
+    config: connection string to the service container, JWT secret and
+    registration code from workflow env — throwaway values, not secrets).
+  - Migrations applied on startup against the fresh DB; e2e user seeded via the
+    register endpoint before the suite runs.
+  - Frontend served via `ng serve` with the development configuration and SSL
+    disabled (dev environment already targets `http://localhost:5229`), so
+    `E2E_BASE_URL=http://localhost:4200`.
+  - `npx playwright test` (both device projects), Playwright HTML report +
+    traces uploaded as workflow artifacts on failure.
+- Branch protection intent: `main` merges require both jobs green. The existing
+  deploy workflows remain unchanged.
+
+## 5. Agentic Local Loop
+
+Tiered checks so Claude gets fast feedback per change and full verification at
+milestones:
+
+- **After each change (automatic):** a Claude Code `Stop` hook in
+  `.claude/settings.json` runs a fast-check script: detects touched areas via
+  `git status`, then runs `dotnet build` + backend unit tests when backend files
+  changed, and `ng build` (type/template check) when frontend files changed.
+  Hook output surfaces failures directly to Claude for immediate repair.
+- **Before commit / task completion (mandated):** full `npm run e2e` + backend
+  tests via the existing `/test-all` skill. Root `CLAUDE.md` is updated to state:
+  no commit and no "task complete" claim without a green full run, and any new
+  feature or behavior change ships with new/updated e2e specs.
+- The `/test-frontend` skill is updated to run the new Playwright suite instead
+  of the legacy script.
+
+## 6. Success Criteria
+
+- Every route and user-facing action has e2e coverage; `npm run e2e` passes on
+  both device projects, including both regression tests after the fixes land.
+- `ci.yml` runs green on a PR from this branch: backend tests + full e2e with
+  report artifacts.
+- The `Stop` hook fires locally and surfaces failures on a deliberately broken
+  build (verified once, then reverted).
 - `/test-mobile` skill exists, is documented, and has been run end-to-end once
   as validation with a findings report.
-- `frontend/flowie-app/CLAUDE.md` and the `/test-frontend` skill reference the
-  new suite.
+- Root `CLAUDE.md`, `frontend/flowie-app/CLAUDE.md`, `/test-frontend`, and
+  `/test-all` reference the new suite and workflow rules.
 - Legacy `.playwright/e2e-tests.mjs` removed after migration.
