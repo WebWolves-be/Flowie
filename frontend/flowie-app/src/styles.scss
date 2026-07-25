@@ -33,3 +33,19 @@ body {
 
 .dialog-panel {
 }
+
+quill-editor {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.ql-container {
+  max-width: 100%;
+}
+
+.ql-editor {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
