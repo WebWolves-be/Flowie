@@ -30,3 +30,8 @@ Thumbs.db
 
 # Angular cache
 .angular/cache
+
+# Playwright
+/e2e/.auth/
+/playwright-report/
+/test-results/
