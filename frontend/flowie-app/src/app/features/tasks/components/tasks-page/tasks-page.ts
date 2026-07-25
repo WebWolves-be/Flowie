@@ -147,11 +147,16 @@ export class TasksPage implements OnInit {
 
         this.#taskFacade.getSections(idNum);
         this.#loadTasksWithDelay(idNum, false);
+
+        if (this.isMobile()) {
+          this.mobileView.set('detail');
+        }
       } else {
         this.#taskFacade.clearSections();
         this.#taskFacade.clearTasks();
 
         this.selectedProjectId.set(null);
+        this.mobileView.set('list');
       }
     });
   }
