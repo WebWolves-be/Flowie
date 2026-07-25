@@ -34,8 +34,21 @@ After implementing or modifying code, **always validate your work**. Do not cons
 
 ### Quick Testing Skills
 
+### Agentic Workflow Rules (mandatory)
+
+- A `Stop` hook (`scripts/fast-check.ps1`) automatically builds and unit-tests
+  whatever you touched after every turn — fix failures it reports immediately.
+- **No commit and no "task complete" claim without a green full run:**
+  `cd frontend/flowie-app && npm run e2e` (both device projects) plus
+  `dotnet test Flowie.sln`.
+- **Every new feature or behavior change ships with new/updated e2e specs**
+  in `frontend/flowie-app/e2e/`.
+- CI (`.github/workflows/ci.yml`) runs the same suite on every PR; `main`
+  requires green CI.
+
 - `/test-backend` - Run backend unit tests with summary
-- `/test-frontend` - Run E2E tests with SSL configured automatically
+- `/test-frontend` - Run the Playwright e2e suite (`npm run e2e`, mobile + desktop projects)
+- `/test-mobile` - Exploratory mobile pass via Chrome DevTools MCP
 - `/test-all` - Run full test suite (backend + frontend)
 - `/test-all quick` - Fast iteration mode (skip E2E)
 - `/migrate name:MigrationName` - Create database migration
