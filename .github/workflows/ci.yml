@@ -82,6 +82,21 @@ jobs:
           E2E_REGISTRATION_CODE: '1311'
         run: npx playwright test
 
+      - name: Print failure diagnostics
+        if: failure()
+        working-directory: ./frontend/flowie-app
+        run: |
+          echo "===== error-context snapshots (first 12) ====="
+          find test-results -name 'error-context.md' | head -12 | while read f; do
+            echo "----- $f -----"
+            head -c 4000 "$f"
+            echo
+          done
+          echo "===== frontend.log tail ====="
+          tail -n 80 frontend.log || true
+          echo "===== backend.log tail ====="
+          tail -n 120 ../../backend/Flowie.Api/backend.log || true
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
