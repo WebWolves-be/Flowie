@@ -8,6 +8,14 @@
 > For exploratory mobile checks use the `/test-mobile` skill.
 > Playwright CLI / Chrome DevTools MCP remain for ad-hoc debugging.
 
+## E2E Tests Are Mandatory
+
+Every new feature or behavior change ships with e2e specs in `e2e/`, and the
+suite must be green before the work counts as done — see the root `CLAUDE.md`
+for the full rule. Bug fixes get a regression test in `e2e/regressions.spec.ts`
+that fails before the fix. Reuse `e2e/helpers.ts` rather than writing new
+locators, and never skip or loosen an assertion to get green.
+
 ### Running the suite
 
 1. Ensure backend (`http://localhost:5229/health`) and frontend
