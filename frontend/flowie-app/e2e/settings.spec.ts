@@ -30,4 +30,42 @@ test.describe("settings", () => {
     await confirmDelete(page);
     await expect(page.locator("td", { hasText: name })).toBeHidden();
   });
+
+  test("regenerating the feed URL asks for confirmation in an in-app dialog", async ({
+    page,
+  }) => {
+    // This used to call window.confirm(), which renders as a system alert
+    // titled with the origin — jarring inside an installed PWA. Fail loudly if
+    // a native dialog ever comes back.
+    let nativeDialogAppeared = false;
+    page.on("dialog", async (d) => {
+      nativeDialogAppeared = true;
+      await d.dismiss();
+    });
+
+    await page.goto("/instellingen");
+    await page.getByRole("button", { name: "Agenda feed" }).click();
+    const before = await page.locator("#feedUrl").inputValue();
+    expect(before).not.toBe("");
+
+    await page.getByRole("button", { name: "URL vernieuwen" }).click();
+
+    const dlg = dialog(page);
+    await expect(
+      dlg.locator("h2", { hasText: "Agenda feed URL vernieuwen" })
+    ).toBeVisible();
+    expect(nativeDialogAppeared).toBe(false);
+
+    // Cancelling must leave the existing URL alone.
+    await dlg.getByRole("button", { name: "Annuleren" }).click();
+    await expect(dlg).toBeHidden();
+    await expect(page.locator("#feedUrl")).toHaveValue(before);
+
+    // Confirming issues a new one.
+    await page.getByRole("button", { name: "URL vernieuwen" }).click();
+    await dlg.getByRole("button", { name: "Vernieuwen" }).click();
+    await expect(dlg).toBeHidden();
+    await expect(page.locator("#feedUrl")).not.toHaveValue(before);
+    expect(nativeDialogAppeared).toBe(false);
+  });
 });

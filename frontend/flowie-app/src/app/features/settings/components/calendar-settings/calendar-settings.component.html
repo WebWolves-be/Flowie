@@ -67,14 +67,9 @@
 
     <div class="pt-4 border-t border-gray-200">
       <button
-        (click)="regenerateToken()"
-        [disabled]="isRegenerating()"
-        class="w-full lg:w-auto inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-        @if (isRegenerating()) {
-          <span>Vernieuwen...</span>
-        } @else {
-          <span>URL vernieuwen</span>
-        }
+        (click)="openRegenerateDialog()"
+        class="w-full lg:w-auto inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50">
+        URL vernieuwen
       </button>
       <p class="text-xs text-gray-500 mt-2">
         Let op: Het vernieuwen van de URL maakt de oude URL ongeldig. Je moet de nieuwe URL opnieuw toevoegen aan je agenda-app.
