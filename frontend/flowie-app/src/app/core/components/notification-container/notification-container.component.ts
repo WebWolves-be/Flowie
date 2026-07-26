@@ -57,7 +57,7 @@ import { NotificationService } from "../../services/notification.service";
 
           <button
             (click)="remove(notification.id)"
-            class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch -m-2 rounded-full text-gray-500 hover:text-gray-700 transition-colors"
+            class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch -m-2 lg:m-0 rounded-full text-gray-500 hover:text-gray-700 transition-colors"
             title="Sluiten"
             type="button">
             <i class="fas fa-times w-5 h-5"></i>

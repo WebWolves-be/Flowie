@@ -57,6 +57,21 @@ body {
   }
 }
 
+/* Apple's 44px minimum touch target, applied only below `lg`. Deliberately not
+   a Tailwind theme value: a mouse pointer is precise enough for the compact
+   desktop controls, and growing those would change a layout that is already
+   right. Every `min-h-touch` / `min-w-touch` in a template is therefore a
+   phone-and-tablet rule, and desktop keeps its own padding. */
+@media (max-width: 1023px) {
+  .min-h-touch {
+    min-height: 2.75rem;
+  }
+
+  .min-w-touch {
+    min-width: 2.75rem;
+  }
+}
+
 /* Interactive elements get an unambiguous pressed state, since hover styles
    never resolve on touch. */
 @media (hover: none) {

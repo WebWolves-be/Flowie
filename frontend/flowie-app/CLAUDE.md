@@ -160,7 +160,10 @@ produced horizontal scrolling and content hidden under the notch:
   a bare element selector).
 - **Interactive controls are ≥44px** (`min-h-touch` / `min-w-touch`, = 2.75rem).
   An icon button needs `flex items-center justify-center min-w-touch min-h-touch`;
-  padding alone leaves a 20px-wide target.
+  padding alone leaves a 20px-wide target. These two are **plain CSS in
+  `styles.scss` under `@media (max-width: 1023px)`**, not Tailwind theme values —
+  a mouse is precise enough for the compact desktop controls, so keep each
+  element's own `py-*` alongside them and desktop is left exactly as it was.
 - **Use `h-dvh` / `min-h-dvh`, not `h-screen`** — 100vh is wrong on iOS when the
   keyboard or the browser toolbars are on screen.
 - **Fixed app chrome carries safe-area padding** (`pt-safe-t` on the mobile

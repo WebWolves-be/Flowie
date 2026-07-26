@@ -6,7 +6,7 @@
           <h1 class="text-lg font-semibold text-gray-900 min-w-0 truncate">Projecten</h1>
           <button
             (click)="onOpenCreateProjectDialog()"
-            class="flex items-center justify-center gap-1 flex-shrink-0 px-4 min-h-touch rounded-lg text-sm whitespace-nowrap bg-teal-600 text-white hover:bg-teal-500 transition-colors">
+            class="flex items-center justify-center gap-1 flex-shrink-0 px-4 py-1.5 min-h-touch lg:px-3 rounded-lg text-sm whitespace-nowrap bg-teal-600 text-white hover:bg-teal-500 transition-colors">
             <i class="fas fa-plus mr-1"></i>
             Nieuw project
           </button>
@@ -20,7 +20,7 @@
           [class.bg-gray-200]="companyFilter() !== 'ALL'"
           [class.text-gray-700]="companyFilter() !== 'ALL'"
           [class.hover:bg-gray-300]="companyFilter() !== 'ALL'"
-          class="inline-flex items-center px-3 min-h-touch rounded-lg text-sm whitespace-nowrap transition-colors">Alle
+          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Alle
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Immoseed)"
@@ -30,7 +30,7 @@
           [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
           [class.text-gray-700]="companyFilter() !== Company.Immoseed"
           [class.hover:bg-gray-300]="companyFilter() !== Company.Immoseed"
-          class="inline-flex items-center px-3 min-h-touch rounded-lg text-sm whitespace-nowrap transition-colors">Immoseed
+          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Immoseed
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.NovaraRealEstate)"
@@ -40,7 +40,7 @@
           [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
           [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
           [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
-          class="inline-flex items-center px-3 min-h-touch rounded-lg text-sm whitespace-nowrap transition-colors">Novara
+          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Novara
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Algemeen)"
@@ -50,7 +50,7 @@
           [class.bg-gray-200]="companyFilter() !== Company.Algemeen"
           [class.text-gray-700]="companyFilter() !== Company.Algemeen"
           [class.hover:bg-gray-300]="companyFilter() !== Company.Algemeen"
-          class="inline-flex items-center px-3 min-h-touch rounded-lg text-sm whitespace-nowrap transition-colors">Algemeen
+          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Algemeen
         </button>
       </div>
     </div>

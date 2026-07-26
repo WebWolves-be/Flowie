@@ -3,7 +3,7 @@
     @if (isCompact()) {
       <button
         (click)="backToList.emit()"
-        class="inline-flex items-center gap-2 min-h-touch px-2 -ml-2 mb-2 rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50">
+        class="inline-flex items-center gap-2 min-h-touch px-2 -ml-2 mb-2 lg:mb-4 rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50">
         <i class="fas fa-chevron-left"></i>
         Terug naar projecten
       </button>
@@ -109,7 +109,7 @@
           [class.bg-gray-200]="showOnlyMyTasks()"
           [class.text-gray-700]="showOnlyMyTasks()"
           [class.hover:bg-gray-300]="showOnlyMyTasks()"
-          class="inline-flex items-center px-4 min-h-touch rounded-full text-sm whitespace-nowrap transition-colors">
+          class="inline-flex items-center px-4 py-1 min-h-touch lg:px-3 rounded-full text-sm whitespace-nowrap transition-colors">
           Alle taken
         </button>
         <button
@@ -120,7 +120,7 @@
           [class.bg-gray-200]="!showOnlyMyTasks()"
           [class.text-gray-700]="!showOnlyMyTasks()"
           [class.hover:bg-gray-300]="!showOnlyMyTasks()"
-          class="inline-flex items-center px-4 min-h-touch rounded-full text-sm whitespace-nowrap transition-colors">
+          class="inline-flex items-center px-4 py-1 min-h-touch lg:px-3 rounded-full text-sm whitespace-nowrap transition-colors">
           Alleen mijn taken
         </button>
       </div>
@@ -162,7 +162,7 @@
                 <h3 class="font-medium text-gray-900 min-w-0 break-words lg:truncate">{{ section.title }}</h3>
                 @if (section.taskCount > 0) {
                   <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
-                    {{ section.completedTaskCount }} / {{ section.taskCount }}
+                    {{ section.completedTaskCount }} / {{ section.taskCount }} taken
                   </span>
                 }
               </div>

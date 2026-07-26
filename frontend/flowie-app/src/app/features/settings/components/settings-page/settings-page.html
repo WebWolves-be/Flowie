@@ -10,14 +10,14 @@
         type="button"
         (click)="activeTab.set('task-types')"
         [ngClass]="{'border-teal-600 text-teal-600': activeTab() === 'task-types', 'border-transparent text-gray-600 hover:text-gray-800': activeTab() !== 'task-types'}"
-        class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch px-3 border-b-2 text-sm font-medium">
+        class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch py-2 px-3 border-b-2 text-sm font-medium">
         Taak types
       </button>
       <button
         type="button"
         (click)="activeTab.set('calendar')"
         [ngClass]="{'border-teal-600 text-teal-600': activeTab() === 'calendar', 'border-transparent text-gray-600 hover:text-gray-800': activeTab() !== 'calendar'}"
-        class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch px-3 border-b-2 text-sm font-medium">
+        class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch py-2 px-3 border-b-2 text-sm font-medium">
         Agenda feed
       </button>
     </nav>
