@@ -43,8 +43,8 @@ After implementing or modifying code, **always validate your work**. Do not cons
   `dotnet test Flowie.sln`.
 - **Every new feature or behavior change ships with new/updated e2e specs**
   in `frontend/flowie-app/e2e/`.
-- CI (`.github/workflows/ci.yml`) runs the same suite on every PR; `main`
-  requires green CI.
+- The `E2E Testing` workflow (`.github/workflows/ci.yml`) runs the same suite
+  plus backend unit tests on every PR; `main` requires it green.
 
 - `/test-backend` - Run backend unit tests with summary
 - `/test-frontend` - Run the Playwright e2e suite (`npm run e2e`, mobile + desktop projects)
