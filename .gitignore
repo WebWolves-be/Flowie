@@ -421,3 +421,6 @@ dist/
 
 # Deployment documentation with sensitive information
 DEPLOYMENT.md
+
+# Playwright CLI test-run output
+.playwright/test-results/

@@ -2,7 +2,7 @@ using Flowie.Api.Features.Tasks.UpdateTask;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using TaskStatus = Flowie.Api.Shared.Domain.Enums.TaskStatus;
 
-namespace Flowie.Api.Tests.Features.Validators;
+namespace Flowie.Api.Tests.Features.Tasks;
 
 public class UpdateTaskCommandValidatorTests : BaseTestClass
 {

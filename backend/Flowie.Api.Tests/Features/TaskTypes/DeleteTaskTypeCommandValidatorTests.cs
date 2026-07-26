@@ -3,7 +3,7 @@ using Flowie.Api.Shared.Domain.Entities;
 using Flowie.Api.Shared.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Flowie.Api.Tests.Features.Validators;
+namespace Flowie.Api.Tests.Features.TaskTypes;
 
 public class DeleteTaskTypeCommandValidatorTests : BaseTestClass
 {

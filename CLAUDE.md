@@ -8,7 +8,8 @@
 Flowie/
 ├── backend/           → .NET 8 Minimal API (see backend/CLAUDE.md)
 ├── frontend/          → Angular app (see frontend/flowie-app/CLAUDE.md)
-└── .playwright/       → Playwright CLI config & test scripts
+│   └── flowie-app/e2e/ → Playwright E2E suite (playwright.config.ts, `npm run e2e`)
+└── .playwright/       → Playwright CLI config (ad-hoc debugging only)
 ```
 
 ## Running Services
