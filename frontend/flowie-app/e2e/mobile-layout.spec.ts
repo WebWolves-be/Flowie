@@ -2,7 +2,9 @@ import { test, expect, Page } from "@playwright/test";
 import {
   createProject,
   createSection,
+  createTaskType,
   dialog,
+  dragOnto,
   openCreateTaskDialog,
   openProject,
   showTask,
@@ -71,9 +73,17 @@ async function expectNothingClipped(page: Page, where: string) {
 
 test.describe("mobile layout", () => {
   test("no page in the app scrolls sideways", async ({ page }) => {
+    // Walks four pages and creates a project, section and task along the way,
+    // which overruns the default 30s budget on CI hardware.
+    test.slow();
+
     const project = `E2E-${UNBREAKABLE}-${Date.now().toString().slice(-5)}`;
     const section = `E2E-Sectie-${UNBREAKABLE}`;
     const task = `E2E-Taak-${UNBREAKABLE}`;
+    const taskType = uniqueName("OverflowType");
+
+    // A task's type is required and a fresh database has none.
+    await createTaskType(page, taskType);
 
     await page.goto("/dashboard");
     await page.waitForLoadState("networkidle");
@@ -102,7 +112,7 @@ test.describe("mobile layout", () => {
     await expectNoHorizontalScroll(page, "task dialog");
     const dlg = dialog(page);
     await dlg.locator("#title").fill(task);
-    await dlg.locator("#taskTypeId").selectOption({ index: 1 });
+    await dlg.locator("#taskTypeId").selectOption({ label: taskType });
     await dlg.locator('button[type="submit"]').click();
     await expect(dlg).toBeHidden();
 
@@ -268,11 +278,17 @@ test.describe("mobile layout", () => {
   test("tasks can be reordered by touch drag", async ({ page }) => {
     // The drag handle used to be opacity-0 until hover, so reordering was
     // impossible on a touch device.
+    // Creates a project, a section and two tasks before it can even drag, which
+    // overruns the default 30s budget on CI hardware.
+    test.slow();
+
     const project = uniqueName("TouchDrag");
     const section = uniqueName("TouchSectie");
     const first = uniqueName("EersteTaak");
     const second = uniqueName("TweedeTaak");
+    const taskType = uniqueName("DragType");
 
+    await createTaskType(page, taskType);
     await createProject(page, project);
     await openProject(page, project);
     await createSection(page, true, section);
@@ -281,7 +297,7 @@ test.describe("mobile layout", () => {
       await openCreateTaskDialog(page, true, section);
       const dlg = dialog(page);
       await dlg.locator("#title").fill(title);
-      await dlg.locator("#taskTypeId").selectOption({ index: 1 });
+      await dlg.locator("#taskTypeId").selectOption({ label: taskType });
       await dlg.locator('button[type="submit"]').click();
       await expect(dlg).toBeHidden();
     }
@@ -316,24 +332,7 @@ test.describe("mobile layout", () => {
       "viewport too short to hold both task cards and the drag distance"
     );
 
-    const target = await taskRow(first).boundingBox();
-
-    await page.mouse.move(
-      handleBox!.x + handleBox!.width / 2,
-      handleBox!.y + handleBox!.height / 2
-    );
-    await page.mouse.down();
-    // Nudge first so CDK clears its drag-start threshold and renders a preview.
-    await page.mouse.move(
-      handleBox!.x + handleBox!.width / 2,
-      handleBox!.y + handleBox!.height / 2 - 10,
-      { steps: 3 }
-    );
-    await expect(page.locator(".cdk-drag-preview")).toHaveCount(1);
-    await page.mouse.move(target!.x + target!.width / 2, target!.y + 4, {
-      steps: 20,
-    });
-    await page.mouse.up();
+    await dragOnto(page, handle, taskRow(first));
 
     await expect(async () => {
       const titles = await page.locator("app-task-item h3").allTextContents();

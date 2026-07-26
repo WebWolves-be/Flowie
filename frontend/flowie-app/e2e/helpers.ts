@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
 
 export const uniqueName = (prefix: string) => `E2E-${prefix}-${Date.now()}`;
 
@@ -122,6 +122,75 @@ export async function confirmDelete(page: Page): Promise<void> {
   const dlg = dialog(page);
   await dlg.getByRole("button", { name: "Verwijderen" }).last().click();
   await expect(dlg).toBeHidden();
+}
+
+/**
+ * Drags `handle` onto `target` reliably.
+ *
+ * A single mouse.move() to the destination is flaky: CDK needs a small initial
+ * movement to clear its drag-start threshold and a repaint before it will track
+ * the pointer, so a fast jump can be registered as a click and reorder nothing.
+ * This nudges first, waits for the drag preview to confirm the drag is live,
+ * then travels in steps.
+ */
+export async function dragOnto(
+  page: Page,
+  handle: Locator,
+  target: Locator
+): Promise<void> {
+  // Creating an item refetches the list, and that response re-derives the order
+  // from the server's displayOrder — which would wipe the optimistic reorder if
+  // it landed mid-drag. Wait for the list to be quiescent before starting.
+  await page.waitForLoadState("networkidle");
+
+  await handle.scrollIntoViewIfNeeded();
+  const from = await handle.boundingBox();
+  const to = await target.boundingBox();
+  if (!from || !to) throw new Error("drag handle or target has no bounding box");
+
+  const startX = from.x + from.width / 2;
+  const startY = from.y + from.height / 2;
+
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  // Nudge sideways, never along the sort axis: a vertical nudge can already
+  // cross into the neighbouring item and swap it, and the travel below then
+  // swaps it back — leaving the list in its original order.
+  await page.mouse.move(startX + 12, startY, { steps: 3 });
+  await expect(page.locator(".cdk-drag-preview")).toHaveCount(1);
+
+  const endX = to.x + to.width / 2;
+  const endY = to.y + 4;
+  await page.mouse.move(endX, endY, { steps: 20 });
+  // One more move at the destination: CDK sorts on pointer movement, so a final
+  // event ensures the last position has been accounted for before the drop.
+  await page.mouse.move(endX, endY + 1);
+  await page.mouse.up();
+
+  // The list animates the reorder and the new order is then persisted; waiting
+  // for the preview to disappear keeps callers from asserting mid-flight.
+  await expect(page.locator(".cdk-drag-preview")).toHaveCount(0);
+}
+
+// A task's type is required, and a fresh database has none — so any spec that
+// creates a task has to create a type first rather than assuming one exists.
+export async function createTaskType(page: Page, name: string): Promise<void> {
+  await page.goto("/instellingen");
+  await page.getByRole("button", { name: "Toevoegen" }).click();
+  const dlg = dialog(page);
+  await dlg.locator("#name").fill(name);
+  await dlg.locator('button[type="submit"]').click();
+  await expect(dlg).toBeHidden();
+  await expect(page.locator("td", { hasText: name })).toBeVisible();
+}
+
+export async function deleteTaskType(page: Page, name: string): Promise<void> {
+  await page.goto("/instellingen");
+  await page
+    .locator("tr", { hasText: name })
+    .getByRole("button", { name: "Verwijderen" })
+    .click();
+  await confirmDelete(page);
 }
 
 export async function deleteProject(
