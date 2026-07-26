@@ -43,7 +43,18 @@ test.describe("auth", () => {
     await page.fill("#email", `e2e+${stamp}@flowie.test`);
     await page.fill("#password", "TestPass123!");
     await page.fill("#registrationCode", REGISTRATION_CODE);
-    await page.click('button[type="submit"]');
+    // Capture the register response so a failure shows the real status/body
+    // instead of a bare navigation timeout.
+    const [response] = await Promise.all([
+      page.waitForResponse((r) => r.url().includes("/auth/register"), {
+        timeout: 20_000,
+      }),
+      page.click('button[type="submit"]'),
+    ]);
+    expect(
+      response.status(),
+      await response.text().catch(() => "<no body>")
+    ).toBe(200);
     await page.waitForURL((url) => url.toString().includes("/dashboard"), {
       timeout: 15_000,
     });

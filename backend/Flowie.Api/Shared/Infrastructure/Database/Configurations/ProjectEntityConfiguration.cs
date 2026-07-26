@@ -23,7 +23,7 @@ public class ProjectEntityConfiguration : BaseEntityConfiguration<Project>
 
         builder.HasIndex(e => e.Code)
             .IsUnique()
-            .HasFilter("[Code] IS NOT NULL");
+            .HasFilter("[Code] IS NOT NULL AND [IsDeleted] = 0");
 
         builder.Property(e => e.Description)
             .HasMaxLength(4000);

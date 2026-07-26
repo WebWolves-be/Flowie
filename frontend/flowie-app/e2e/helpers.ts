@@ -2,15 +2,24 @@ import { Page, expect } from "@playwright/test";
 
 export const uniqueName = (prefix: string) => `E2E-${prefix}-${Date.now()}`;
 
+// Project codes are max 5 chars and unique — a timestamp prefix is identical
+// across calls, so use random base36 instead.
+export const uniqueCode = () =>
+  `E${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
 export const dialog = (page: Page) =>
   page.locator('[role="dialog"][aria-modal="true"]');
 
-export async function createProject(page: Page, title: string): Promise<void> {
+export async function createProject(
+  page: Page,
+  title: string,
+  code?: string
+): Promise<void> {
   await page.goto("/taken");
   await page.getByRole("button", { name: "Nieuw project" }).click();
   const dlg = dialog(page);
   await dlg.locator("#title").fill(title);
-  await dlg.locator("#code").fill(`E${Date.now()}`.slice(0, 5));
+  await dlg.locator("#code").fill(code ?? uniqueCode());
   await dlg.locator("#company").selectOption({ index: 1 });
   await dlg.locator('button[type="submit"]').click();
   await expect(dlg).toBeHidden();

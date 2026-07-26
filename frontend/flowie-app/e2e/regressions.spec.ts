@@ -5,6 +5,7 @@ import {
   openCreateTaskDialog,
   deleteProject,
   uniqueName,
+  uniqueCode,
   dialog,
 } from "./helpers";
 
@@ -22,6 +23,18 @@ test.describe("regressions", () => {
       timeout: 5_000,
     });
     await deleteProject(page, isMobile, title);
+  });
+
+  test("a deleted project's code can be reused", async ({ page, isMobile }) => {
+    // The Code unique index used to include soft-deleted rows, so recreating a
+    // project with a previously used code failed with a 500.
+    const code = uniqueCode();
+    const first = uniqueName("CodeA");
+    const second = uniqueName("CodeB");
+    await createProject(page, first, code);
+    await deleteProject(page, isMobile, first);
+    await createProject(page, second, code);
+    await deleteProject(page, isMobile, second);
   });
 
   test("long unbroken text does not overflow the task dialog", async ({
