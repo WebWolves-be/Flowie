@@ -63,6 +63,15 @@ export const sectionRow = (page: Page, sectionTitle: string) =>
     .locator(".cdk-drag", { has: page.locator("h3", { hasText: sectionTitle }) })
     .first();
 
+// Tasks are rendered by <app-task-item>, so scope to that element rather than a
+// bare div (which resolves to page-level wrappers).
+export const taskCard = (page: Page, taskTitle: string) =>
+  page
+    .locator("app-task-item", {
+      has: page.locator("h3", { hasText: taskTitle }),
+    })
+    .first();
+
 // Sections render collapsed; their tasks only exist in the DOM once expanded.
 export async function expandSection(
   page: Page,

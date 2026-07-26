@@ -7,6 +7,7 @@ import {
   confirmDelete,
   expandSection,
   sectionRow,
+  taskCard,
   uniqueName,
   dialog,
 } from "./helpers";
@@ -83,15 +84,19 @@ test.describe("tasks", () => {
     await page.getByRole("button", { name: "Beginnen" }).first().click();
     await expect(page.getByRole("button", { name: "Klaar" }).first()).toBeVisible();
     await page.getByRole("button", { name: "Klaar" }).first().click();
+
+    // A completed task collapses itself, hiding its action buttons — clicking
+    // its title expands it again (only done tasks toggle).
+    await page.locator("h3", { hasText: taskTitle }).first().click();
     await expect(
       page.getByRole("button", { name: "Openzetten" }).first()
     ).toBeVisible();
     await page.getByRole("button", { name: "Openzetten" }).first().click();
 
-    const taskCard = page
-      .locator("div", { has: page.locator("h3", { hasText: taskTitle }) })
-      .last();
-    await taskCard.locator('button[title="Acties"]').first().click();
+    // Deleting is only offered while the task is still pending, so reopen first
+    // and wait for the kebab (hidden on done tasks) to come back.
+    const card = taskCard(page, taskTitle);
+    await card.locator('button[title="Acties"]').first().click();
     await page.getByRole("button", { name: "Verwijderen" }).click();
     await confirmDelete(page);
     await expect(page.locator("h3", { hasText: taskTitle })).toBeHidden();
@@ -121,10 +126,8 @@ test.describe("tasks", () => {
     await expandSection(page, section);
     await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
 
-    const taskCard = page
-      .locator("div", { has: page.locator("h3", { hasText: taskTitle }) })
-      .last();
-    await taskCard.locator('button[title="Acties"]').first().click();
+    const card = taskCard(page, taskTitle);
+    await card.locator('button[title="Acties"]').first().click();
     await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
     dlg = dialog(page);
     await dlg.locator("#title").fill(subtask);
