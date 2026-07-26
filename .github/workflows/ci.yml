@@ -56,6 +56,7 @@ jobs:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: http://localhost:5229
           ConnectionStrings__FlowieDb: 'Server=localhost,1433;Database=Flowie;User Id=sa;Password=E2e_Str0ngPass!;TrustServerCertificate=True'
+          Logging__LogLevel__Microsoft.AspNetCore.Authentication: Debug
         run: |
           nohup dotnet run --no-launch-profile > backend.log 2>&1 &
           timeout 120 bash -c 'until curl -fsS http://localhost:5229/health; do sleep 2; done'
@@ -86,16 +87,18 @@ jobs:
         if: failure()
         working-directory: ./frontend/flowie-app
         run: |
-          echo "===== error-context snapshots (first 12) ====="
-          find test-results -name 'error-context.md' | head -12 | while read f; do
+          echo "===== error-context snapshots ====="
+          find test-results -name 'error-context.md' | sort | head -30 | while read f; do
             echo "----- $f -----"
-            head -c 4000 "$f"
+            head -c 3000 "$f"
             echo
           done
-          echo "===== frontend.log tail ====="
-          tail -n 80 frontend.log || true
+          echo "===== backend runtime log (warnings/failures/auth) ====="
+          grep -aE 'warn:|fail:|Authentication|Bearer|logged in|logged out|TokenVersion|register' ../../backend/Flowie.Api/backend.log | tail -n 80 || true
           echo "===== backend.log tail ====="
-          tail -n 120 ../../backend/Flowie.Api/backend.log || true
+          tail -n 40 ../../backend/Flowie.Api/backend.log || true
+          echo "===== frontend.log tail ====="
+          tail -n 30 frontend.log || true
 
       - name: Upload Playwright report
         if: failure()

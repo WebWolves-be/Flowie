@@ -49,10 +49,26 @@ test.describe("auth", () => {
     });
   });
 
-  test("logout returns to login (desktop sidebar)", async ({ page, isMobile }) => {
+  test("logout returns to login (desktop sidebar)", async ({ page, isMobile, request }) => {
     test.skip(isMobile, "Logout button lives in the desktop sidebar (hidden < lg)");
+    // Logging out bumps the user's TokenVersion server-side, killing every other
+    // session of that user — so this test gets its own throwaway account instead
+    // of invalidating the shared e2e user's storageState.
+    const API_URL = process.env["E2E_API_URL"] ?? "http://localhost:5229";
+    const email = `e2e+logout${Date.now()}@flowie.test`;
+    const register = await request.post(`${API_URL}/auth/register`, {
+      data: {
+        firstName: "E2E",
+        lastName: "Logout",
+        email,
+        password: PASSWORD,
+        registrationCode: REGISTRATION_CODE,
+      },
+    });
+    expect(register.ok(), await register.text()).toBeTruthy();
+
     await page.goto("/login");
-    await page.fill("#email", EMAIL);
+    await page.fill("#email", email);
     await page.fill("#password", PASSWORD);
     await page.click('button[type="submit"]');
     await page.waitForURL((url) => !url.toString().includes("/login"), {

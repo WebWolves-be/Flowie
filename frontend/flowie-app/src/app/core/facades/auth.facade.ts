@@ -100,6 +100,11 @@ export class AuthFacade {
     return localStorage.getItem("access_token");
   }
 
+  /** Clears the full auth state when the server rejects the session (401). */
+  sessionExpired(): void {
+    this.#clearAuthState();
+  }
+
   #storeTokens(response: TokenResponse): void {
     localStorage.setItem("access_token", response.accessToken);
     localStorage.setItem("refresh_token", response.refreshToken);
