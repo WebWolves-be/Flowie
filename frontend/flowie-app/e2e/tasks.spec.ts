@@ -5,6 +5,7 @@ import {
   openCreateTaskDialog,
   deleteProject,
   confirmDelete,
+  expandSection,
   sectionRow,
   uniqueName,
   dialog,
@@ -76,6 +77,7 @@ test.describe("tasks", () => {
     await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
+    await expandSection(page, section);
     await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
 
     await page.getByRole("button", { name: "Beginnen" }).first().click();
@@ -103,15 +105,21 @@ test.describe("tasks", () => {
     const section = uniqueName("Sectie");
     const taskTitle = uniqueName("Hoofdtaak");
     const subtask = uniqueName("Subtaak");
+    const typeName = uniqueName("SubType");
 
+    // Task type is a required field, so the dialog cannot be submitted without it.
+    await createTaskType(page, typeName);
     await createProject(page, project);
     await page.locator("h3", { hasText: project }).first().click();
     await createSection(page, isMobile, section);
     await openCreateTaskDialog(page, isMobile, section);
     let dlg = dialog(page);
     await dlg.locator("#title").fill(taskTitle);
+    await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
+    await expandSection(page, section);
+    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
 
     const taskCard = page
       .locator("div", { has: page.locator("h3", { hasText: taskTitle }) })
@@ -122,9 +130,10 @@ test.describe("tasks", () => {
     await dlg.locator("#title").fill(subtask);
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
-    await expect(page.locator("text=Subtaken")).toBeVisible();
+    await expect(page.locator("h3", { hasText: subtask })).toBeVisible();
 
     await deleteProject(page, isMobile, project);
+    await deleteTaskType(page, typeName);
   });
 
   test("sections can be reordered by dragging (desktop)", async ({

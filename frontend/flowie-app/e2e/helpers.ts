@@ -63,6 +63,19 @@ export const sectionRow = (page: Page, sectionTitle: string) =>
     .locator(".cdk-drag", { has: page.locator("h3", { hasText: sectionTitle }) })
     .first();
 
+// Sections render collapsed; their tasks only exist in the DOM once expanded.
+export async function expandSection(
+  page: Page,
+  sectionTitle: string
+): Promise<void> {
+  const row = sectionRow(page, sectionTitle);
+  const chevron = row.locator("i.fa-chevron-right").first();
+  if (!(await chevron.evaluate((el) => el.classList.contains("rotate-90")))) {
+    await row.locator("h3", { hasText: sectionTitle }).first().click();
+    await expect(chevron).toHaveClass(/rotate-90/);
+  }
+}
+
 export async function openCreateTaskDialog(
   page: Page,
   isMobile: boolean,
