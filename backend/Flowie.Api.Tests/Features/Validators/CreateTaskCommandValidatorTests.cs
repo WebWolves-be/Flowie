@@ -287,7 +287,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Validate_ShouldFail_WhenDueDateIsToday()
+    public async System.Threading.Tasks.Task Validate_ShouldPass_WhenDueDateIsToday()
     {
         // Arrange
         var command = new CreateTaskCommand(
@@ -302,7 +302,7 @@ public class CreateTaskCommandValidatorTests : BaseTestClass
         var result = await _validator.TestValidateAsync(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.DueDate);
+        result.ShouldNotHaveValidationErrorFor(x => x.DueDate);
     }
 
     [Fact]

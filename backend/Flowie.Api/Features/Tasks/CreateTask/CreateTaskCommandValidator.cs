@@ -19,8 +19,8 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
             .WithMessage("Titel moet tussen 3 en 200 tekens zijn.");
 
         RuleFor(x => x.DueDate)
-            .Must(x => !x.HasValue || x.Value > DateOnly.FromDateTime(DateTime.Today))
-            .WithMessage("Deadline moet in de toekomst zijn.");
+            .Must(x => !x.HasValue || x.Value >= DateOnly.FromDateTime(DateTime.Today))
+            .WithMessage("Deadline moet vandaag of in de toekomst zijn.");
 
         RuleFor(x => x.SectionId)
             .MustAsync(async (sectionId, ct) =>
