@@ -12,6 +12,18 @@ Flowie/
 └── .playwright/       → Playwright CLI config (ad-hoc debugging only)
 ```
 
+### Never add two paths that differ only by case
+
+Development happens on Windows, where the filesystem is case-insensitive but git
+is not. Committing both `CLAUDE.md` and `claude.md` in one directory means only
+one file can exist on disk: a checkout writes one over the other, git reports the
+loser as modified, and committing that silently deletes its contents. This
+already happened once to `frontend/flowie-app/claude.md`.
+
+CI runs on Linux where both files coexist happily, so the `Path case collisions`
+job in `.github/workflows/ci.yml` is what catches it. When adding a file, match
+the casing of the existing one rather than introducing a variant.
+
 ## Running Services
 
 | Service  | URL                          |
