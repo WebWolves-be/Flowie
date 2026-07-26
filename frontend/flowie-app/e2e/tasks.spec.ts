@@ -125,9 +125,10 @@ test.describe("tasks", () => {
     // Deleting is only offered while a task is still pending.
     const card = taskCard(page, taskTitle);
     await card.locator('button[title="Acties"]').first().click();
-    // Scope to the task's own menu: the project header also has a
-    // "Project verwijderen" button, whose name contains "Verwijderen".
-    await card.getByRole("button", { name: "Verwijderen", exact: true }).click();
+    // Scoping to the card is what disambiguates this from the project header's
+    // "Project verwijderen"; an exact name would not match because Font Awesome
+    // glyphs are part of the accessible name (e.g. " Verwijderen").
+    await card.getByRole("button", { name: "Verwijderen" }).first().click();
     await confirmDelete(page);
     await expect(page.locator("h3", { hasText: taskTitle })).toBeHidden();
 
