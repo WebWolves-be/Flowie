@@ -56,7 +56,7 @@ test.describe("tasks", () => {
     await deleteProject(page, isMobile, project);
   });
 
-  test("task lifecycle: create with description, start, complete, reopen, delete", async ({
+  test("task status flow: create with description, start, complete, reopen", async ({
     page,
     isMobile,
   }) => {
@@ -96,8 +96,34 @@ test.describe("tasks", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Openzetten" }).first().click();
 
-    // Deleting is only offered while the task is still pending, so reopen first
-    // and wait for the kebab (hidden on done tasks) to come back.
+    // Reopening returns the task to Pending, so its start action is offered again.
+    await expandSection(page, section);
+    await expect(page.getByRole("button", { name: "Beginnen" }).first()).toBeVisible();
+
+    await deleteProject(page, isMobile, project);
+    await deleteTaskType(page, typeName);
+  });
+
+  test("a task can be deleted", async ({ page, isMobile }) => {
+    const project = uniqueName("DelProj");
+    const section = uniqueName("Sectie");
+    const taskTitle = uniqueName("Taak");
+    const typeName = uniqueName("DelType");
+
+    await createTaskType(page, typeName);
+    await createProject(page, project);
+    await page.locator("h3", { hasText: project }).first().click();
+    await createSection(page, isMobile, section);
+
+    await openCreateTaskDialog(page, isMobile, section);
+    const dlg = dialog(page);
+    await dlg.locator("#title").fill(taskTitle);
+    await dlg.locator("#taskTypeId").selectOption({ label: typeName });
+    await dlg.getByRole("button", { name: "Aanmaken" }).click();
+    await expect(dlg).toBeHidden();
+    await expandSection(page, section);
+
+    // Deleting is only offered while a task is still pending.
     const card = taskCard(page, taskTitle);
     await card.locator('button[title="Acties"]').first().click();
     // Scope to the task's own menu: the project header also has a
