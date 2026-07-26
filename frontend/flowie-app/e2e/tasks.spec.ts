@@ -5,6 +5,7 @@ import {
   openCreateTaskDialog,
   deleteProject,
   confirmDelete,
+  sectionRow,
   uniqueName,
   dialog,
 } from "./helpers";
@@ -36,14 +37,12 @@ test.describe("tasks", () => {
     await page.locator("h3", { hasText: project }).first().click();
     await createSection(page, isMobile, section);
 
-    const sectionRow = page
-      .locator("div", { has: page.locator("h3", { hasText: section }) })
-      .first();
+    const row = sectionRow(page, section);
     if (isMobile) {
-      await sectionRow.locator('button[title="Acties"]').first().click();
+      await row.locator('button[title="Acties"]').first().click();
       await page.getByRole("button", { name: "Bewerken" }).click();
     } else {
-      await sectionRow.locator("button:has(i.fa-edit)").first().click();
+      await row.locator("button:has(i.fa-edit)").first().click();
     }
     const dlg = dialog(page);
     await expect(dlg.locator("h2", { hasText: "Sectie bewerken" })).toBeVisible();

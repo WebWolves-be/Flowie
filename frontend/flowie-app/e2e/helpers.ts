@@ -56,19 +56,25 @@ export async function createSection(
   await expect(page.locator("h3", { hasText: title })).toBeVisible();
 }
 
+// Sections render as cdkDrag containers; scoping to .cdk-drag avoids matching
+// page-level wrapper divs (a bare div locator resolves to the outermost match).
+export const sectionRow = (page: Page, sectionTitle: string) =>
+  page
+    .locator(".cdk-drag", { has: page.locator("h3", { hasText: sectionTitle }) })
+    .first();
+
 export async function openCreateTaskDialog(
   page: Page,
   isMobile: boolean,
   sectionTitle: string
 ): Promise<void> {
-  const sectionRow = page
-    .locator("div", { has: page.locator("h3", { hasText: sectionTitle }) })
-    .first();
+  const row = sectionRow(page, sectionTitle);
   if (isMobile) {
-    await sectionRow.locator('button[title="Acties"]').first().click();
+    await row.locator('button[title="Acties"]').first().click();
     await page.getByRole("button", { name: "Taak toevoegen" }).click();
   } else {
-    await sectionRow.getByRole("button", { name: "Taak", exact: true }).first().click();
+    // The button's accessible name includes the plus glyph ("+ Taak").
+    await row.getByRole("button", { name: /^\+?\s*Taak$/ }).first().click();
   }
   await expect(dialog(page)).toBeVisible();
 }

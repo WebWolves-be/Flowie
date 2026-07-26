@@ -56,7 +56,13 @@ jobs:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: http://localhost:5229
           ConnectionStrings__FlowieDb: 'Server=localhost,1433;Database=Flowie;User Id=sa;Password=E2e_Str0ngPass!;TrustServerCertificate=True'
-          Logging__LogLevel__Microsoft.AspNetCore.Authentication: Debug
+          # The app logs through Serilog, which has no sinks configured in
+          # Development — give it a console sink so backend.log shows requests
+          # and exception stack traces.
+          Serilog__WriteTo__0__Name: Console
+          Serilog__MinimumLevel__Default: Information
+          Serilog__MinimumLevel__Override__Microsoft: Warning
+          Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore: Warning
         run: |
           nohup dotnet run --no-launch-profile > backend.log 2>&1 &
           timeout 120 bash -c 'until curl -fsS http://localhost:5229/health; do sleep 2; done'
@@ -93,10 +99,10 @@ jobs:
             head -c 3000 "$f"
             echo
           done
-          echo "===== backend runtime log (warnings/failures/auth) ====="
-          grep -aE 'warn:|fail:|Authentication|Bearer|logged in|logged out|TokenVersion|register' ../../backend/Flowie.Api/backend.log | tail -n 80 || true
+          echo "===== backend runtime log (errors/warnings + slow or failed requests) ====="
+          grep -aE '\[ERR\]|\[WRN\]|\[FTL\]|Exception|responded 5[0-9][0-9]|responded 4[0-9][0-9]' ../../backend/Flowie.Api/backend.log | tail -n 120 || true
           echo "===== backend.log tail ====="
-          tail -n 40 ../../backend/Flowie.Api/backend.log || true
+          tail -n 60 ../../backend/Flowie.Api/backend.log || true
           echo "===== frontend.log tail ====="
           tail -n 30 frontend.log || true
 
