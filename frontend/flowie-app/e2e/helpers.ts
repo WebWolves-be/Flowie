@@ -72,17 +72,34 @@ export const taskCard = (page: Page, taskTitle: string) =>
     })
     .first();
 
-// Sections render collapsed; their tasks only exist in the DOM once expanded.
+// Sections render collapsed, and reloading tasks (after a create or a status
+// change) can re-collapse them — so keep toggling until the task is on screen.
 export async function expandSection(
   page: Page,
   sectionTitle: string
 ): Promise<void> {
   const row = sectionRow(page, sectionTitle);
   const chevron = row.locator("i.fa-chevron-right").first();
-  if (!(await chevron.evaluate((el) => el.classList.contains("rotate-90")))) {
-    await row.locator("h3", { hasText: sectionTitle }).first().click();
-    await expect(chevron).toHaveClass(/rotate-90/);
-  }
+  await expect(async () => {
+    if (!(await chevron.evaluate((el) => el.classList.contains("rotate-90")))) {
+      await row.locator("h3", { hasText: sectionTitle }).first().click();
+    }
+    await expect(chevron).toHaveClass(/rotate-90/, { timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+}
+
+/** Expands the section and waits for the task itself to be rendered. */
+export async function showTask(
+  page: Page,
+  sectionTitle: string,
+  taskTitle: string
+): Promise<void> {
+  await expect(async () => {
+    await expandSection(page, sectionTitle);
+    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible({
+      timeout: 3_000,
+    });
+  }).toPass({ timeout: 25_000 });
 }
 
 export async function openCreateTaskDialog(

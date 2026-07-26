@@ -6,6 +6,7 @@ import {
   deleteProject,
   confirmDelete,
   expandSection,
+  showTask,
   sectionRow,
   taskCard,
   uniqueName,
@@ -78,8 +79,7 @@ test.describe("tasks", () => {
     await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
-    await expandSection(page, section);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
+    await showTask(page, section, taskTitle);
 
     await page.getByRole("button", { name: "Beginnen" }).first().click();
     await expect(page.getByRole("button", { name: "Klaar" }).first()).toBeVisible();
@@ -88,8 +88,7 @@ test.describe("tasks", () => {
     // Reloading tasks after a status change can re-collapse the section, and a
     // completed task collapses itself (hiding its action buttons) — so re-expand
     // both before reopening it.
-    await expandSection(page, section);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
+    await showTask(page, section, taskTitle);
     await page.locator("h3", { hasText: taskTitle }).first().click();
     await expect(
       page.getByRole("button", { name: "Openzetten" }).first()
@@ -121,7 +120,7 @@ test.describe("tasks", () => {
     await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
-    await expandSection(page, section);
+    await showTask(page, section, taskTitle);
 
     // Deleting is only offered while a task is still pending.
     const card = taskCard(page, taskTitle);
@@ -154,8 +153,7 @@ test.describe("tasks", () => {
     await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
-    await expandSection(page, section);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
+    await showTask(page, section, taskTitle);
 
     const card = taskCard(page, taskTitle);
     await card.locator('button[title="Acties"]').first().click();
