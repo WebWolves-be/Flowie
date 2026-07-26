@@ -1,9 +1,9 @@
-<div class="flex flex-col h-full min-h-0">
-  <div class="bg-white border-b border-gray-200 px-3 py-3 md:p-6 flex-shrink-0">
-    @if (isMobile()) {
+<div class="flex flex-col h-full min-h-0 min-w-0">
+  <div class="bg-white border-b border-gray-200 px-3 py-3 lg:p-6 flex-shrink-0 min-w-0">
+    @if (isCompact()) {
       <button
         (click)="backToList.emit()"
-        class="flex items-center text-teal-600 hover:text-teal-700 mb-4 -ml-2">
+        class="inline-flex items-center gap-2 min-h-touch px-2 -ml-2 mb-2 rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50">
         <i class="fas fa-chevron-left"></i>
         Terug naar projecten
       </button>
@@ -19,13 +19,13 @@
         </div>
       </div>
     } @else {
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex items-start justify-between md:block">
-          <div class="flex-1">
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              <h2 class="text-2xl font-bold text-gray-900 mr-3">{{ project().title }}</h2>
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 min-w-0">
+        <div class="flex items-start justify-between gap-2 lg:block min-w-0">
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-2 min-w-0">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-900 break-words min-w-0">{{ project().title }}</h2>
               @if (project().code) {
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 whitespace-nowrap">
                   {{ project().code }}
                 </span>
               }
@@ -36,41 +36,41 @@
                 [class.text-purple-800]="project().company === Company.NovaraRealEstate"
                 [class.bg-teal-100]="project().company === Company.Algemeen"
                 [class.text-teal-800]="project().company === Company.Algemeen"
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap">
                 {{ project().company === Company.NovaraRealEstate ? 'Novara' : project().company }}
               </span>
             </div>
             @if (project().description) {
-              <div class="text-sm text-gray-500 mb-3 max-w-2xl description-content"
+              <div class="text-sm text-gray-500 mb-3 max-w-2xl min-w-0 description-content"
                    [innerHTML]="project().description">
               </div>
             }
           </div>
 
-          <div class="md:hidden relative ml-3 mt-1">
+          <div class="lg:hidden relative flex-shrink-0">
             <button
               (click)="toggleProjectMenu($event)"
-              class="bg-teal-600 hover:bg-teal-500 text-white p-2 rounded-full focus:outline-none"
+              class="flex items-center justify-center min-w-touch min-h-touch bg-teal-600 hover:bg-teal-500 text-white rounded-full focus:outline-none"
               title="Acties">
               <i class="fas fa-ellipsis-vertical"></i>
             </button>
             @if (showProjectMenu()) {
-              <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+              <div class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
                 <button
                   (click)="onCreateSection(); showProjectMenu.set(false)"
-                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <i class="fas fa-plus mr-2 w-4"></i>
                   Sectie toevoegen
                 </button>
                 <button
                   (click)="onUpdateProject(); showProjectMenu.set(false)"
-                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <i class="fas fa-edit mr-2 w-4"></i>
                   Project bewerken
                 </button>
                 <button
                   (click)="onDeleteProject(); showProjectMenu.set(false)"
-                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                  class="w-full text-left px-4 py-3 min-h-touch text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                   <i class="fas fa-trash mr-2 w-4"></i>
                   Project verwijderen
                 </button>
@@ -78,7 +78,7 @@
             }
           </div>
         </div>
-        <div class="hidden md:flex flex-col md:flex-row gap-3">
+        <div class="hidden lg:flex flex-col lg:flex-row gap-3 flex-shrink-0">
           <button (click)="onCreateSection()"
                   class="px-4 py-2 text-sm rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition-colors flex items-center gap-2">
             <i class="fas fa-plus mr-2"></i>
@@ -99,7 +99,7 @@
     }
   </div>
   @if (!isDetailLoading() && (sections().length > 0 || tasks().length > 0)) {
-    <div class="bg-gray-50 border-b border-gray-200 px-3 md:px-6 py-3 flex-shrink-0">
+    <div class="bg-gray-50 border-b border-gray-200 px-3 lg:px-6 py-3 flex-shrink-0 min-w-0">
       <div class="flex flex-wrap gap-2">
         <button
           (click)="onToggleTaskFilter(false)"
@@ -109,7 +109,7 @@
           [class.bg-gray-200]="showOnlyMyTasks()"
           [class.text-gray-700]="showOnlyMyTasks()"
           [class.hover:bg-gray-300]="showOnlyMyTasks()"
-          class="px-3 py-1 rounded-full text-sm transition-colors">
+          class="inline-flex items-center px-4 min-h-touch rounded-full text-sm whitespace-nowrap transition-colors">
           Alle taken
         </button>
         <button
@@ -120,13 +120,13 @@
           [class.bg-gray-200]="!showOnlyMyTasks()"
           [class.text-gray-700]="!showOnlyMyTasks()"
           [class.hover:bg-gray-300]="!showOnlyMyTasks()"
-          class="px-3 py-1 rounded-full text-sm transition-colors">
+          class="inline-flex items-center px-4 min-h-touch rounded-full text-sm whitespace-nowrap transition-colors">
           Alleen mijn taken
         </button>
       </div>
     </div>
   }
-  <div class="flex-1 px-0 py-4 md:p-6 overflow-y-auto bg-gray-50" cdkScrollable>
+  <div class="flex-1 min-w-0 px-3 py-4 lg:p-6 scroll-pane bg-gray-50" cdkScrollable>
     @if (isDetailLoading() || isLoadingSections()) {
       <div class="space-y-4 animate-pulse">
         <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -148,65 +148,65 @@
     } @else {
       <div class="space-y-3" cdkDropList (cdkDropListDropped)="onSectionDrop($event)">
         @for (section of orderedSections(); track section.sectionId) {
-          <div class="border border-gray-200 rounded-lg bg-white" cdkDrag>
+          <div class="border border-gray-200 rounded-lg bg-white min-w-0" cdkDrag>
             <div
-              class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+              class="flex items-center justify-between gap-2 p-3 lg:p-4 cursor-pointer hover:bg-gray-50 transition-colors min-w-0"
               (click)="toggleSection(section.sectionId)">
-              <div class="flex items-center gap-3">
-                <div cdkDragHandle class="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors" (click)="$event.stopPropagation()">
+              <div class="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
+                <div cdkDragHandle class="flex items-center justify-center min-w-touch min-h-touch -ml-2 lg:ml-0 lg:min-w-0 lg:min-h-0 flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 lg:text-gray-300 hover:text-gray-500 transition-colors" (click)="$event.stopPropagation()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                   </svg>
                 </div>
-                <i class="fas fa-chevron-right transition-transform text-gray-500" [class.rotate-90]="expandedSections().has(section.sectionId)"></i>
-                <h3 class="font-medium text-gray-900">{{ section.title }}</h3>
+                <i class="fas fa-chevron-right transition-transform text-gray-500 flex-shrink-0" [class.rotate-90]="expandedSections().has(section.sectionId)"></i>
+                <h3 class="font-medium text-gray-900 min-w-0 break-words lg:truncate">{{ section.title }}</h3>
                 @if (section.taskCount > 0) {
-                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    {{ section.completedTaskCount }} / {{ section.taskCount }} taken
+                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
+                    {{ section.completedTaskCount }} / {{ section.taskCount }}
                   </span>
                 }
               </div>
-              <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+              <div class="flex items-center gap-2 flex-shrink-0" (click)="$event.stopPropagation()">
                 <button
                   (click)="onCreateTaskInSection($event, section.sectionId)"
-                  class="hidden md:flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition-colors">
+                  class="hidden lg:flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition-colors">
                   <i class="fas fa-plus mr-1"></i>
                   Taak
                 </button>
                 <button
                   (click)="onUpdateSection(section.sectionId); $event.stopPropagation()"
-                  class="hidden md:block text-gray-500 hover:text-gray-700 p-1">
+                  class="hidden lg:block text-gray-500 hover:text-gray-700 p-1">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
                   (click)="onDeleteSection(section.sectionId); $event.stopPropagation()"
-                  class="hidden md:block text-red-500 hover:text-red-700 p-1">
+                  class="hidden lg:block text-red-500 hover:text-red-700 p-1">
                   <i class="fas fa-trash"></i>
                 </button>
-                <div class="md:hidden relative">
+                <div class="lg:hidden relative">
                   <button
                     (click)="toggleSectionMenu($event, section.sectionId)"
-                    class="text-gray-400 hover:text-gray-600 p-2 rounded-full focus:outline-none"
+                    class="flex items-center justify-center min-w-touch min-h-touch text-gray-500 hover:text-gray-700 rounded-full focus:outline-none"
                     title="Acties">
                     <i class="fas fa-ellipsis-vertical"></i>
                   </button>
                   @if (showSectionMenu() === section.sectionId) {
-                    <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+                    <div class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
                       <button
                         (click)="onCreateTaskInSection($event, section.sectionId); showSectionMenu.set(null)"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                         <i class="fas fa-plus mr-2 w-4"></i>
                         Taak toevoegen
                       </button>
                       <button
                         (click)="onUpdateSection(section.sectionId); showSectionMenu.set(null); $event.stopPropagation()"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                         <i class="fas fa-edit mr-2 w-4"></i>
                         Bewerken
                       </button>
                       <button
                         (click)="onDeleteSection(section.sectionId); showSectionMenu.set(null); $event.stopPropagation()"
-                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        class="w-full text-left px-4 py-3 min-h-touch text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                         <i class="fas fa-trash mr-2 w-4"></i>
                         Verwijderen
                       </button>
@@ -216,10 +216,10 @@
               </div>
             </div>
             @if (expandedSections().has(section.sectionId)) {
-              <div class="border-t border-gray-200 p-4">
+              <div class="border-t border-gray-200 p-3 lg:p-4 min-w-0">
                 @if (section.description) {
-                  <div class="mb-4 pb-4 border-b border-dashed border-gray-200">
-                    <p class="text-sm text-gray-600" [innerHTML]="section.description"></p>
+                  <div class="mb-4 pb-4 border-b border-dashed border-gray-200 min-w-0">
+                    <p class="text-sm text-gray-600 description-content" [innerHTML]="section.description"></p>
                   </div>
                 }
                 @if (isLoadingTasks()) {
@@ -232,17 +232,20 @@
                     <p class="text-sm text-gray-500 text-center py-4">Geen taken in deze sectie</p>
                   } @else {
                     <div
-                      class="space-y-3 pl-5"
+                      class="space-y-3 min-w-0"
                       cdkDropList
                       (cdkDropListDropped)="onTaskDrop($event, section.sectionId)">
                       @for (task of getTasksForSection(section.sectionId); track task.taskId) {
-                        <div cdkDrag class="relative group">
-                          <div cdkDragHandle class="cursor-grab active:cursor-grabbing absolute -left-5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div cdkDrag class="group min-w-0 flex items-start gap-1">
+                          <div cdkDragHandle
+                               title="Verplaatsen"
+                               class="flex-shrink-0 flex items-center justify-center w-6 min-h-touch mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 lg:text-gray-300 lg:opacity-0 lg:group-hover:opacity-100 lg:transition-opacity">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                               <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                             </svg>
                           </div>
                           <app-task-item
+                            class="block flex-1 min-w-0"
                             [task]="task"
                             [isLast]="$last"
                             (taskUpdateRequested)="onTaskUpdate(task.taskId)"

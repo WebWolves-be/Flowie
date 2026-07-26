@@ -179,7 +179,9 @@ test.describe("tasks", () => {
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, "CDK drag handles are desktop-only interactions");
+    // Touch reordering is covered by mobile-layout.spec.ts; this exercises the
+    // hover-revealed desktop handle.
+    test.skip(isMobile, "Covered for touch by mobile-layout.spec.ts");
     const project = uniqueName("DragProj");
     const first = uniqueName("Eerste");
     const second = uniqueName("Tweede");

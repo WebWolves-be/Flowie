@@ -11,6 +11,62 @@ html, body {
   height: 100%;
 }
 
+/* Nothing in this app is meant to pan sideways. Clamping both elements stops a
+   single mis-sized child from making the whole page horizontally scrollable. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  /* iOS inflates text when a phone is rotated to landscape unless this is
+     pinned, which silently breaks every width calculation below. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+  /* Grey flash on every tap in a standalone PWA reads as a rendering bug;
+     :active styles below give deliberate feedback instead. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS Safari zooms the viewport whenever a focused field is under 16px, and it
+   never zooms back out — leaving the page permanently pannable sideways. Any
+   value >= 16px prevents it, so pin the fields that the design renders smaller.
+   The matching min-height brings them up to a comfortable tap size at the same
+   time, which keeps it out of twenty separate class attributes.
+
+   A Tailwind text-* utility is a class, so it outranks a bare `input` selector
+   no matter the source order — hence `!important` rather than a specificity
+   trick. Without it iOS silently keeps zooming. */
+@media (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .ql-editor {
+    font-size: 16px !important;
+    max-width: 100%;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 2.75rem;
+  }
+}
+
+/* Interactive elements get an unambiguous pressed state, since hover styles
+   never resolve on touch. */
+@media (hover: none) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.7;
+  }
+}
+
 .cdk-drag-preview {
   box-sizing: border-box;
 }
@@ -19,8 +75,10 @@ html, body {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-body {
-  overscroll-behavior-y: none;
+/* A drag handle must claim the gesture, otherwise the scroll container wins and
+   reordering is impossible on touch. */
+[cdkDragHandle] {
+  touch-action: none;
 }
 
 .app-container {
@@ -31,7 +89,15 @@ body {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
 
-.dialog-panel {
+/* Scroll panes should not chain their overscroll to the document, which is what
+   makes a PWA feel like a web page rather than an app. */
+.scroll-pane {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* overflow-y alone computes overflow-x to `auto`, quietly adding a second
+     scroll axis; naming both keeps sideways panning impossible. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 quill-editor {
@@ -48,4 +114,49 @@ quill-editor {
 .ql-editor {
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/* The Quill toolbar lays its groups out in a single row that overflows a phone;
+   wrapping keeps every control reachable. */
+@media (max-width: 1023px) {
+  .ql-toolbar.ql-snow {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+
+  .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 0.5rem;
+  }
+
+  /* Quill's own 28x24 buttons are well under a comfortable tap target. */
+  .ql-toolbar.ql-snow button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* Rich-text descriptions come from user input, so their contents must be
+   clamped to the container instead of widening it. */
+.description-content {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.description-content img,
+.description-content video,
+.description-content iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.description-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.description-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }

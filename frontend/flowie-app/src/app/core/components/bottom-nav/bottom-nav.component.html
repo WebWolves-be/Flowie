@@ -1,31 +1,31 @@
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
-  <div class="flex justify-around items-center h-16">
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 lg:hidden pb-safe-b">
+  <div class="flex justify-around items-stretch h-16">
     <a
       routerLink="/dashboard"
-      routerLinkActive="text-teal-600"
+      routerLinkActive="text-teal-600 font-semibold"
       [routerLinkActiveOptions]="{ exact: true }"
-      class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-teal-600 transition-colors"
+      class="flex flex-col items-center justify-center flex-1 min-w-0 text-gray-600 hover:text-teal-600 transition-colors"
     >
-      <i class="fas fa-house w-6 h-6 text-xl"></i>
-      <span class="text-xs mt-1">Dashboard</span>
+      <i class="fas fa-house text-xl"></i>
+      <span class="text-xs mt-1 truncate max-w-full px-1">Dashboard</span>
     </a>
 
     <a
       routerLink="/taken"
-      routerLinkActive="text-teal-600"
-      class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-teal-600 transition-colors"
+      routerLinkActive="text-teal-600 font-semibold"
+      class="flex flex-col items-center justify-center flex-1 min-w-0 text-gray-600 hover:text-teal-600 transition-colors"
     >
-      <i class="fas fa-list-check w-6 h-6 text-xl"></i>
-      <span class="text-xs mt-1">Taken</span>
+      <i class="fas fa-list-check text-xl"></i>
+      <span class="text-xs mt-1 truncate max-w-full px-1">Taken</span>
     </a>
 
     <a
       routerLink="/instellingen"
-      routerLinkActive="text-teal-600"
-      class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-teal-600 transition-colors"
+      routerLinkActive="text-teal-600 font-semibold"
+      class="flex flex-col items-center justify-center flex-1 min-w-0 text-gray-600 hover:text-teal-600 transition-colors"
     >
-      <i class="fas fa-gear w-6 h-6 text-xl"></i>
-      <span class="text-xs mt-1">Instellingen</span>
+      <i class="fas fa-gear text-xl"></i>
+      <span class="text-xs mt-1 truncate max-w-full px-1">Instellingen</span>
     </a>
   </div>
 </nav>
