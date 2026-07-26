@@ -97,7 +97,9 @@ test.describe("tasks", () => {
     // and wait for the kebab (hidden on done tasks) to come back.
     const card = taskCard(page, taskTitle);
     await card.locator('button[title="Acties"]').first().click();
-    await page.getByRole("button", { name: "Verwijderen" }).click();
+    // Scope to the task's own menu: the project header also has a
+    // "Project verwijderen" button, whose name contains "Verwijderen".
+    await card.getByRole("button", { name: "Verwijderen", exact: true }).click();
     await confirmDelete(page);
     await expect(page.locator("h3", { hasText: taskTitle })).toBeHidden();
 
@@ -130,7 +132,12 @@ test.describe("tasks", () => {
     await card.locator('button[title="Acties"]').first().click();
     await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
     dlg = dialog(page);
+    await expect(
+      dlg.locator("h2", { hasText: "Nieuwe subtaak aanmaken" })
+    ).toBeVisible();
     await dlg.locator("#title").fill(subtask);
+    // Subtasks require a task type as well.
+    await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
     await expect(page.locator("h3", { hasText: subtask })).toBeVisible();
