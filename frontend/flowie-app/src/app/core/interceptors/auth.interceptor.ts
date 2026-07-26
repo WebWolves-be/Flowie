@@ -26,9 +26,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !isAuthEndpoint) {
         if (router.url !== "/login") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("expires_at");
+          // Clear the in-memory auth state too — only removing the tokens left
+          // isAuthenticated() true, so guestGuard bounced /login → /dashboard
+          // and stranded the user in a zombie session.
+          authFacade.sessionExpired();
           router.navigate(["/login"]);
         }
       }

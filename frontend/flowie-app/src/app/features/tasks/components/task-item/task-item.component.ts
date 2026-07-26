@@ -29,9 +29,17 @@ export class TaskItemComponent implements OnChanges {
   showMenu = signal<boolean>(false);
   showSubtaskMenu = signal<number | null>(null);
   orderedSubtasks = signal<Subtask[]>([]);
+  expanded = signal<boolean>(true);
 
   ngOnChanges() {
     this.orderedSubtasks.set([...(this.task().subtasks ?? [])]);
+    this.expanded.set(!this.isDone());
+  }
+
+  toggleExpanded() {
+    if (this.isDone()) {
+      this.expanded.update(v => !v);
+    }
   }
 
   onSubtaskDrop(event: CdkDragDrop<Subtask[]>) {

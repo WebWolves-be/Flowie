@@ -4,8 +4,15 @@ namespace Flowie.Api.Shared.Infrastructure.Extensions;
 
 public static class RateLimitingExtensions
 {
-    public static IServiceCollection AddRateLimitingServices(this IServiceCollection services)
+    public static IServiceCollection AddRateLimitingServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Limits are configurable so Development (local e2e runs and CI) can be
+        // generous while Production keeps the strict defaults below.
+        var section = configuration.GetSection("RateLimiting");
+        var authPermitLimit = section.GetValue("AuthPermitLimit", 5);
+        var refreshPermitLimit = section.GetValue("RefreshPermitLimit", 10);
+        var globalPermitLimit = section.GetValue("GlobalPermitLimit", 100);
+
         services.AddRateLimiter(options =>
         {
             options.AddPolicy("AuthPolicy", httpContext =>
@@ -15,7 +22,7 @@ public static class RateLimitingExtensions
                     partitionKey: clientIp,
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 5,
+                        PermitLimit = authPermitLimit,
                         Window = TimeSpan.FromMinutes(1),
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 2
@@ -29,7 +36,7 @@ public static class RateLimitingExtensions
                     partitionKey: clientIp,
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 10,
+                        PermitLimit = refreshPermitLimit,
                         Window = TimeSpan.FromMinutes(1),
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 3
@@ -43,7 +50,7 @@ public static class RateLimitingExtensions
                     partitionKey: clientIp,
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 100,
+                        PermitLimit = globalPermitLimit,
                         Window = TimeSpan.FromMinutes(1)
                     });
             });

@@ -105,7 +105,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddSingleton(TimeProvider.System);
 
-builder.Services.AddRateLimitingServices();
+builder.Services.AddRateLimitingServices(builder.Configuration);
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<DatabaseContext>();

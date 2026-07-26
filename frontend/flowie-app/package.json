@@ -7,7 +7,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "playwright test",
+    "e2e:mobile": "playwright test --project=mobile",
+    "e2e:desktop": "playwright test --project=desktop"
   },
   "dependencies": {
     "@angular/animations": "^20.0.0",
