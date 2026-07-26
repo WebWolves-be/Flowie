@@ -85,8 +85,11 @@ test.describe("tasks", () => {
     await expect(page.getByRole("button", { name: "Klaar" }).first()).toBeVisible();
     await page.getByRole("button", { name: "Klaar" }).first().click();
 
-    // A completed task collapses itself, hiding its action buttons — clicking
-    // its title expands it again (only done tasks toggle).
+    // Reloading tasks after a status change can re-collapse the section, and a
+    // completed task collapses itself (hiding its action buttons) — so re-expand
+    // both before reopening it.
+    await expandSection(page, section);
+    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible();
     await page.locator("h3", { hasText: taskTitle }).first().click();
     await expect(
       page.getByRole("button", { name: "Openzetten" }).first()
@@ -140,7 +143,8 @@ test.describe("tasks", () => {
     await dlg.locator("#taskTypeId").selectOption({ label: typeName });
     await dlg.getByRole("button", { name: "Aanmaken" }).click();
     await expect(dlg).toBeHidden();
-    await expect(page.locator("h3", { hasText: subtask })).toBeVisible();
+    // Subtask titles render in a <span> inside the parent task, not an <h3>.
+    await expect(page.getByText(subtask, { exact: true })).toBeVisible();
 
     await deleteProject(page, isMobile, project);
     await deleteTaskType(page, typeName);
