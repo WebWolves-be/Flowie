@@ -5,7 +5,7 @@ using Flowie.Api.Shared.Domain.Enums;
 using Flowie.Api.Shared.Infrastructure.Database.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Flowie.Api.Tests.Features.Validators;
+namespace Flowie.Api.Tests.Features.Tasks;
 
 public class CreateTaskCommandValidatorTests : BaseTestClass
 {

@@ -10,9 +10,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Flowie.Api.Tests")]
 
 // Suppressing warnings about internal types and Shared namespace
-[assembly: SuppressMessage("Design", "CA1515:Type is internal", Scope = "namespace", Target = "~N:Flowie.Api.Infrastructure.Behaviors")]
-[assembly: SuppressMessage("Design", "CA1515:Type is internal", Scope = "namespace", Target = "~N:Flowie.Api.Infrastructure.Middleware")]
-[assembly: SuppressMessage("Design", "CA1515:Type is internal", Scope = "namespace", Target = "~N:Flowie.Api.Migrations")]
 [assembly: SuppressMessage("Design", "CA1716:Identifiers should not match keywords", Scope = "namespace", Target = "~N:Flowie.Api.Shared.Infrastructure.Behaviors")]
 [assembly: SuppressMessage("Design", "CA1716:Identifiers should not match keywords", Scope = "namespace", Target = "~N:Flowie.Api.Shared.Infrastructure.Middleware")]
 [assembly: SuppressMessage("Design", "CA1716:Identifiers should not match keywords", Scope = "namespace", Target = "~N:Flowie.Api.Shared.Domain")]
