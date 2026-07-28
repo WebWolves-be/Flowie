@@ -11,46 +11,46 @@
             Nieuw project
           </button>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="inline-flex lg:flex lg:flex-wrap gap-1 lg:gap-2 p-0.5 lg:p-0 rounded-full bg-gray-200 lg:bg-transparent">
         <button
           (click)="onFilterProjectsByCompany('ALL')"
           [class.bg-teal-600]="companyFilter() === 'ALL'"
           [class.text-white]="companyFilter() === 'ALL'"
           [class.hover:bg-teal-500]="companyFilter() === 'ALL'"
-          [class.bg-gray-200]="companyFilter() !== 'ALL'"
+          [class.bg-transparent]="companyFilter() !== 'ALL'"
           [class.text-gray-700]="companyFilter() !== 'ALL'"
-          [class.hover:bg-gray-300]="companyFilter() !== 'ALL'"
-          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Alle
+          [class.lg:bg-gray-200]="companyFilter() !== 'ALL'"
+          class="inline-flex items-center justify-center px-4 lg:px-2 min-h-touch text-xs lg:text-xs rounded-full lg:rounded whitespace-nowrap transition-colors">Alle
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Immoseed)"
           [class.bg-teal-600]="companyFilter() === Company.Immoseed"
           [class.text-white]="companyFilter() === Company.Immoseed"
           [class.hover:bg-teal-500]="companyFilter() === Company.Immoseed"
-          [class.bg-gray-200]="companyFilter() !== Company.Immoseed"
+          [class.bg-transparent]="companyFilter() !== Company.Immoseed"
           [class.text-gray-700]="companyFilter() !== Company.Immoseed"
-          [class.hover:bg-gray-300]="companyFilter() !== Company.Immoseed"
-          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Immoseed
+          [class.lg:bg-gray-200]="companyFilter() !== Company.Immoseed"
+          class="inline-flex items-center justify-center px-4 lg:px-2 min-h-touch text-xs lg:text-xs rounded-full lg:rounded whitespace-nowrap transition-colors">Immoseed
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.NovaraRealEstate)"
           [class.bg-teal-600]="companyFilter() === Company.NovaraRealEstate"
           [class.text-white]="companyFilter() === Company.NovaraRealEstate"
           [class.hover:bg-teal-500]="companyFilter() === Company.NovaraRealEstate"
-          [class.bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
+          [class.bg-transparent]="companyFilter() !== Company.NovaraRealEstate"
           [class.text-gray-700]="companyFilter() !== Company.NovaraRealEstate"
-          [class.hover:bg-gray-300]="companyFilter() !== Company.NovaraRealEstate"
-          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Novara
+          [class.lg:bg-gray-200]="companyFilter() !== Company.NovaraRealEstate"
+          class="inline-flex items-center justify-center px-4 lg:px-2 min-h-touch text-xs lg:text-xs rounded-full lg:rounded whitespace-nowrap transition-colors">Novara
         </button>
         <button
           (click)="onFilterProjectsByCompany(Company.Algemeen)"
           [class.bg-teal-600]="companyFilter() === Company.Algemeen"
           [class.text-white]="companyFilter() === Company.Algemeen"
           [class.hover:bg-teal-500]="companyFilter() === Company.Algemeen"
-          [class.bg-gray-200]="companyFilter() !== Company.Algemeen"
+          [class.bg-transparent]="companyFilter() !== Company.Algemeen"
           [class.text-gray-700]="companyFilter() !== Company.Algemeen"
-          [class.hover:bg-gray-300]="companyFilter() !== Company.Algemeen"
-          class="inline-flex items-center px-3 py-1 min-h-touch lg:px-2 lg:text-xs lg:rounded rounded-lg text-sm whitespace-nowrap transition-colors">Algemeen
+          [class.lg:bg-gray-200]="companyFilter() !== Company.Algemeen"
+          class="inline-flex items-center justify-center px-4 lg:px-2 min-h-touch text-xs lg:text-xs rounded-full lg:rounded whitespace-nowrap transition-colors">Algemeen
         </button>
       </div>
     </div>
