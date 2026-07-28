@@ -19,8 +19,11 @@
         </div>
       </div>
     } @else {
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 min-w-0">
-        <div class="flex items-start justify-between gap-2 lg:block min-w-0">
+      <!-- lg:flex-wrap lets the action buttons drop to their own row rather than
+           squeezing the title into a one-word-per-line column: the buttons do not
+           shrink, so without it a long title collapses to whatever is left over. -->
+      <div class="flex flex-col lg:flex-row lg:flex-wrap lg:items-center lg:justify-between gap-4 min-w-0">
+        <div class="flex items-start justify-between gap-2 lg:block min-w-0 lg:flex-1 lg:min-w-[16rem]">
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2 mb-2 min-w-0">
               <h2 class="text-xl lg:text-2xl font-bold text-gray-900 break-words min-w-0">{{ project().title }}</h2>

@@ -143,7 +143,12 @@ export async function dragOnto(
   // it landed mid-drag. Wait for the list to be quiescent before starting.
   await page.waitForLoadState("networkidle");
 
-  await handle.scrollIntoViewIfNeeded();
+  // hover() scrolls the handle into view and verifies the point actually hits it
+  // before moving there. Computing the centre from boundingBox() by hand does
+  // neither, and silently pressed the title instead of the grip on CI — which
+  // dragged a text selection across the row rather than starting a drag.
+  await handle.hover();
+
   const from = await handle.boundingBox();
   const to = await target.boundingBox();
   if (!from || !to) throw new Error("drag handle or target has no bounding box");
@@ -152,30 +157,42 @@ export async function dragOnto(
   const startY = from.y + from.height / 2;
   const preview = page.locator(".cdk-drag-preview");
 
-  await page.mouse.move(startX, startY);
   await page.mouse.down();
 
   // CDK begins the drag on the first pointer movement past its threshold, but on
   // slow CI that first move can arrive before the handle's listeners are live and
-  // is then simply lost. Keep nudging until the preview proves the drag started
-  // rather than assuming a single move took.
+  // is then simply lost. Keep nudging until the preview proves the drag started.
   //
-  // The nudge is sideways, never along the sort axis: a vertical nudge can
-  // already cross into the neighbouring item and swap it, and the travel below
-  // would swap it straight back, leaving the list in its original order.
+  // Every nudge is sideways and small. Sideways because a vertical nudge can
+  // already cross into the neighbouring item and swap it, which the travel below
+  // would swap straight back; small so the pointer stays on the handle instead of
+  // drifting onto the title.
+  const nudges = [10, 6, 12, 8, 14];
   let started = false;
-  for (let attempt = 1; attempt <= 5 && !started; attempt++) {
-    await page.mouse.move(startX + 12 * attempt, startY, { steps: 3 });
+  for (const dx of nudges) {
+    await page.mouse.move(startX + dx, startY, { steps: 2 });
     started = await preview
       .waitFor({ state: "attached", timeout: 1_000 })
       .then(() => true)
       .catch(() => false);
+    if (started) break;
   }
 
   if (!started) {
     await page.mouse.up();
+    const under = await page.evaluate(
+      ([x, y]) => {
+        const el = document.elementFromPoint(x, y);
+        return el
+          ? `${el.tagName.toLowerCase()}.${(el.getAttribute("class") || "").split(" ").slice(0, 3).join(".")}`
+          : "nothing";
+      },
+      [startX, startY]
+    );
     throw new Error(
-      "drag never started: no .cdk-drag-preview appeared after nudging the handle"
+      `drag never started: no .cdk-drag-preview after nudging. Point (${Math.round(
+        startX
+      )},${Math.round(startY)}) is over <${under}>`
     );
   }
 
