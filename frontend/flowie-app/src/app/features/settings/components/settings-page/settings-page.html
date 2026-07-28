@@ -20,6 +20,13 @@
         class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch py-2 px-3 border-b-2 text-sm font-medium">
         Agenda feed
       </button>
+      <button
+        type="button"
+        (click)="activeTab.set('version')"
+        [ngClass]="{'border-teal-600 text-teal-600': activeTab() === 'version', 'border-transparent text-gray-600 hover:text-gray-800': activeTab() !== 'version'}"
+        class="flex-shrink-0 inline-flex items-center whitespace-nowrap min-h-touch py-2 px-3 border-b-2 text-sm font-medium">
+        Versie
+      </button>
     </nav>
   </div>
 
@@ -29,6 +36,9 @@
     }
     @if (activeTab() === 'calendar') {
       <app-calendar-settings></app-calendar-settings>
+    }
+    @if (activeTab() === 'version') {
+      <app-version-settings></app-version-settings>
     }
   </div>
 </div>

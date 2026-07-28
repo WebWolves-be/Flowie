@@ -12,6 +12,32 @@ test.describe("settings", () => {
     await expect(page.locator("h2", { hasText: "Taak types" })).toBeVisible();
   });
 
+  test("the version tab identifies the running build", async ({ page }) => {
+    // An installed PWA can sit on stale cached code for days. Without a visible
+    // build stamp neither the user nor support can tell which version is running.
+    await page.goto("/instellingen");
+    await page.getByRole("button", { name: "Versie" }).click();
+
+    const commit = page.locator("#buildCommit");
+    await expect(commit).toBeVisible();
+    await expect(commit).not.toHaveText("");
+
+    await expect(page.locator("#buildDate")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Controleer op updates" })).toBeVisible();
+  });
+
+  test("checking for updates reports back", async ({ page }) => {
+    // `ng serve` disables the service worker, so this exercises the unavailable
+    // branch — enough to prove the button is wired to PwaUpdateService.
+    await page.goto("/instellingen");
+    await page.getByRole("button", { name: "Versie" }).click();
+    await page.getByRole("button", { name: "Controleer op updates" }).click();
+
+    await expect(
+      page.locator("app-notification-container", { hasText: "Updates zijn hier niet beschikbaar" })
+    ).toBeVisible();
+  });
+
   test("task type can be created and deleted", async ({ page }) => {
     const name = uniqueName("Type");
     await page.goto("/instellingen");
