@@ -171,8 +171,14 @@ produced horizontal scrolling and content hidden under the notch:
   shell). `index.html` needs `viewport-fit=cover` for `env(safe-area-inset-*)` to
   be non-zero at all.
 - **Hover is not available on touch.** Anything revealed by `group-hover` must be
-  visible by default below `lg` — that is why drag handles were unusable on
-  phones.
+  visible by default below `lg`, or replaced by a touch gesture. Drag handles
+  took the second route: a permanently visible grip costs ~28px of every row for
+  an occasional action, so below `lg` the row is dragged directly after a hold
+  (`cdkDragStartDelay`) and no grip is rendered at all.
+- **Weight and tap size are separate problems.** A control can be visually
+  compact while keeping a 44px target: `.touch-pill` in `styles.scss` keeps the
+  button box at 44px and insets the visible border with a `::before`, so status
+  buttons read light without getting harder to hit.
 - Custom utilities live in `tailwind.config.js`: `min-h-touch`, `min-w-touch`,
   `h-dvh`, `min-h-dvh`, `pt-safe-t`, `pb-safe-b`, `pt-header-safe`, `pb-nav-safe`.
 
@@ -242,6 +248,10 @@ needs no workaround inside the suite.
 - Sections *and* tasks are both `.cdk-drag` elements, and a section contains its
   tasks' `<h3>`s. To target a task row use `.cdk-drag:has(> app-task-item)`,
   otherwise the locator resolves to the enclosing section.
+- **Drag handles only exist at `lg` and up.** Below that no `[cdkdraghandle]` is
+  rendered and the row itself is the drag target, with `cdkDragStartDelay` making
+  the reorder start on a long press. Use the `dragOnto` helper — pass
+  `{ holdMs: 500 }` for touch — instead of hand-rolling mouse moves.
 
 ### The `lg` breakpoint is the mobile/desktop line
 

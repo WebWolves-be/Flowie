@@ -14,6 +14,10 @@ import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } fro
 })
 export class TaskItemComponent implements OnChanges {
   task = input.required<Task>();
+  isCompact = input<boolean>(false);
+
+  /** Matches ProjectDetailComponent: hold-to-drag where there is no grip. */
+  readonly DRAG_HOLD_MS = 300;
   isLast = input<boolean>(false);
 
   taskUpdateRequested = output<number>();

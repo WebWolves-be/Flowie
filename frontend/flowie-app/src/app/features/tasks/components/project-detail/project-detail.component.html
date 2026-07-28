@@ -129,7 +129,7 @@
       </div>
     </div>
   }
-  <div class="flex-1 min-w-0 px-3 py-4 lg:p-6 scroll-pane bg-gray-50" cdkScrollable>
+  <div class="flex-1 min-w-0 px-2 py-3 lg:p-6 scroll-pane bg-gray-50" cdkScrollable>
     @if (isDetailLoading() || isLoadingSections()) {
       <div class="space-y-4 animate-pulse">
         <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -151,16 +151,22 @@
     } @else {
       <div class="space-y-3" cdkDropList (cdkDropListDropped)="onSectionDrop($event)">
         @for (section of orderedSections(); track section.sectionId) {
-          <div class="border border-gray-200 rounded-lg bg-white min-w-0" cdkDrag>
+          <div class="border border-gray-200 rounded-lg bg-white min-w-0" cdkDrag
+               [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0">
             <div
               class="flex items-center justify-between gap-2 p-3 lg:p-4 cursor-pointer hover:bg-gray-50 transition-colors min-w-0"
               (click)="toggleSection(section.sectionId)">
               <div class="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
-                <div cdkDragHandle class="flex items-center justify-center min-w-touch min-h-touch -ml-2 lg:ml-0 lg:min-w-0 lg:min-h-0 flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 lg:text-gray-300 hover:text-gray-500 transition-colors" (click)="$event.stopPropagation()">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                  </svg>
-                </div>
+                <!-- A permanently visible grip costs ~28px of every row on a phone
+                     for an occasional action, so below `lg` the whole row is the
+                     drag target instead and reordering starts on a long press. -->
+                @if (!isCompact()) {
+                  <div cdkDragHandle class="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors" (click)="$event.stopPropagation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                  </div>
+                }
                 <i class="fas fa-chevron-right transition-transform text-gray-500 flex-shrink-0" [class.rotate-90]="expandedSections().has(section.sectionId)"></i>
                 <h3 class="font-medium text-gray-900 min-w-0 break-words lg:truncate">{{ section.title }}</h3>
                 @if (section.taskCount > 0) {
@@ -219,7 +225,7 @@
               </div>
             </div>
             @if (expandedSections().has(section.sectionId)) {
-              <div class="border-t border-gray-200 p-3 lg:p-4 min-w-0">
+              <div class="border-t border-gray-200 p-2.5 lg:p-4 min-w-0">
                 @if (section.description) {
                   <div class="mb-4 pb-4 border-b border-dashed border-gray-200 min-w-0">
                     <p class="text-sm text-gray-600 description-content" [innerHTML]="section.description"></p>
@@ -239,16 +245,20 @@
                       cdkDropList
                       (cdkDropListDropped)="onTaskDrop($event, section.sectionId)">
                       @for (task of getTasksForSection(section.sectionId); track task.taskId) {
-                        <div cdkDrag class="group min-w-0 flex items-start gap-1">
-                          <div cdkDragHandle
-                               title="Verplaatsen"
-                               class="flex-shrink-0 flex items-center justify-center w-6 min-h-touch mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 lg:text-gray-300 lg:opacity-0 lg:group-hover:opacity-100 lg:transition-opacity">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                              <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                            </svg>
-                          </div>
+                        <div cdkDrag class="group min-w-0 flex items-start gap-1"
+                             [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0">
+                          @if (!isCompact()) {
+                            <div cdkDragHandle
+                                 title="Verplaatsen"
+                                 class="flex-shrink-0 flex items-center justify-center w-6 mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                              </svg>
+                            </div>
+                          }
                           <app-task-item
                             class="block flex-1 min-w-0"
+                            [isCompact]="isCompact()"
                             [task]="task"
                             [isLast]="$last"
                             (taskUpdateRequested)="onTaskUpdate(task.taskId)"

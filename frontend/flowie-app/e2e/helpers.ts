@@ -136,7 +136,10 @@ export async function confirmDelete(page: Page): Promise<void> {
 export async function dragOnto(
   page: Page,
   handle: Locator,
-  target: Locator
+  target: Locator,
+  // Below `lg` rows have no grip: the row itself is the drag target and CDK only
+  // starts the drag after a hold, so the press has to be held past that delay.
+  options: { holdMs?: number } = {}
 ): Promise<void> {
   // Creating an item refetches the list, and that response re-derives the order
   // from the server's displayOrder — which would wipe the optimistic reorder if
@@ -158,6 +161,12 @@ export async function dragOnto(
   const preview = page.locator(".cdk-drag-preview");
 
   await page.mouse.down();
+
+  if (options.holdMs) {
+    // Hold still: any movement before the delay elapses cancels the pending drag
+    // (which is what keeps scrolling working).
+    await page.waitForTimeout(options.holdMs);
+  }
 
   // CDK begins the drag on the first pointer movement past its threshold, but on
   // slow CI that first move can arrive before the handle's listeners are live and

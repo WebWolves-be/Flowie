@@ -72,6 +72,28 @@ body {
   }
 }
 
+/* A status button at a full 44px tall reads as a heavy slab next to the task
+   text. Keep the 44px tap area — the thing that makes it easy to hit — but draw
+   the visible pill inset inside it, so the control looks compact without
+   becoming harder to press. The border uses currentColor, so each button keeps
+   its own teal/green/amber text colour. */
+@media (max-width: 1023px) {
+  .touch-pill {
+    position: relative;
+    border-color: transparent !important;
+    background-color: transparent !important;
+  }
+
+  .touch-pill::before {
+    content: "";
+    position: absolute;
+    inset: 0.3125rem 0;
+    border: 1px solid currentColor;
+    border-radius: 0.5rem;
+    pointer-events: none;
+  }
+}
+
 /* Interactive elements get an unambiguous pressed state, since hover styles
    never resolve on touch. */
 @media (hover: none) {

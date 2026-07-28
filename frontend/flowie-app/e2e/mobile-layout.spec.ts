@@ -312,15 +312,10 @@ test.describe("mobile layout", () => {
         has: page.locator("h3", { hasText: title }),
       });
 
-    const handle = taskRow(second).locator("[cdkdraghandle]").first();
-
-    // This is the regression itself: the handle is visible and tap-sized with no
-    // hover involved. Asserted at every mobile size.
-    await handle.scrollIntoViewIfNeeded();
-    await expect(handle).toBeVisible();
-    await expect(handle).toHaveCSS("opacity", "1");
-    const handleBox = await handle.boundingBox();
-    expect(handleBox!.height).toBeGreaterThanOrEqual(43);
+    // No grip is rendered below `lg` — it would cost ~28px of every row for an
+    // occasional action — so the row itself is the drag target. Assert that,
+    // otherwise a stray handle would quietly reintroduce the wasted column.
+    await expect(taskRow(second).locator("[cdkdraghandle]")).toHaveCount(0);
 
     // Completing the gesture needs both cards plus the drag distance on screen
     // at once. A 375px-tall landscape viewport cannot hold that, and simulating
@@ -332,7 +327,8 @@ test.describe("mobile layout", () => {
       "viewport too short to hold both task cards and the drag distance"
     );
 
-    await dragOnto(page, handle, taskRow(first));
+    // Reordering starts on a long press rather than a grab.
+    await dragOnto(page, taskRow(second), taskRow(first), { holdMs: 500 });
 
     await expect(async () => {
       const titles = await page.locator("app-task-item h3").allTextContents();

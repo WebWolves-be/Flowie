@@ -1,5 +1,5 @@
 <div
-  class="bg-white shadow rounded-lg p-4 lg:p-6 min-w-0"
+  class="bg-white shadow rounded-lg p-3 lg:p-6 min-w-0"
   [class.mb-4]="!isLast()"
   [class.border-b]="!isLast()"
   [class.border-gray-200]="!isLast()">
@@ -38,7 +38,7 @@
         </div>
       }
       @if (expanded() && (!task().subtasks || task().subtasks!.length === 0)) {
-        <div id="task-metadata-row" class="flex flex-wrap lg:flex-nowrap lg:items-center gap-x-0 gap-y-1.5 lg:gap-0 text-sm text-black">
+        <div id="task-metadata-row" class="flex flex-wrap lg:flex-nowrap lg:items-center gap-x-0 gap-y-1 lg:gap-0 text-sm text-black">
           <span class="flex items-center gap-1 mr-3 lg:mr-0">
             <i class="fas fa-tag text-teal-600 text-xs lg:hidden"></i>
             {{ task().taskTypeName }}
@@ -83,6 +83,7 @@
             @for (subtask of orderedSubtasks(); track subtask.taskId) {
               <div
                 cdkDrag
+                [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0"
                 class="px-3 py-2 rounded-r relative min-w-0"
                 [class.border-l-4]="true"
                 [class.border-green-400]="isSubtaskDone(subtask)"
@@ -90,14 +91,16 @@
                 [class.border-gray-300]="!isSubtaskDone(subtask)"
                 [class.bg-white]="!isSubtaskDone(subtask)">
                 <div class="flex items-start justify-between gap-1 min-w-0">
-                  <div
-                    cdkDragHandle
-                    title="Verplaatsen"
-                    class="flex-shrink-0 flex items-center justify-center w-6 min-h-touch cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 lg:text-gray-300 lg:min-h-0 lg:mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                    </svg>
-                  </div>
+                  @if (!isCompact()) {
+                    <div
+                      cdkDragHandle
+                      title="Verplaatsen"
+                      class="flex-shrink-0 flex items-center justify-center w-6 mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                      </svg>
+                    </div>
+                  }
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1 min-w-0">
                       <span
@@ -114,7 +117,7 @@
                         [innerHTML]="subtask.description">
                       </div>
                     }
-                    <div class="flex flex-wrap lg:flex-nowrap lg:items-center gap-x-0 gap-y-1.5 lg:gap-2 text-xs mb-3">
+                    <div class="flex flex-wrap lg:flex-nowrap lg:items-center gap-x-0 gap-y-1 lg:gap-2 text-xs mb-3">
                       <span class="flex items-center gap-1 mr-3 lg:mr-0 text-gray-700">
                         <i class="fas fa-tag text-teal-600 lg:hidden"></i>
                         {{ subtask.taskTypeName }}
@@ -155,38 +158,38 @@
                       @if (isSubtaskPending(subtask)) {
                         <button
                           (click)="onStartSubtask(subtask)"
-                          class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+                          class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
                           Beginnen
                         </button>
                       }
                       @if (isSubtaskOngoing(subtask)) {
                         <button
                           (click)="onCompleteSubtask(subtask)"
-                          class="border border-green-600 text-green-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
+                          class="border border-green-600 text-green-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
                           Klaar
                         </button>
                         <button
                           (click)="onWaitSubtask(subtask)"
-                          class="border border-amber-600 text-amber-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-amber-50">
+                          class="border border-amber-600 text-amber-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-amber-50">
                           Wachten op
                         </button>
                       }
                       @if (isSubtaskWaitingOn(subtask)) {
                         <button
                           (click)="onCompleteSubtask(subtask)"
-                          class="border border-green-600 text-green-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
+                          class="border border-green-600 text-green-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
                           Klaar
                         </button>
                         <button
                           (click)="onReopenSubtask(subtask)"
-                          class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+                          class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
                           Heropenen
                         </button>
                       }
                       @if (isSubtaskDone(subtask)) {
                         <button
                           (click)="onReopenSubtask(subtask)"
-                          class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+                          class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
                           Openzetten
                         </button>
                       }
@@ -228,42 +231,42 @@
         </div>
       }
       @if (expanded() && (!task().subtasks || task().subtasks!.length === 0)) {
-        <div class="flex flex-wrap items-center gap-2 mt-3 min-w-0">
+        <div class="flex flex-wrap items-center gap-2 mt-2 lg:mt-3 min-w-0">
           @if (isPending()) {
             <button
               (click)="onStartTask()"
-              class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+              class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
               Beginnen
             </button>
           }
           @if (isOngoing()) {
             <button
               (click)="onCompleteTask()"
-              class="border border-green-600 text-green-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
+              class="border border-green-600 text-green-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
               Klaar
             </button>
             <button
               (click)="onWaitTask()"
-              class="border border-amber-600 text-amber-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-amber-50">
+              class="border border-amber-600 text-amber-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-amber-50">
               Wachten op
             </button>
           }
           @if (isWaitingOn()) {
             <button
               (click)="onCompleteTask()"
-              class="border border-green-600 text-green-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
+              class="border border-green-600 text-green-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-green-50">
               Klaar
             </button>
             <button
               (click)="onReopenTask()"
-              class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+              class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
               Heropenen
             </button>
           }
           @if (isDone()) {
             <button
               (click)="onReopenTask()"
-              class="border border-teal-600 text-teal-600 inline-flex items-center justify-center px-4 py-1 min-h-touch rounded-lg lg:rounded lg:px-3 text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
+              class="border border-teal-600 text-teal-600 touch-pill inline-flex items-center justify-center px-3 py-1 min-h-touch rounded-lg lg:rounded text-sm whitespace-nowrap bg-transparent hover:bg-teal-50">
               Openzetten
             </button>
           }

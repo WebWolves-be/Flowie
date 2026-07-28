@@ -18,6 +18,13 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 export class ProjectDetailComponent {
   readonly Company = Company;
 
+  /**
+   * Hold-to-drag delay used below `lg`, where rows have no visible grip. Long
+   * enough that a scroll flick or a tap never starts a drag, short enough to
+   * feel deliberate rather than laggy.
+   */
+  readonly DRAG_HOLD_MS = 300;
+
   project = input.required<Project>();
   sections = input<Section[]>([]);
   isLoadingSections = input<boolean>(false);
