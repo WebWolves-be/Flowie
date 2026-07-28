@@ -150,14 +150,34 @@ export async function dragOnto(
 
   const startX = from.x + from.width / 2;
   const startY = from.y + from.height / 2;
+  const preview = page.locator(".cdk-drag-preview");
 
   await page.mouse.move(startX, startY);
   await page.mouse.down();
-  // Nudge sideways, never along the sort axis: a vertical nudge can already
-  // cross into the neighbouring item and swap it, and the travel below then
-  // swaps it back — leaving the list in its original order.
-  await page.mouse.move(startX + 12, startY, { steps: 3 });
-  await expect(page.locator(".cdk-drag-preview")).toHaveCount(1);
+
+  // CDK begins the drag on the first pointer movement past its threshold, but on
+  // slow CI that first move can arrive before the handle's listeners are live and
+  // is then simply lost. Keep nudging until the preview proves the drag started
+  // rather than assuming a single move took.
+  //
+  // The nudge is sideways, never along the sort axis: a vertical nudge can
+  // already cross into the neighbouring item and swap it, and the travel below
+  // would swap it straight back, leaving the list in its original order.
+  let started = false;
+  for (let attempt = 1; attempt <= 5 && !started; attempt++) {
+    await page.mouse.move(startX + 12 * attempt, startY, { steps: 3 });
+    started = await preview
+      .waitFor({ state: "attached", timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  if (!started) {
+    await page.mouse.up();
+    throw new Error(
+      "drag never started: no .cdk-drag-preview appeared after nudging the handle"
+    );
+  }
 
   const endX = to.x + to.width / 2;
   const endY = to.y + 4;
@@ -169,7 +189,7 @@ export async function dragOnto(
 
   // The list animates the reorder and the new order is then persisted; waiting
   // for the preview to disappear keeps callers from asserting mid-flight.
-  await expect(page.locator(".cdk-drag-preview")).toHaveCount(0);
+  await expect(preview).toHaveCount(0);
 }
 
 // A task's type is required, and a fresh database has none — so any spec that
