@@ -8,17 +8,12 @@
         Terug naar projecten
       </button>
     }
-    @if (isDetailLoading()) {
-      <div class="animate-pulse">
-        <div class="h-8 w-72 bg-gray-200 rounded"></div>
-        <div class="h-4 w-96 bg-gray-200 rounded mt-3"></div>
-        <div class="h-4 w-80 bg-gray-200 rounded mt-2"></div>
-        <div class="flex space-x-3 mt-4">
-          <div class="h-9 w-36 bg-gray-200 rounded-lg"></div>
-          <div class="h-9 w-40 bg-gray-200 rounded-lg"></div>
-        </div>
-      </div>
-    } @else {
+      <!-- The project is always already loaded here — it came from the list the
+           user just tapped — so the header renders straight away. Replacing it
+           with a skeleton hid a title we already had, and the skeleton was
+           desktop-shaped: a fixed w-96 bar that overflowed a 375px screen and
+           two button blocks that do not exist below `lg`. Only the section and
+           task area below actually has to wait for data. -->
       <!-- lg:flex-wrap lets the action buttons drop to their own row rather than
            squeezing the title into a one-word-per-line column: the buttons do not
            shrink, so without it a long title collapses to whatever is left over. -->
@@ -99,7 +94,6 @@
           </button>
         </div>
       </div>
-    }
   </div>
   @if (!isDetailLoading() && (sections().length > 0 || tasks().length > 0)) {
     <div class="bg-gray-50 border-b border-gray-200 px-3 lg:px-6 py-3 flex-shrink-0 min-w-0">
