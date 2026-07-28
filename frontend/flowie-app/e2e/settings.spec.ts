@@ -33,8 +33,10 @@ test.describe("settings", () => {
     await page.getByRole("button", { name: "Versie" }).click();
     await page.getByRole("button", { name: "Controleer op updates" }).click();
 
+    // app-notification-container has no layout box of its own — its only child
+    // is position:fixed — so assert on the toast text, not on the host element.
     await expect(
-      page.locator("app-notification-container", { hasText: "Updates zijn hier niet beschikbaar" })
+      page.locator("app-notification-container").getByText("Updates zijn hier niet beschikbaar")
     ).toBeVisible();
   });
 

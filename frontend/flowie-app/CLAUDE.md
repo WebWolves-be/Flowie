@@ -206,6 +206,31 @@ produced horizontal scrolling and content hidden under the notch:
 > For exploratory mobile checks use the `/test-mobile` skill.
 > Playwright CLI / Chrome DevTools MCP remain for ad-hoc debugging.
 
+### Unit tests (Karma/Jasmine)
+
+`npm test -- --watch=false --browsers=ChromeHeadless` runs `*.spec.ts` files
+under `src/`. Use these for logic that e2e cannot reach — anything depending on
+the service worker, which `ng serve` disables. Injectable seams exist for that
+purpose: `AppReloader` wraps `location.reload()` so a test can assert a reload
+without navigating. E2E remains the default; unit tests are the exception.
+
+## PWA versioning
+
+- `src/build-info.ts` is **generated** by `scripts/generate-build-info.mjs` and
+  committed with placeholder values (`commit: "dev"`). `npm run build` stamps the
+  real commit via the `prebuild` hook. It stays committed because CI starts the
+  app with `npx ng serve` directly, which skips npm lifecycle hooks — if the file
+  were gitignored the CI build would not compile.
+- After a production build the file is dirty with a machine-specific stamp.
+  `git checkout src/build-info.ts` to restore the placeholder before committing.
+- `PwaUpdateService` (`core/services/`) prompts via `NotificationService.showAction`
+  when `SwUpdate` reports `VERSION_READY`, polls every 30 minutes, and handles
+  `unrecoverable`. `AppComponent`'s constructor calls `initialize()`.
+- `NotificationService.showAction()` creates a **sticky** toast (no duration) with
+  a button. Use it for anything the user must act on; the `show*` helpers all
+  auto-dismiss.
+- Settings has a `Versie` tab showing commit/date/branch plus a manual check.
+
 ## E2E Tests Are Mandatory
 
 Every new feature or behavior change ships with e2e specs in `e2e/`, and the
