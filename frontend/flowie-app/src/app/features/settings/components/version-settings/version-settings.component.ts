@@ -16,21 +16,19 @@ import { PwaUpdateService } from "../../../../core/services/pwa-update.service";
 
       <dl class="mt-4 divide-y divide-gray-200 border-y border-gray-200">
         <div class="flex items-start justify-between gap-4 py-3 min-w-0">
-          <dt class="text-sm text-gray-600 flex-shrink-0">Build</dt>
-          <dd id="buildCommit" class="text-sm font-mono text-gray-900 min-w-0 break-words text-right">
-            {{ commit }}
-          </dd>
+          <dt class="text-sm text-gray-600 flex-shrink-0">Versie</dt>
+          <dd id="buildVersion" class="text-sm font-mono font-semibold text-gray-900 min-w-0 break-words text-right">{{ version }}</dd>
         </div>
         <div class="flex items-start justify-between gap-4 py-3 min-w-0">
           <dt class="text-sm text-gray-600 flex-shrink-0">Gebouwd op</dt>
           <dd id="buildDate" class="text-sm text-gray-900 min-w-0 break-words text-right">
-            {{ builtAt | date: "d MMMM y, HH:mm" : undefined : "nl" }}
+            {{ builtAt | date: "d MMMM y, HH:mm" : "UTC" : "nl" }} UTC
           </dd>
         </div>
         <div class="flex items-start justify-between gap-4 py-3 min-w-0">
-          <dt class="text-sm text-gray-600 flex-shrink-0">Branch</dt>
-          <dd id="buildBranch" class="text-sm font-mono text-gray-900 min-w-0 break-words text-right">
-            {{ branch }}
+          <dt class="text-sm text-gray-600 flex-shrink-0">Code</dt>
+          <dd id="buildCommit" class="text-sm font-mono text-gray-500 min-w-0 break-words text-right">
+            {{ commit }}
           </dd>
         </div>
       </dl>
@@ -48,8 +46,8 @@ import { PwaUpdateService } from "../../../../core/services/pwa-update.service";
 export class VersionSettingsComponent {
   #updates = inject(PwaUpdateService);
 
+  version = buildInfo.version;
   commit = buildInfo.commit;
-  branch = buildInfo.branch;
   builtAt = buildInfo.builtAt;
 
   isChecking = signal(false);

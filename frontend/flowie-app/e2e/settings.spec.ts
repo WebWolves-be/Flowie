@@ -18,11 +18,17 @@ test.describe("settings", () => {
     await page.goto("/instellingen");
     await page.getByRole("button", { name: "Versie" }).click();
 
-    const commit = page.locator("#buildCommit");
-    await expect(commit).toBeVisible();
-    await expect(commit).not.toHaveText("");
+    // The version has to be readable out loud, so support can ask "staat er
+    // 2026.07.28-1719?" over the phone. A bare commit hash cannot do that.
+    const version = page.locator("#buildVersion");
+    await expect(version).toBeVisible();
+    await expect(version).toHaveText(/^(dev|\d{4}\.\d{2}\.\d{2}-\d{4})$/);
 
     await expect(page.locator("#buildDate")).toBeVisible();
+
+    // The branch says nothing to a user and is meaningless in CI's detached HEAD.
+    await expect(page.locator("#buildBranch")).toHaveCount(0);
+
     await expect(page.getByRole("button", { name: "Controleer op updates" })).toBeVisible();
   });
 

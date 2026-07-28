@@ -13,21 +13,32 @@ function git(command, fallback) {
   }
 }
 
-// actions/checkout leaves a detached HEAD, so `rev-parse --abbrev-ref HEAD`
-// returns the literal "HEAD" in CI. GitHub's own variables are the truth there.
+// actions/checkout leaves a detached HEAD, so `rev-parse --short HEAD` still
+// works but the branch name does not. GitHub's own variable is the truth there.
 const commit = (process.env.GITHUB_SHA ?? "").slice(0, 7) || git("rev-parse --short HEAD", "onbekend");
-const branch = process.env.GITHUB_REF_NAME ?? git("rev-parse --abbrev-ref HEAD", "onbekend");
-const builtAt = new Date().toISOString();
+
+// A hash is unreadable over the phone. Build the version from the build time in
+// UTC so it sorts chronologically and can be read out digit by digit — the
+// displayed date is rendered in UTC too, so the two always agree.
+const now = new Date();
+const pad = (value) => String(value).padStart(2, "0");
+const version = [
+  now.getUTCFullYear(),
+  pad(now.getUTCMonth() + 1),
+  pad(now.getUTCDate())
+].join(".") + `-${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}`;
+
+const builtAt = now.toISOString();
 
 writeFileSync(
   target,
   `export const buildInfo = {
+  version: "${version}",
   commit: "${commit}",
-  branch: "${branch}",
   builtAt: "${builtAt}"
 };
 `,
   "utf8"
 );
 
-console.log(`build-info.ts: ${commit} (${branch}) @ ${builtAt}`);
+console.log(`build-info.ts: ${version} (${commit})`);
