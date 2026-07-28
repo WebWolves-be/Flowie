@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full min-h-0 min-w-0">
+<ng-template #projectHeader>
   <div class="bg-white border-b border-gray-200 px-3 py-3 lg:p-6 flex-shrink-0 min-w-0">
     @if (isCompact()) {
       <button
@@ -95,18 +95,24 @@
         </div>
       </div>
   </div>
+</ng-template>
+
+<ng-template #taskFilter>
   @if (!isDetailLoading() && (sections().length > 0 || tasks().length > 0)) {
-    <div class="bg-gray-50 border-b border-gray-200 px-3 lg:px-6 py-3 flex-shrink-0 min-w-0">
-      <div class="flex flex-wrap gap-2">
+    <!-- A binary filter used occasionally does not deserve a 76px band above the
+         list on a phone. Below `lg` it is a compact segmented control; desktop
+         keeps the roomier pills. -->
+    <div class="bg-gray-50 border-b border-gray-200 px-2 lg:px-6 py-2 lg:py-3 flex-shrink-0 min-w-0">
+      <div class="inline-flex lg:flex lg:flex-wrap gap-1 lg:gap-2 p-0.5 lg:p-0 rounded-full bg-gray-200 lg:bg-transparent">
         <button
           (click)="onToggleTaskFilter(false)"
           [class.bg-teal-600]="!showOnlyMyTasks()"
           [class.text-white]="!showOnlyMyTasks()"
           [class.hover:bg-teal-500]="!showOnlyMyTasks()"
-          [class.bg-gray-200]="showOnlyMyTasks()"
+          [class.bg-transparent]="showOnlyMyTasks()"
+          [class.lg:bg-gray-200]="showOnlyMyTasks()"
           [class.text-gray-700]="showOnlyMyTasks()"
-          [class.hover:bg-gray-300]="showOnlyMyTasks()"
-          class="inline-flex items-center px-4 py-1 min-h-touch lg:px-3 rounded-full text-sm whitespace-nowrap transition-colors">
+          class="inline-flex items-center px-3 py-1.5 lg:px-3 lg:min-h-touch rounded-full text-xs lg:text-sm whitespace-nowrap transition-colors">
           Alle taken
         </button>
         <button
@@ -114,16 +120,33 @@
           [class.bg-teal-600]="showOnlyMyTasks()"
           [class.text-white]="showOnlyMyTasks()"
           [class.hover:bg-teal-500]="showOnlyMyTasks()"
-          [class.bg-gray-200]="!showOnlyMyTasks()"
+          [class.bg-transparent]="!showOnlyMyTasks()"
+          [class.lg:bg-gray-200]="!showOnlyMyTasks()"
           [class.text-gray-700]="!showOnlyMyTasks()"
-          [class.hover:bg-gray-300]="!showOnlyMyTasks()"
-          class="inline-flex items-center px-4 py-1 min-h-touch lg:px-3 rounded-full text-sm whitespace-nowrap transition-colors">
+          class="inline-flex items-center px-3 py-1.5 lg:px-3 lg:min-h-touch rounded-full text-xs lg:text-sm whitespace-nowrap transition-colors">
           Alleen mijn taken
         </button>
       </div>
     </div>
   }
+</ng-template>
+
+<!-- Below `lg` the project header and the filter scroll away with the list
+     instead of being pinned chrome. They cost ~170px of a 375px-tall landscape
+     phone, which left the task list a sliver; the section headers stay sticky,
+     so scrolling never loses the context that actually matters. -->
+<div class="flex flex-col h-full min-h-0 min-w-0">
+  @if (!isCompact()) {
+    <ng-container [ngTemplateOutlet]="projectHeader"></ng-container>
+    <ng-container [ngTemplateOutlet]="taskFilter"></ng-container>
+  }
   <div class="flex-1 min-w-0 px-2 py-3 lg:p-6 scroll-pane bg-gray-50" cdkScrollable>
+    @if (isCompact()) {
+      <div class="-mx-2 -mt-3 mb-3">
+        <ng-container [ngTemplateOutlet]="projectHeader"></ng-container>
+        <ng-container [ngTemplateOutlet]="taskFilter"></ng-container>
+      </div>
+    }
     @if (isDetailLoading() || isLoadingSections()) {
       <div class="space-y-4 animate-pulse">
         <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -145,10 +168,14 @@
     } @else {
       <div class="space-y-3" cdkDropList (cdkDropListDropped)="onSectionDrop($event)">
         @for (section of orderedSections(); track section.sectionId) {
-          <div class="border border-gray-200 rounded-lg bg-white min-w-0" cdkDrag
+          <!-- Below `lg` the section is not a card: its header sits directly on
+               the grey background as a sticky divider and the tasks form one
+               grouped list. That removes a nesting level — and its border,
+               padding and shadow — from the narrowest screen we support. -->
+          <div class="min-w-0 lg:border lg:border-gray-200 lg:rounded-lg lg:bg-white" cdkDrag
                [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0">
             <div
-              class="flex items-center justify-between gap-2 p-3 lg:p-4 cursor-pointer hover:bg-gray-50 transition-colors min-w-0"
+              class="flex items-center justify-between gap-2 py-2 px-1 lg:p-4 cursor-pointer lg:hover:bg-gray-50 transition-colors min-w-0 sticky top-0 z-10 bg-gray-50 lg:static lg:bg-transparent"
               (click)="toggleSection(section.sectionId)">
               <div class="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
                 <!-- A permanently visible grip costs ~28px of every row on a phone
@@ -219,7 +246,7 @@
               </div>
             </div>
             @if (expandedSections().has(section.sectionId)) {
-              <div class="border-t border-gray-200 p-2.5 lg:p-4 min-w-0">
+              <div class="lg:border-t lg:border-gray-200 p-0 lg:p-4 min-w-0">
                 @if (section.description) {
                   <div class="mb-4 pb-4 border-b border-dashed border-gray-200 min-w-0">
                     <p class="text-sm text-gray-600 description-content" [innerHTML]="section.description"></p>
@@ -232,14 +259,14 @@
                   </div>
                 } @else {
                   @if (getTasksForSection(section.sectionId).length === 0) {
-                    <p class="text-sm text-gray-500 text-center py-4">Geen taken in deze sectie</p>
+                    <p class="text-sm text-gray-500 text-center py-2 lg:py-4">Geen taken in deze sectie</p>
                   } @else {
                     <div
-                      class="space-y-3 min-w-0"
+                      class="min-w-0 lg:space-y-3 rounded-lg bg-white divide-y divide-gray-100 lg:bg-transparent lg:rounded-none lg:divide-y-0"
                       cdkDropList
                       (cdkDropListDropped)="onTaskDrop($event, section.sectionId)">
                       @for (task of getTasksForSection(section.sectionId); track task.taskId) {
-                        <div cdkDrag class="group min-w-0 flex items-start gap-1"
+                        <div cdkDrag class="group min-w-0 flex items-start gap-1 px-2 lg:px-0 scroll-mt-14 lg:scroll-mt-0"
                              [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0">
                           @if (!isCompact()) {
                             <div cdkDragHandle
@@ -250,20 +277,28 @@
                               </svg>
                             </div>
                           }
-                          <app-task-item
-                            class="block flex-1 min-w-0"
-                            [isCompact]="isCompact()"
-                            [task]="task"
-                            [isLast]="$last"
-                            (taskUpdateRequested)="onTaskUpdate(task.taskId)"
-                            (taskDeleteRequested)="onTaskDelete(task.taskId)"
-                            (taskStatusChanged)="onTaskStatusChanged($event)"
-                            (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
-                            (subtaskCreateRequested)="onSubtaskCreate(task.taskId)"
-                            (subtaskUpdateRequested)="onSubtaskUpdate($event)"
-                            (subtaskDeleteRequested)="onSubtaskDelete($event)"
-                            (subtaskReorderRequested)="onSubtaskReorder($event)">
-                          </app-task-item>
+                          @if (isCompact()) {
+                            <app-task-item-mobile
+                              class="block flex-1 min-w-0"
+                              [task]="task"
+                              (detailRequested)="openTaskDetail($event)"
+                              (taskStatusChanged)="onTaskStatusChanged($event)">
+                            </app-task-item-mobile>
+                          } @else {
+                            <app-task-item
+                              class="block flex-1 min-w-0"
+                              [task]="task"
+                              [isLast]="$last"
+                              (taskUpdateRequested)="onTaskUpdate(task.taskId)"
+                              (taskDeleteRequested)="onTaskDelete(task.taskId)"
+                              (taskStatusChanged)="onTaskStatusChanged($event)"
+                              (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
+                              (subtaskCreateRequested)="onSubtaskCreate(task.taskId)"
+                              (subtaskUpdateRequested)="onSubtaskUpdate($event)"
+                              (subtaskDeleteRequested)="onSubtaskDelete($event)"
+                              (subtaskReorderRequested)="onSubtaskReorder($event)">
+                            </app-task-item>
+                          }
                         </div>
                       }
                     </div>
@@ -277,3 +312,18 @@
     }
   </div>
 </div>
+
+@if (isCompact() && selectedTask(); as detailTask) {
+  <app-task-detail-sheet
+    [task]="detailTask"
+    (close)="closeTaskDetail()"
+    (taskUpdateRequested)="onTaskUpdate($event)"
+    (taskDeleteRequested)="closeTaskDetail(); onTaskDelete($event)"
+    (taskStatusChanged)="onTaskStatusChanged($event)"
+    (subtaskStatusChanged)="onSubtaskStatusChanged($event)"
+    (subtaskCreateRequested)="onSubtaskCreate($event)"
+    (subtaskUpdateRequested)="onSubtaskUpdate($event)"
+    (subtaskDeleteRequested)="onSubtaskDelete($event)"
+    (subtaskReorderRequested)="onSubtaskReorder($event)">
+  </app-task-detail-sheet>
+}

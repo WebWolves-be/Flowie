@@ -7,8 +7,10 @@ export const uniqueName = (prefix: string) => `E2E-${prefix}-${Date.now()}`;
 export const uniqueCode = () =>
   `E${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
+// Scoped to the CDK overlay: the mobile detail sheet is also an aria-modal
+// dialog and stays open underneath, so an unscoped locator matches both.
 export const dialog = (page: Page) =>
-  page.locator('[role="dialog"][aria-modal="true"]');
+  page.locator('.cdk-overlay-container [role="dialog"][aria-modal="true"]');
 
 export async function createProject(
   page: Page,
@@ -63,14 +65,56 @@ export const sectionRow = (page: Page, sectionTitle: string) =>
     .locator(".cdk-drag", { has: page.locator("h3", { hasText: sectionTitle }) })
     .first();
 
-// Tasks are rendered by <app-task-item>, so scope to that element rather than a
-// bare div (which resolves to page-level wrappers).
+// Desktop renders an expandable <app-task-item> card; below `lg` the same task
+// is an <app-task-item-mobile> row whose title is a <span>, not an <h3>. Match
+// either so specs do not have to care which design is on screen.
 export const taskCard = (page: Page, taskTitle: string) =>
   page
-    .locator("app-task-item", {
-      has: page.locator("h3", { hasText: taskTitle }),
-    })
+    .locator("app-task-item, app-task-item-mobile")
+    .filter({ hasText: taskTitle })
     .first();
+
+/** The task's title element, whichever design rendered it. */
+export const taskTitle = (page: Page, title: string) =>
+  taskCard(page, title).locator("h3, span.font-medium").filter({ hasText: title }).first();
+
+/**
+ * Opens a task's detail: the bottom sheet on mobile, the expanded card on
+ * desktop. A completed desktop card auto-collapses and hides its actions behind
+ * a chevron, so expand it again when one is present.
+ */
+export async function openTaskDetail(
+  page: Page,
+  isMobile: boolean,
+  title: string
+): Promise<void> {
+  const card = taskCard(page, title);
+  if (!isMobile) {
+    const chevron = card.locator("svg.transition-transform").first();
+    if ((await chevron.count()) === 0) return;
+    await expect(async () => {
+      if (!(await chevron.evaluate((el) => el.classList.contains("rotate-90")))) {
+        await card.locator("h3", { hasText: title }).first().click();
+      }
+      await expect(chevron).toHaveClass(/rotate-90/, { timeout: 2_000 });
+    }).toPass({ timeout: 10_000 });
+    return;
+  }
+  await card.getByRole("button").last().click();
+  await expect(page.locator("app-task-detail-sheet")).toBeVisible();
+}
+
+/** Scopes to the detail sheet on mobile, or to the task card on desktop. */
+export const taskActions = (page: Page, isMobile: boolean, title: string) =>
+  isMobile ? page.locator("app-task-detail-sheet") : taskCard(page, title);
+
+export async function closeTaskDetail(page: Page): Promise<void> {
+  const sheet = page.locator("app-task-detail-sheet");
+  if (await sheet.isVisible().catch(() => false)) {
+    await sheet.getByTitle("Sluiten").click();
+    await expect(sheet).toBeHidden();
+  }
+}
 
 // Sections render collapsed, and reloading tasks (after a create or a status
 // change) can re-collapse them — so keep toggling until the task is on screen.
@@ -96,9 +140,7 @@ export async function showTask(
 ): Promise<void> {
   await expect(async () => {
     await expandSection(page, sectionTitle);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeVisible({
-      timeout: 3_000,
-    });
+    await expect(taskCard(page, taskTitle)).toBeVisible({ timeout: 3_000 });
   }).toPass({ timeout: 25_000 });
 }
 

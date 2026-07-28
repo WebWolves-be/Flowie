@@ -179,6 +179,23 @@ produced horizontal scrolling and content hidden under the notch:
   compact while keeping a 44px target: `.touch-pill` in `styles.scss` keeps the
   button box at 44px and insets the visible border with a `::before`, so status
   buttons read light without getting harder to hit.
+- **Phone and desktop get separate templates, not one responsive template.**
+  Shared logic lives in an abstract `@Directive()` base and each surface renders
+  what suits it. Tasks are the reference implementation:
+  `task-item/task-item-base.ts` holds every input, output, signal and status
+  rule; `app-task-item` is the desktop card, `app-task-item-mobile` a one-row
+  summary (tappable status, title, due date, assignee, subtask progress), and
+  `app-task-detail-sheet` a bottom sheet holding everything the row leaves out.
+  Add behaviour to the base, never to one template.
+- **A bottom sheet's host element needs its own box.** With only `fixed`
+  children the host measures 0×0 and counts as hidden. Put
+  `position: fixed; inset: 0; z-index: …` on `:host` and position the backdrop
+  and panel `absolute` inside it. The z-index must beat the bottom nav's `z-50`,
+  which is rendered later in the document.
+- **Below `lg` the project header and filter scroll with the list**, rendered
+  inside the `.scroll-pane` via `ngTemplateOutlet`; only at `lg` and up are they
+  pinned chrome. Pinned they cost ~170px — half a landscape phone. Section
+  headers are `sticky top-0` so context survives the scroll.
 - Custom utilities live in `tailwind.config.js`: `min-h-touch`, `min-w-touch`,
   `h-dvh`, `min-h-dvh`, `pt-safe-t`, `pb-safe-b`, `pt-header-safe`, `pb-nav-safe`.
 
@@ -281,8 +298,17 @@ needs no workaround inside the suite.
   Both match `button[title="Uitloggen"]`, so **scope to `app-mobile-header`** on
   phones — the sidebar keeps a `display:none` copy in the DOM.
 - Sections *and* tasks are both `.cdk-drag` elements, and a section contains its
-  tasks' `<h3>`s. To target a task row use `.cdk-drag:has(> app-task-item)`,
-  otherwise the locator resolves to the enclosing section.
+  tasks' `<h3>`s. To target a task row use `.cdk-drag:has(> app-task-item)`
+  (`> app-task-item-mobile` below `lg`), otherwise the locator resolves to the
+  enclosing section.
+- A task is `app-task-item` on desktop and `app-task-item-mobile` below `lg`;
+  its title is an `<h3>` there and a `<span>` here. Use `taskCard()`, which
+  matches either. Task actions live in the expanded desktop card or in
+  `app-task-detail-sheet` on mobile — reach them via `openTaskDetail()` +
+  `taskActions()` rather than locating buttons on the row.
+- The detail sheet is itself `role="dialog" aria-modal="true"` and stays open
+  underneath a CDK dialog opened from it, so the `dialog()` helper is scoped to
+  `.cdk-overlay-container`.
 - **Drag handles only exist at `lg` and up.** Below that no `[cdkdraghandle]` is
   rendered and the row itself is the drag target, with `cdkDragStartDelay` making
   the reorder start on a long press. Use the `dragOnto` helper — pass

@@ -9,6 +9,9 @@ import {
   deleteProject,
   deleteTaskType,
   expandSection,
+  openTaskDetail,
+  closeTaskDetail,
+  taskActions,
   showTask,
   sectionRow,
   taskCard,
@@ -65,23 +68,31 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    await page.getByRole("button", { name: "Beginnen" }).first().click();
-    await expect(page.getByRole("button", { name: "Klaar" }).first()).toBeVisible();
-    await page.getByRole("button", { name: "Klaar" }).first().click();
+    // Desktop keeps the actions in the expanded card; mobile moved them into the
+    // detail sheet, so each step opens the task first and closes it afterwards.
+    const act = async (label: string) => {
+      await showTask(page, section, taskTitle);
+      await openTaskDetail(page, isMobile, taskTitle);
+      await taskActions(page, isMobile, taskTitle)
+        .getByRole("button", { name: label })
+        .first()
+        .click();
+      await closeTaskDetail(page);
+    };
 
-    // Reloading tasks after a status change can re-collapse the section, and a
-    // completed task collapses itself (hiding its action buttons) — so re-expand
-    // both before reopening it.
-    await showTask(page, section, taskTitle);
-    await page.locator("h3", { hasText: taskTitle }).first().click();
-    await expect(
-      page.getByRole("button", { name: "Openzetten" }).first()
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Openzetten" }).first().click();
+    await act("Beginnen");
+    await act("Klaar");
+    await act("Openzetten");
 
     // Reopening returns the task to Pending, so its start action is offered again.
-    await expandSection(page, section);
-    await expect(page.getByRole("button", { name: "Beginnen" }).first()).toBeVisible();
+    await showTask(page, section, taskTitle);
+    await openTaskDetail(page, isMobile, taskTitle);
+    await expect(
+      taskActions(page, isMobile, taskTitle)
+        .getByRole("button", { name: "Beginnen" })
+        .first()
+    ).toBeVisible();
+    await closeTaskDetail(page);
 
     await deleteProject(page, isMobile, project);
     await deleteTaskType(page, typeName);
@@ -106,15 +117,25 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    // Deleting is only offered while a task is still pending.
-    const card = taskCard(page, taskTitle);
-    await card.locator('button[title="Acties"]').first().click();
-    // Scoping to the card is what disambiguates this from the project header's
-    // "Project verwijderen"; an exact name would not match because Font Awesome
-    // glyphs are part of the accessible name (e.g. " Verwijderen").
-    await card.getByRole("button", { name: "Verwijderen" }).first().click();
+    // Deleting is only offered while a task is still pending. Desktop hides it
+    // behind the card's kebab; mobile lists it in the detail sheet.
+    if (isMobile) {
+      await openTaskDetail(page, isMobile, taskTitle);
+      await page
+        .locator("app-task-detail-sheet")
+        .getByRole("button", { name: "Verwijderen" })
+        .first()
+        .click();
+    } else {
+      const card = taskCard(page, taskTitle);
+      await card.locator('button[title="Acties"]').first().click();
+      // Scoping to the card disambiguates this from the project header's
+      // "Project verwijderen"; an exact name would not match because Font
+      // Awesome glyphs form part of the accessible name.
+      await card.getByRole("button", { name: "Verwijderen" }).first().click();
+    }
     await confirmDelete(page);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeHidden();
+    await expect(taskCard(page, taskTitle)).toBeHidden();
 
     await deleteProject(page, isMobile, project);
     await deleteTaskType(page, typeName);
@@ -140,9 +161,17 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    const card = taskCard(page, taskTitle);
-    await card.locator('button[title="Acties"]').first().click();
-    await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
+    if (isMobile) {
+      await openTaskDetail(page, isMobile, taskTitle);
+      await page
+        .locator("app-task-detail-sheet")
+        .getByRole("button", { name: "Subtaak" })
+        .click();
+    } else {
+      const card = taskCard(page, taskTitle);
+      await card.locator('button[title="Acties"]').first().click();
+      await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
+    }
     dlg = dialog(page);
     await expect(
       dlg.locator("h2", { hasText: "Nieuwe subtaak aanmaken" })

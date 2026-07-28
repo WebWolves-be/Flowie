@@ -1,6 +1,9 @@
-import { Component, effect, input, output, signal } from "@angular/core";
+import { Component, computed, effect, input, output, signal } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
 import { Company } from "../../models/company.enum";
 import { TaskItemComponent } from "../task-item/task-item.component";
+import { TaskItemMobileComponent } from "../task-item/task-item-mobile.component";
+import { TaskDetailSheetComponent } from "../task-detail-sheet/task-detail-sheet.component";
 import { Project } from "../../models/project.model";
 import { Section } from "../../models/section.model";
 import { Task } from "../../models/task.model";
@@ -11,7 +14,16 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 @Component({
   selector: "app-project-detail",
   standalone: true,
-  imports: [TaskItemComponent, CdkDropList, CdkDrag, CdkDragHandle, CdkScrollable],
+  imports: [
+    NgTemplateOutlet,
+    TaskItemComponent,
+    TaskItemMobileComponent,
+    TaskDetailSheetComponent,
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    CdkScrollable
+  ],
   templateUrl: "./project-detail.component.html",
   styleUrl: "./project-detail.component.scss"
 })
@@ -54,6 +66,17 @@ export class ProjectDetailComponent {
   sectionReorderRequested = output<{ sectionId: number; displayOrder: number }[]>();
 
   expandedSections = signal<Set<number>>(new Set());
+
+  /**
+   * Task shown in the mobile detail sheet, held by id rather than by value so
+   * the sheet re-reads from `tasks()` and reflects status changes made inside it.
+   */
+  selectedTaskId = signal<number | null>(null);
+  selectedTask = computed(() => {
+    const id = this.selectedTaskId();
+    return id === null ? null : this.tasks().find(t => t.taskId === id) ?? null;
+  });
+
   showSectionMenu = signal<number | null>(null);
   showProjectMenu = signal<boolean>(false);
   orderedSections = signal<Section[]>([]);
@@ -79,6 +102,14 @@ export class ProjectDetailComponent {
       }
       this.#orderedTasksBySectionId.set(map);
     });
+  }
+
+  openTaskDetail(taskId: number): void {
+    this.selectedTaskId.set(taskId);
+  }
+
+  closeTaskDetail(): void {
+    this.selectedTaskId.set(null);
   }
 
   toggleProjectMenu(event: Event): void {

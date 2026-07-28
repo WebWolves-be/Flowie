@@ -8,6 +8,8 @@ import {
   openCreateTaskDialog,
   openProject,
   showTask,
+  openTaskDetail,
+  closeTaskDetail,
   uniqueName,
 } from "./helpers";
 
@@ -117,8 +119,14 @@ test.describe("mobile layout", () => {
     await expect(dlg).toBeHidden();
 
     await showTask(page, section, task);
-    await page.locator("h3", { hasText: task }).click();
-    await expect(page.getByRole("button", { name: "Beginnen" })).toBeVisible();
+    // Detail is a bottom sheet on mobile, not an inline expansion.
+    await openTaskDetail(page, true, task);
+    await expect(
+      page.locator("app-task-detail-sheet").getByRole("button", { name: "Beginnen" })
+    ).toBeVisible();
+    await expectNoHorizontalScroll(page, "task detail sheet");
+    await expectNothingClipped(page, "task detail sheet");
+    await closeTaskDetail(page);
     await expectNoHorizontalScroll(page, "expanded task");
     await expectNothingClipped(page, "expanded task");
 
@@ -306,11 +314,10 @@ test.describe("mobile layout", () => {
 
     // Sections are cdkDrag containers too, and a section contains the task's
     // <h3> as a descendant — so the task row has to be identified by having an
-    // <app-task-item> as its direct child, or the locator resolves to the section.
+    // <app-task-item-mobile> as its direct child, or the locator resolves to the
+    // enclosing section.
     const taskRow = (title: string) =>
-      page.locator(".cdk-drag:has(> app-task-item)", {
-        has: page.locator("h3", { hasText: title }),
-      });
+      page.locator(".cdk-drag:has(> app-task-item-mobile)").filter({ hasText: title });
 
     // No grip is rendered below `lg` — it would cost ~28px of every row for an
     // occasional action — so the row itself is the drag target. Assert that,
@@ -331,11 +338,62 @@ test.describe("mobile layout", () => {
     await dragOnto(page, taskRow(second), taskRow(first), { holdMs: 500 });
 
     await expect(async () => {
-      const titles = await page.locator("app-task-item h3").allTextContents();
+      const titles = await page.locator("app-task-item-mobile").allTextContents();
       const firstIdx = titles.findIndex((t) => t.includes(first));
       const secondIdx = titles.findIndex((t) => t.includes(second));
       expect(secondIdx).toBeGreaterThanOrEqual(0);
       expect(secondIdx).toBeLessThan(firstIdx);
     }).toPass({ timeout: 10_000 });
+  });
+
+  test("the project header scrolls away and the section header stays", async ({
+    page,
+  }) => {
+    // Pinned above the list, the project header and filter cost ~170px — half a
+    // landscape viewport — and left the task list a sliver.
+    test.slow();
+
+    const project = uniqueName(UNBREAKABLE);
+    const section = uniqueName("ScrollSectie");
+    const taskType = uniqueName("ScrollType");
+
+    await createTaskType(page, taskType);
+    await createProject(page, project);
+    await openProject(page, project);
+    await createSection(page, true, section);
+
+    for (const suffix of ["Een", "Twee", "Drie"]) {
+      await openCreateTaskDialog(page, true, section);
+      const dlg = dialog(page);
+      await dlg.locator("#title").fill(uniqueName(suffix));
+      await dlg.locator("#taskTypeId").selectOption({ label: taskType });
+      await dlg.locator('button[type="submit"]').click();
+      await expect(dlg).toBeHidden();
+    }
+
+    const pane = page.locator(".scroll-pane").first();
+    await expect(
+      pane.locator("h2", { hasText: project }),
+      "the project title must scroll with the list, not be pinned above it"
+    ).toHaveCount(1);
+
+    const sectionHeader = page
+      .locator("div.sticky", { has: page.locator("h3", { hasText: section }) })
+      .first();
+    expect(
+      await sectionHeader.evaluate((el) => getComputedStyle(el).position),
+      "the section header must stay put while its tasks scroll"
+    ).toBe("sticky");
+
+    // Only meaningful once there is something to scroll; a tall portrait
+    // viewport can hold this project whole.
+    const scrollable = await pane.evaluate(
+      (el) => el.scrollHeight - el.clientHeight
+    );
+    if (scrollable > 60) {
+      await pane.evaluate((el) => el.scrollBy(0, el.scrollHeight));
+      await expect(page.locator("h2", { hasText: project })).not.toBeInViewport();
+      await expect(page.locator("h3", { hasText: section })).toBeInViewport();
+    }
   });
 });
