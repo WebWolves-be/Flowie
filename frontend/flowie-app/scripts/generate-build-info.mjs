@@ -13,8 +13,10 @@ function git(command, fallback) {
   }
 }
 
-const commit = git("rev-parse --short HEAD", "onbekend");
-const branch = git("rev-parse --abbrev-ref HEAD", "onbekend");
+// actions/checkout leaves a detached HEAD, so `rev-parse --abbrev-ref HEAD`
+// returns the literal "HEAD" in CI. GitHub's own variables are the truth there.
+const commit = (process.env.GITHUB_SHA ?? "").slice(0, 7) || git("rev-parse --short HEAD", "onbekend");
+const branch = process.env.GITHUB_REF_NAME ?? git("rev-parse --abbrev-ref HEAD", "onbekend");
 const builtAt = new Date().toISOString();
 
 writeFileSync(
