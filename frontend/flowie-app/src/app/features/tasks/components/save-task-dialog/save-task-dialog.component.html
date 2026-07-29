@@ -1,5 +1,5 @@
 <div class="flex flex-col w-screen max-w-full h-dvh md:h-auto md:w-[32rem] md:max-w-[calc(100vw-2rem)] md:max-h-[90dvh] min-w-0 bg-white rounded-none md:rounded-xl shadow-xl" role="dialog" aria-modal="true">
-  <div class="flex items-center justify-between gap-2 flex-shrink-0 px-4 py-4 pt-safe-t md:pt-6 md:px-6 md:pb-0 border-b border-gray-200 md:border-b-0 min-w-0">
+  <div class="flex items-center justify-between gap-2 flex-shrink-0 px-4 py-4 pt-4-safe-t md:pt-6 md:px-6 md:pb-0 border-b border-gray-200 md:border-b-0 min-w-0">
     <h2 class="text-lg font-semibold text-gray-900 min-w-0 break-words">{{ titleLabel() }}</h2>
     <button type="button" (click)="onCancel()" class="md:hidden flex items-center justify-center flex-shrink-0 min-w-touch min-h-touch -mr-2 p-1 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100">
       <i class="fas fa-times"></i>
@@ -72,6 +72,7 @@
               Deadline
             </label>
             <input id="dueDate" type="date" formControlName="dueDate"
+                   (click)="onOpenDatePicker($event)"
                    class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
                    [class.border-2]="dueDate?.invalid && dueDate?.touched"
                    [class.border-red-500]="dueDate?.invalid && dueDate?.touched"

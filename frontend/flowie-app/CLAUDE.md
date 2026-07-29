@@ -175,10 +175,23 @@ produced horizontal scrolling and content hidden under the notch:
   took the second route: a permanently visible grip costs ~28px of every row for
   an occasional action, so below `lg` the row is dragged directly after a hold
   (`cdkDragStartDelay`) and no grip is rendered at all.
-- **Weight and tap size are separate problems.** A control can be visually
-  compact while keeping a 44px target: `.touch-pill` in `styles.scss` keeps the
-  button box at 44px and insets the visible border with a `::before`, so status
-  buttons read light without getting harder to hit.
+- **Every control on one row is the same box.** A filled button and an outlined
+  one side by side must agree on height, width and top edge — so the filled one
+  carries `border border-transparent` (a border changes flex-basis maths and
+  otherwise makes it 2px narrower), and neither insets its visible edge inside
+  its tap target. An earlier `.touch-pill` helper drew a compact border inside a
+  44px box; it read as two different buttons and has been removed.
+- **A 44px tap target must not resize the glyph inside it.** Quill sizes its
+  toolbar icons to the button's content box, so growing the button without
+  adding padding doubled the weight of B and I against the rest of the form.
+- **`pt-safe-t` overwrites `py-*`, it does not add to it.** A header that needs
+  its own padding *plus* the notch inset uses `pt-4-safe-t`
+  (`calc(1rem + env(safe-area-inset-top))`). Written as `py-4 pt-safe-t` the top
+  padding collapses to zero on every device without a notch, which is what left
+  dialog titles flush against their own header band.
+- **`input[type="date"]` opens its picker from a tap anywhere in the field**
+  (`onOpenDatePicker` → `showPicker()`), and the native indicator is widened
+  below `lg`. Its default target is ~14px in the corner of the field.
 - **Phone and desktop get separate templates, not one responsive template.**
   Shared logic lives in an abstract `@Directive()` base and each surface renders
   what suits it. Tasks are the reference implementation:
@@ -197,7 +210,8 @@ produced horizontal scrolling and content hidden under the notch:
   pinned chrome. Pinned they cost ~170px — half a landscape phone. Section
   headers are `sticky top-0` so context survives the scroll.
 - Custom utilities live in `tailwind.config.js`: `min-h-touch`, `min-w-touch`,
-  `h-dvh`, `min-h-dvh`, `pt-safe-t`, `pb-safe-b`, `pt-header-safe`, `pb-nav-safe`.
+  `h-dvh`, `min-h-dvh`, `pt-safe-t`, `pt-4-safe-t`, `pb-safe-b`,
+  `pt-header-safe`, `pb-nav-safe`.
 
 `e2e/mobile-layout.spec.ts` enforces all of the above at 375×812 and 812×375.
 

@@ -3,6 +3,8 @@ import {
   createProject,
   createSection,
   createTaskType,
+  deleteProject,
+  deleteTaskType,
   dialog,
   dragOnto,
   openCreateTaskDialog,
@@ -344,6 +346,164 @@ test.describe("mobile layout", () => {
       expect(secondIdx).toBeGreaterThanOrEqual(0);
       expect(secondIdx).toBeLessThan(firstIdx);
     }).toPass({ timeout: 10_000 });
+  });
+
+  test("dialog headers are centred and their controls line up", async ({
+    page,
+  }) => {
+    // `pt-safe-t` after `py-4` overwrote the padding rather than adding to it,
+    // so on any device without a notch the title sat flush against the top edge
+    // of its own header band. And a 44px tap target only reads as deliberate if
+    // the glyph inside it keeps its own size — Quill sizes its icons to the
+    // button, so widening the button doubled the weight of B and I.
+    await page.goto("/taken");
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: "Nieuw project" }).click();
+    await expect(dialog(page)).toBeVisible();
+
+    const header = await dialog(page).evaluate((panel) => {
+      const band = panel.firstElementChild as HTMLElement;
+      const title = band.querySelector("h2")!.getBoundingClientRect();
+      const close = band.querySelector("button")!;
+      const closeBox = close.getBoundingClientRect();
+      const b = band.getBoundingClientRect();
+      return {
+        above: title.top - b.top,
+        below: b.bottom - title.bottom,
+        titleCentre: title.top + title.height / 2,
+        closeCentre: closeBox.top + closeBox.height / 2,
+        // Above `md` the dialog is a floating card whose header deliberately
+        // has no bottom padding — the body below supplies it — and the close
+        // button is hidden. That form is not what this test is about.
+        isFullScreen: closeBox.height > 0,
+      };
+    });
+
+    expect(
+      header.above,
+      "no padding above the dialog title"
+    ).toBeGreaterThan(8);
+
+    if (header.isFullScreen) {
+      // A rounded line box can leave the two off by a fraction; anything more is
+      // padding that only exists on one side.
+      expect(
+        Math.abs(header.above - header.below),
+        `dialog title is ${header.above}px from the top and ${header.below}px from the bottom of its header`
+      ).toBeLessThanOrEqual(2);
+      expect(
+        Math.abs(header.titleCentre - header.closeCentre),
+        "the title and the close button are not on the same centre line"
+      ).toBeLessThanOrEqual(1);
+    }
+
+    await page.getByRole("button", { name: "Annuleren" }).click();
+    await expect(dialog(page)).toBeHidden();
+  });
+
+  test("rich text and date controls keep their glyphs in proportion", async ({
+    page,
+  }) => {
+    test.slow();
+
+    const project = uniqueName("GlyphProj");
+    const section = uniqueName("GlyphSectie");
+    await createProject(page, project);
+    await openProject(page, project);
+    await createSection(page, true, section);
+    await openCreateTaskDialog(page, true, section);
+
+    const metrics = await dialog(page).evaluate((panel) => {
+      const button = panel.querySelector(".ql-toolbar.ql-snow button")!;
+      const glyph = button.querySelector("svg")!;
+      const b = button.getBoundingClientRect();
+      const g = glyph.getBoundingClientRect();
+      const date = panel.querySelector('input[type="date"]')!;
+      const indicator = getComputedStyle(date, "::-webkit-calendar-picker-indicator");
+      return {
+        button: b.height,
+        glyph: g.height,
+        indicator: parseFloat(indicator.width) || 0,
+        canOpenPicker: typeof (date as HTMLInputElement & { showPicker?: unknown }).showPicker === "function",
+      };
+    });
+
+    expect(metrics.button, "toolbar button is below the touch minimum").toBeGreaterThanOrEqual(43);
+    expect(
+      metrics.glyph,
+      `toolbar glyph is ${metrics.glyph}px inside a ${metrics.button}px button — it should stay around its natural size`
+    ).toBeLessThanOrEqual(24);
+    // Chrome only; other engines have no such pseudo-element and report 0.
+    if (metrics.indicator > 0) {
+      expect(metrics.indicator, "the calendar button is too small to hit").toBeGreaterThanOrEqual(20);
+    }
+    expect(metrics.canOpenPicker, "showPicker is unavailable, so tapping the field cannot open the picker").toBe(true);
+
+    await page.getByRole("button", { name: "Annuleren" }).click();
+    await expect(dialog(page)).toBeHidden();
+    await deleteProject(page, true, project);
+  });
+
+  test("every action in a sheet row is the same box", async ({ page }) => {
+    // The outlined buttons drew their border inset by 5px, so a filled and an
+    // outlined action side by side were visibly different heights.
+    test.slow();
+
+    const project = uniqueName("RowProj");
+    const section = uniqueName("RowSectie");
+    const task = uniqueName("RowTaak");
+    const taskType = uniqueName("RowType");
+
+    await createTaskType(page, taskType);
+    await createProject(page, project);
+    await openProject(page, project);
+    await createSection(page, true, section);
+    await openCreateTaskDialog(page, true, section);
+    const dlg = dialog(page);
+    await dlg.locator("#title").fill(task);
+    await dlg.locator("#taskTypeId").selectOption({ label: taskType });
+    await dlg.locator('button[type="submit"]').click();
+    await expect(dlg).toBeHidden();
+
+    await showTask(page, section, task);
+    await openTaskDetail(page, true, task);
+
+    const sheet = page.locator("app-task-detail-sheet");
+    // Pending offers one action; starting it puts a filled and an outlined
+    // button on the same row, which is where they used to disagree.
+    await sheet.getByRole("button", { name: "Beginnen" }).click();
+    await expect(sheet.getByRole("button", { name: "Wachten op" })).toBeVisible();
+
+    const rows = await sheet.evaluate((el) => {
+      const footer = el.querySelector('[role="dialog"]')!.lastElementChild!;
+      return [...footer.children].map((row) =>
+        [...row.querySelectorAll("button")].map((b) => {
+          const r = b.getBoundingClientRect();
+          return { label: b.textContent!.trim(), top: r.top, height: r.height, width: r.width };
+        })
+      );
+    });
+
+    for (const row of rows) {
+      for (const button of row) {
+        expect(
+          Math.abs(button.height - row[0].height),
+          `"${button.label}" is ${button.height}px tall next to "${row[0].label}" at ${row[0].height}px`
+        ).toBeLessThanOrEqual(0.5);
+        expect(
+          Math.abs(button.top - row[0].top),
+          `"${button.label}" does not share a top edge with "${row[0].label}"`
+        ).toBeLessThanOrEqual(0.5);
+        expect(
+          Math.abs(button.width - row[0].width),
+          `"${button.label}" is ${button.width}px wide next to "${row[0].label}" at ${row[0].width}px`
+        ).toBeLessThanOrEqual(0.5);
+      }
+    }
+
+    await closeTaskDetail(page);
+    await deleteProject(page, true, project);
+    await deleteTaskType(page, taskType);
   });
 
   test("the project header scrolls away and the section header stays", async ({
