@@ -88,3 +88,30 @@ whatever you touched after every turn — fix what it reports immediately.
 - **Backend change?** → Test via curl / Swagger. See `backend/CLAUDE.md` for details.
 - **Frontend change?** → Test via Playwright CLI or Chrome DevTools MCP. See `frontend/flowie-app/CLAUDE.md` for details.
 - **Full-stack change?** → Test both.
+
+---
+
+## Versioning a release
+
+The app shows one number — a plain semver like `1.0.0` — under Settings →
+Versie. It comes from **`frontend/flowie-app/package.json`**, and nothing else
+feeds it.
+
+**To release, bump it once on the branch you are merging:**
+
+```bash
+cd frontend/flowie-app && npm version patch --no-git-tag-version
+```
+
+`patch` for fixes, `minor` for new features, `major` for a breaking change.
+Then commit `package.json` together with the regenerated `src/build-info.ts`
+(`node scripts/generate-build-info.mjs`).
+
+- **Not every PR needs a bump.** The version identifies a *release*, not a
+  commit: bump when you ship something a user would notice, and name the version
+  in the PR description. A PR that only touches tests or docs does not need one.
+- The version is display-only. The service worker detects updates by comparing
+  content hashes in `ngsw.json`, so an update still reaches users whether or not
+  the number changed.
+- Mechanics of the generated file live in `frontend/flowie-app/CLAUDE.md` under
+  "PWA versioning".

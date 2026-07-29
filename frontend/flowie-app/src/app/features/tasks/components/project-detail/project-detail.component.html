@@ -45,15 +45,25 @@
             }
           </div>
 
-          <div class="lg:hidden relative flex-shrink-0">
+          <div class="lg:hidden flex-shrink-0">
             <button
+              cdkOverlayOrigin
+              #projectMenuTrigger="cdkOverlayOrigin"
               (click)="toggleProjectMenu($event)"
               class="flex items-center justify-center min-w-touch min-h-touch bg-teal-600 hover:bg-teal-500 text-white rounded-full focus:outline-none"
               title="Acties">
               <i class="fas fa-ellipsis-vertical"></i>
             </button>
-            @if (showProjectMenu()) {
-              <div class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="projectMenuTrigger"
+              [cdkConnectedOverlayOpen]="showProjectMenu()"
+              [cdkConnectedOverlayPositions]="MENU_POSITIONS"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+              (backdropClick)="showProjectMenu.set(false)"
+              (detach)="showProjectMenu.set(false)">
+              <div class="w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                 <button
                   (click)="onCreateSection(); showProjectMenu.set(false)"
                   class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
@@ -73,7 +83,7 @@
                   Project verwijderen
                 </button>
               </div>
-            }
+            </ng-template>
           </div>
         </div>
         <div class="hidden lg:flex flex-col lg:flex-row gap-3 flex-shrink-0">
@@ -166,16 +176,19 @@
         </div>
       </div>
     } @else {
-      <div class="space-y-3" cdkDropList (cdkDropListDropped)="onSectionDrop($event)">
+      <div class="space-y-2 lg:space-y-3" cdkDropList (cdkDropListDropped)="onSectionDrop($event)">
         @for (section of orderedSections(); track section.sectionId) {
-          <!-- Below `lg` the section is not a card: its header sits directly on
-               the grey background as a sticky divider and the tasks form one
-               grouped list. That removes a nesting level — and its border,
-               padding and shadow — from the narrowest screen we support. -->
-          <div class="min-w-0 lg:border lg:border-gray-200 lg:rounded-lg lg:bg-white" cdkDrag
+          <!-- An open menu drops over the sections below it, and those come
+               later in the document — with everything on the same z-index the
+               later section wins and clips the menu. Lift the whole section
+               while its own menu is open. -->
+          <div class="min-w-0 border border-gray-200 rounded-lg bg-white"
+               cdkDrag
                [cdkDragStartDelay]="isCompact() ? DRAG_HOLD_MS : 0">
             <div
-              class="flex items-center justify-between gap-2 py-2 px-1 lg:p-4 cursor-pointer lg:hover:bg-gray-50 transition-colors min-w-0 sticky top-0 z-10 bg-gray-50 lg:static lg:bg-transparent"
+              class="flex items-center justify-between gap-2 px-3 py-2.5 lg:p-4 cursor-pointer lg:hover:bg-gray-50 transition-colors min-w-0 sticky top-0 z-10 bg-white rounded-t-lg lg:static"
+              [class.border-b]="expandedSections().has(section.sectionId)"
+              [class.border-gray-100]="expandedSections().has(section.sectionId)"
               (click)="toggleSection(section.sectionId)">
               <div class="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
                 <!-- A permanently visible grip costs ~28px of every row on a phone
@@ -190,11 +203,20 @@
                 }
                 <i class="fas fa-chevron-right transition-transform text-gray-500 flex-shrink-0" [class.rotate-90]="expandedSections().has(section.sectionId)"></i>
                 <h3 class="font-medium text-gray-900 min-w-0 break-words lg:truncate">{{ section.title }}</h3>
-                @if (section.taskCount > 0) {
-                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
+                <!-- Always rendered: an empty section used to show nothing at
+                     all next to its title, which read as a section still
+                     loading rather than one with no tasks in it. -->
+                <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap"
+                      [class.text-gray-500]="section.taskCount > 0"
+                      [class.bg-gray-100]="section.taskCount > 0"
+                      [class.text-gray-400]="section.taskCount === 0"
+                      [class.bg-gray-50]="section.taskCount === 0">
+                  @if (section.taskCount > 0) {
                     {{ section.completedTaskCount }} / {{ section.taskCount }} taken
-                  </span>
-                }
+                  } @else {
+                    Geen taken
+                  }
+                </span>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0" (click)="$event.stopPropagation()">
                 <button
@@ -213,15 +235,25 @@
                   class="hidden lg:block text-red-500 hover:text-red-700 p-1">
                   <i class="fas fa-trash"></i>
                 </button>
-                <div class="lg:hidden relative">
+                <div class="lg:hidden">
                   <button
+                    cdkOverlayOrigin
+                    #sectionMenuTrigger="cdkOverlayOrigin"
                     (click)="toggleSectionMenu($event, section.sectionId)"
                     class="flex items-center justify-center min-w-touch min-h-touch text-gray-500 hover:text-gray-700 rounded-full focus:outline-none"
                     title="Acties">
                     <i class="fas fa-ellipsis-vertical"></i>
                   </button>
-                  @if (showSectionMenu() === section.sectionId) {
-                    <div class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+                  <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="sectionMenuTrigger"
+                    [cdkConnectedOverlayOpen]="showSectionMenu() === section.sectionId"
+                    [cdkConnectedOverlayPositions]="MENU_POSITIONS"
+                    [cdkConnectedOverlayHasBackdrop]="true"
+                    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                    (backdropClick)="showSectionMenu.set(null)"
+                    (detach)="showSectionMenu.set(null)">
+                    <div class="w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                       <button
                         (click)="onCreateTaskInSection($event, section.sectionId); showSectionMenu.set(null)"
                         class="w-full text-left px-4 py-3 min-h-touch text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
@@ -241,14 +273,14 @@
                         Verwijderen
                       </button>
                     </div>
-                  }
+                  </ng-template>
                 </div>
               </div>
             </div>
             @if (expandedSections().has(section.sectionId)) {
-              <div class="lg:border-t lg:border-gray-200 p-0 lg:p-4 min-w-0">
+              <div class="px-2 py-2 lg:p-4 lg:border-t lg:border-gray-200 min-w-0">
                 @if (section.description) {
-                  <div class="mb-4 pb-4 border-b border-dashed border-gray-200 min-w-0">
+                  <div class="px-1 pb-2 mb-2 border-b border-gray-100 min-w-0 lg:px-0 lg:pb-4 lg:mb-4">
                     <p class="text-sm text-gray-600 description-content" [innerHTML]="section.description"></p>
                   </div>
                 }
@@ -262,7 +294,7 @@
                     <p class="text-sm text-gray-500 text-center py-2 lg:py-4">Geen taken in deze sectie</p>
                   } @else {
                     <div
-                      class="min-w-0 lg:space-y-3 rounded-lg bg-white divide-y divide-gray-100 lg:bg-transparent lg:rounded-none lg:divide-y-0"
+                      class="min-w-0 divide-y divide-gray-100 lg:space-y-3 lg:divide-y-0"
                       cdkDropList
                       (cdkDropListDropped)="onTaskDrop($event, section.sectionId)">
                       @for (task of getTasksForSection(section.sectionId); track task.taskId) {
@@ -271,7 +303,7 @@
                           @if (!isCompact()) {
                             <div cdkDragHandle
                                  title="Verplaatsen"
-                                 class="flex-shrink-0 flex items-center justify-center w-6 mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                 class="flex-shrink-0 flex items-center justify-center w-6 mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                               </svg>

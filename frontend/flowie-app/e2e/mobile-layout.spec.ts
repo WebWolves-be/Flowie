@@ -9,6 +9,7 @@ import {
   dragOnto,
   openCreateTaskDialog,
   openProject,
+  sectionRow,
   showTask,
   openTaskDetail,
   closeTaskDetail,
@@ -504,6 +505,57 @@ test.describe("mobile layout", () => {
     await closeTaskDetail(page);
     await deleteProject(page, true, project);
     await deleteTaskType(page, taskType);
+  });
+
+  test("a section menu opens above the sections below it and taps away", async ({
+    page,
+  }) => {
+    // The menu drops over the next section, and that section comes later in the
+    // document — with both on the same z-index the later one won, so the menu
+    // was drawn behind it and its top items were unclickable.
+    test.slow();
+
+    const project = uniqueName("MenuProj");
+    const first = uniqueName("EersteSectie");
+    const second = uniqueName("TweedeSectie");
+
+    await createProject(page, project);
+    await openProject(page, project);
+    await createSection(page, true, first);
+    await createSection(page, true, second);
+
+    // "Sectie succesvol aangemaakt" sits over the top of a 375px-tall landscape
+    // screen; let it go before asking what is painted where.
+    await expect(
+      page.locator("app-notification-container [role='alert'], app-notification-container button")
+    ).toHaveCount(0, { timeout: 15_000 });
+
+    await sectionRow(page, first).locator('button[title="Acties"]').first().click();
+    const item = page.getByRole("button", { name: "Taak toevoegen" });
+    await expect(item).toBeVisible();
+
+    // toBeVisible() does not notice an element painted underneath another one,
+    // so ask the document what is actually on top at the item's centre.
+    const hit = await item.evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+      return {
+        onTop: top !== null && (el === top || el.contains(top)),
+        covering: top
+          ? `<${top.tagName.toLowerCase()} class="${(top.getAttribute("class") || "").slice(0, 60)}">`
+          : "nothing",
+      };
+    });
+    expect(hit.onTop, `${hit.covering} is painted over the open menu`).toBe(true);
+
+    // A phone has no Escape key in reach, so tapping anywhere else must dismiss.
+    // That tap lands on the overlay's backdrop, which is what absorbs it.
+    // Aim at a corner: the backdrop covers the whole viewport, and its centre is
+    // where the menu itself sits.
+    await page.locator(".cdk-overlay-backdrop").click({ position: { x: 5, y: 5 } });
+    await expect(item).toBeHidden();
+
+    await deleteProject(page, true, project);
   });
 
   test("the project header scrolls away and the section header stays", async ({

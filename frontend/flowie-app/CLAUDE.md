@@ -247,30 +247,24 @@ without navigating. E2E remains the default; unit tests are the exception.
 
 ## PWA versioning
 
-- Nothing is bumped by hand. The Angular service worker detects updates by
-  comparing content hashes in `ngsw.json`; `package.json`'s `version` is unused.
-- `buildInfo.version` is the **build timestamp in UTC** (`2026.07.28-1735`), so it
-  sorts chronologically and can be read aloud to a user over the phone. The
-  `Gebouwd op` row renders in UTC too (`date: … : "UTC"`) so the two never
-  disagree. `buildInfo.commit` is kept as a muted `Code` row for debugging.
-- `src/build-info.ts` is **generated** by `scripts/generate-build-info.mjs` and
-  committed with placeholder values (`version: "dev"`). `npm run build` stamps the
-  real values via the `prebuild` hook. It stays committed because CI starts the
-  app with `npx ng serve` directly, which skips npm lifecycle hooks — if the file
-  were gitignored the CI build would not compile.
-- The generator prefers `GITHUB_SHA` / `GITHUB_REF_NAME`: `actions/checkout`
-  leaves a detached HEAD, so git's own branch lookup returns the literal `HEAD`.
-- After a production build the file is dirty with a machine-specific stamp.
-  `git checkout src/build-info.ts` to restore the placeholder before committing.
+- `package.json`'s `version` is the only source. See "Versioning a release" in
+  the root `CLAUDE.md` for when and how to bump it.
+- `src/build-info.ts` is **generated** from it by
+  `scripts/generate-build-info.mjs`, which `npm run build` runs via `prebuild`.
+  Because it only ever contains the version, a build is byte-identical unless the
+  version changed — no dirty working tree afterwards, and no `git checkout` dance.
+  It stays committed because CI starts the app with `npx ng serve`, which skips
+  npm lifecycle hooks; gitignored, the CI build would not compile.
+- Never hand-edit `src/build-info.ts` — the next build overwrites it.
+- Settings → Versie shows that number and nothing else. Build date, commit hash
+  and branch were dropped: they described the build machine rather than the
+  release, and the branch is a detached `HEAD` in CI anyway.
 - `PwaUpdateService` (`core/services/`) prompts via `NotificationService.showAction`
   when `SwUpdate` reports `VERSION_READY`, polls every 30 minutes, and handles
   `unrecoverable`. `AppComponent`'s constructor calls `initialize()`.
 - `NotificationService.showAction()` creates a **sticky** toast (no duration) with
   a button. Use it for anything the user must act on; the `show*` helpers all
   auto-dismiss.
-- Settings has a `Versie` tab showing version/date/commit plus a manual check.
-  The branch was deliberately dropped: it means nothing to a user and is
-  `HEAD` in CI anyway.
 
 ## E2E Tests Are Mandatory
 

@@ -11,7 +11,7 @@
     [title]="statusLabel()"
     (click)="onStatusTap($event)">
     <span
-      class="progress-circle flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold"
+      class="progress-circle flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold"
       [ngClass]="progressClass()">
       @if (hasSubtasks()) {
         {{ taskProgress() }}%
@@ -20,7 +20,7 @@
           'fa-check': statusIcon() === 'check',
           'fa-question': statusIcon() === 'ongoing',
           'fa-clock': statusIcon() === 'waiting',
-          'fa-circle-notch': statusIcon() === 'pending'
+          'fa-times': statusIcon() === 'pending'
         }"></i>
       }
     </span>

@@ -50,12 +50,29 @@ export abstract class TaskItemBase implements OnChanges {
     this.subtaskReorderRequested.emit(subtasks.map((s, i) => ({ taskId: s.taskId, displayOrder: i })));
   }
 
-  isPending = computed(() => this.task().status === TaskStatus.Pending);
-  isOngoing = computed(() => this.task().status === TaskStatus.Ongoing);
-  isDone = computed(() => this.task().status === TaskStatus.Done);
-  isWaitingOn = computed(() => this.task().status === TaskStatus.WaitingOn);
-
   hasSubtasks = computed(() => (this.task().subtasks?.length ?? 0) > 0);
+
+  /**
+   * A task that has subtasks takes its status from them, not from its own
+   * column: it is only done once every subtask is done. Its own status is
+   * whatever it happened to be before the subtasks existed, so trusting it
+   * showed a finished task the moment a single subtask went green.
+   */
+  effectiveStatus = computed<TaskStatus>(() => {
+    const task = this.task();
+    const subtasks = task.subtasks ?? [];
+    if (subtasks.length === 0) return task.status;
+
+    if (subtasks.every(subtask => this.isSubtaskDone(subtask))) return TaskStatus.Done;
+    if (subtasks.some(subtask => subtask.status === TaskStatus.WaitingOn)) return TaskStatus.WaitingOn;
+    if (subtasks.some(subtask => subtask.status !== TaskStatus.Pending)) return TaskStatus.Ongoing;
+    return TaskStatus.Pending;
+  });
+
+  isPending = computed(() => this.effectiveStatus() === TaskStatus.Pending);
+  isOngoing = computed(() => this.effectiveStatus() === TaskStatus.Ongoing);
+  isDone = computed(() => this.effectiveStatus() === TaskStatus.Done);
+  isWaitingOn = computed(() => this.effectiveStatus() === TaskStatus.WaitingOn);
 
   taskProgress = computed(() => {
     const task = this.task();
@@ -69,7 +86,7 @@ export abstract class TaskItemBase implements OnChanges {
   });
 
   progressClass = computed(() => {
-    const status = this.task().status;
+    const status = this.effectiveStatus();
     if (status === TaskStatus.Done) return "progress-100";
     if (status === TaskStatus.Pending) return "progress-0";
     if (status === TaskStatus.WaitingOn) return "progress-waiting";
@@ -77,7 +94,7 @@ export abstract class TaskItemBase implements OnChanges {
   });
 
   statusIcon = computed(() => {
-    const status = this.task().status;
+    const status = this.effectiveStatus();
     if (status === TaskStatus.Done) return "check";
     if (status === TaskStatus.Pending) return "pending";
     if (status === TaskStatus.WaitingOn) return "waiting";
@@ -86,7 +103,7 @@ export abstract class TaskItemBase implements OnChanges {
 
   /** Dutch label for the current status, used where there is no room for buttons. */
   statusLabel = computed(() => {
-    const status = this.task().status;
+    const status = this.effectiveStatus();
     if (status === TaskStatus.Done) return "Klaar";
     if (status === TaskStatus.Pending) return "Openstaand";
     if (status === TaskStatus.WaitingOn) return "Wachten op";

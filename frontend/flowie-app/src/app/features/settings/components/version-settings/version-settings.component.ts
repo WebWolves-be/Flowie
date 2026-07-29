@@ -1,12 +1,10 @@
 import { Component, inject, signal } from "@angular/core";
-import { DatePipe } from "@angular/common";
 import { buildInfo } from "../../../../../build-info";
 import { PwaUpdateService } from "../../../../core/services/pwa-update.service";
 
 @Component({
   selector: "app-version-settings",
   standalone: true,
-  imports: [DatePipe],
   template: `
     <div class="min-w-0">
       <h2 class="text-base font-semibold text-gray-900">Versie</h2>
@@ -15,21 +13,9 @@ import { PwaUpdateService } from "../../../../core/services/pwa-update.service";
       </p>
 
       <dl class="mt-4 divide-y divide-gray-200 border-y border-gray-200">
-        <div class="flex items-start justify-between gap-4 py-3 min-w-0">
+        <div class="flex items-center justify-between gap-4 py-3 min-w-0">
           <dt class="text-sm text-gray-600 flex-shrink-0">Versie</dt>
           <dd id="buildVersion" class="text-sm font-mono font-semibold text-gray-900 min-w-0 break-words text-right">{{ version }}</dd>
-        </div>
-        <div class="flex items-start justify-between gap-4 py-3 min-w-0">
-          <dt class="text-sm text-gray-600 flex-shrink-0">Gebouwd op</dt>
-          <dd id="buildDate" class="text-sm text-gray-900 min-w-0 break-words text-right">
-            {{ builtAt | date: "d MMMM y, HH:mm" : "UTC" : "nl" }} UTC
-          </dd>
-        </div>
-        <div class="flex items-start justify-between gap-4 py-3 min-w-0">
-          <dt class="text-sm text-gray-600 flex-shrink-0">Code</dt>
-          <dd id="buildCommit" class="text-sm font-mono text-gray-500 min-w-0 break-words text-right">
-            {{ commit }}
-          </dd>
         </div>
       </dl>
 
@@ -47,8 +33,6 @@ export class VersionSettingsComponent {
   #updates = inject(PwaUpdateService);
 
   version = buildInfo.version;
-  commit = buildInfo.commit;
-  builtAt = buildInfo.builtAt;
 
   isChecking = signal(false);
 
