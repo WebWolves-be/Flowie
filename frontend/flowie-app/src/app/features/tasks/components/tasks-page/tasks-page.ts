@@ -87,9 +87,9 @@ export class TasksPage implements OnInit {
 
   selectedProjectId = signal<number | null>(null);
   showOnlyMyTasks = signal<boolean>(false);
-  mobileView = signal<'list' | 'detail'>('list');
+  compactView = signal<'list' | 'detail'>('list');
 
-  isMobile = this.#breakpointService.isMobile;
+  isCompact = this.#breakpointService.isCompact;
 
   selectedProject = computed(() => {
     const id = this.selectedProjectId();
@@ -97,13 +97,13 @@ export class TasksPage implements OnInit {
   });
 
   showProjectList = computed(() => {
-    if (!this.isMobile()) return true;
-    return this.mobileView() === 'list';
+    if (!this.isCompact()) return true;
+    return this.compactView() === 'list';
   });
 
   showProjectDetail = computed(() => {
-    if (!this.isMobile()) return true;
-    return this.mobileView() === 'detail' && this.selectedProjectId() !== null;
+    if (!this.isCompact()) return true;
+    return this.compactView() === 'detail' && this.selectedProjectId() !== null;
   });
 
   constructor() {
@@ -148,15 +148,15 @@ export class TasksPage implements OnInit {
         this.#taskFacade.getSections(idNum);
         this.#loadTasksWithDelay(idNum, false);
 
-        if (this.isMobile()) {
-          this.mobileView.set('detail');
+        if (this.isCompact()) {
+          this.compactView.set('detail');
         }
       } else {
         this.#taskFacade.clearSections();
         this.#taskFacade.clearTasks();
 
         this.selectedProjectId.set(null);
-        this.mobileView.set('list');
+        this.compactView.set('list');
       }
     });
   }
@@ -183,13 +183,13 @@ export class TasksPage implements OnInit {
 
   onProjectSelected(projectId: number) {
     void this.#router.navigate(["/taken/project", projectId]);
-    if (this.isMobile()) {
-      this.mobileView.set('detail');
+    if (this.isCompact()) {
+      this.compactView.set('detail');
     }
   }
 
   onBackToProjectList() {
-    this.mobileView.set('list');
+    this.compactView.set('list');
     void this.#router.navigate(["/taken"]);
   }
 

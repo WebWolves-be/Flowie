@@ -11,6 +11,42 @@ env:
   NODE_VERSION: '20.x'
 
 jobs:
+  path-collisions:
+    name: Path case collisions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # CI runs on a case-sensitive filesystem, so two tracked paths like
+      # CLAUDE.md and claude.md coexist happily here while silently clobbering
+      # each other on a Windows or macOS checkout — the working tree ends up
+      # with one file's content and git reports the other as modified.
+      - name: Fail on tracked paths that differ only by case
+        run: |
+          git ls-files | awk '
+            {
+              key = tolower($0)
+              group[key] = (key in group) ? group[key] "\n  " $0 : "  " $0
+              count[key]++
+            }
+            END {
+              found = 0
+              for (key in count) {
+                if (count[key] > 1) {
+                  if (!found) print "Tracked paths that differ only by case:"
+                  print group[key]
+                  found = 1
+                }
+              }
+              if (found) {
+                print ""
+                print "These overwrite each other on case-insensitive filesystems."
+                print "Keep one path and remove the other with: git rm --cached <path>"
+                exit 1
+              }
+              print "No case-colliding tracked paths."
+            }
+          '
+
   backend-tests:
     name: Backend unit tests
     runs-on: ubuntu-latest

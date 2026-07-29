@@ -1,0 +1,13 @@
+@use "../task-item/task-item.component.scss";
+
+/* The backdrop and panel are positioned against the host rather than the
+   viewport, so the host itself has a box. With only fixed children it measured
+   0×0, which reads as hidden to assistive tech and to Playwright.
+   Above the bottom nav's z-50: this is modal, and the nav is rendered later in
+   the document, so an equal z-index would bury the sheet's actions. */
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: block;
+}

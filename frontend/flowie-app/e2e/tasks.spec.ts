@@ -1,36 +1,23 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import {
+  confirmDelete,
   createProject,
   createSection,
+  createTaskType,
+  dragOnto,
   openCreateTaskDialog,
   deleteProject,
-  confirmDelete,
+  deleteTaskType,
   expandSection,
+  openTaskDetail,
+  closeTaskDetail,
+  taskActions,
   showTask,
   sectionRow,
   taskCard,
   uniqueName,
   dialog,
 } from "./helpers";
-
-async function createTaskType(page: Page, name: string): Promise<void> {
-  await page.goto("/instellingen");
-  await page.getByRole("button", { name: "Toevoegen" }).click();
-  const dlg = dialog(page);
-  await dlg.locator("#name").fill(name);
-  await dlg.locator('button[type="submit"]').click();
-  await expect(dlg).toBeHidden();
-  await expect(page.locator("td", { hasText: name })).toBeVisible();
-}
-
-async function deleteTaskType(page: Page, name: string): Promise<void> {
-  await page.goto("/instellingen");
-  await page
-    .locator("tr", { hasText: name })
-    .getByRole("button", { name: "Verwijderen" })
-    .click();
-  await confirmDelete(page);
-}
 
 test.describe("tasks", () => {
   test("section CRUD inside a project", async ({ page, isMobile }) => {
@@ -81,23 +68,31 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    await page.getByRole("button", { name: "Beginnen" }).first().click();
-    await expect(page.getByRole("button", { name: "Klaar" }).first()).toBeVisible();
-    await page.getByRole("button", { name: "Klaar" }).first().click();
+    // Desktop keeps the actions in the expanded card; mobile moved them into the
+    // detail sheet, so each step opens the task first and closes it afterwards.
+    const act = async (label: string) => {
+      await showTask(page, section, taskTitle);
+      await openTaskDetail(page, isMobile, taskTitle);
+      await taskActions(page, isMobile, taskTitle)
+        .getByRole("button", { name: label })
+        .first()
+        .click();
+      await closeTaskDetail(page);
+    };
 
-    // Reloading tasks after a status change can re-collapse the section, and a
-    // completed task collapses itself (hiding its action buttons) — so re-expand
-    // both before reopening it.
-    await showTask(page, section, taskTitle);
-    await page.locator("h3", { hasText: taskTitle }).first().click();
-    await expect(
-      page.getByRole("button", { name: "Openzetten" }).first()
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Openzetten" }).first().click();
+    await act("Beginnen");
+    await act("Klaar");
+    await act("Openzetten");
 
     // Reopening returns the task to Pending, so its start action is offered again.
-    await expandSection(page, section);
-    await expect(page.getByRole("button", { name: "Beginnen" }).first()).toBeVisible();
+    await showTask(page, section, taskTitle);
+    await openTaskDetail(page, isMobile, taskTitle);
+    await expect(
+      taskActions(page, isMobile, taskTitle)
+        .getByRole("button", { name: "Beginnen" })
+        .first()
+    ).toBeVisible();
+    await closeTaskDetail(page);
 
     await deleteProject(page, isMobile, project);
     await deleteTaskType(page, typeName);
@@ -122,15 +117,25 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    // Deleting is only offered while a task is still pending.
-    const card = taskCard(page, taskTitle);
-    await card.locator('button[title="Acties"]').first().click();
-    // Scoping to the card is what disambiguates this from the project header's
-    // "Project verwijderen"; an exact name would not match because Font Awesome
-    // glyphs are part of the accessible name (e.g. " Verwijderen").
-    await card.getByRole("button", { name: "Verwijderen" }).first().click();
+    // Deleting is only offered while a task is still pending. Desktop hides it
+    // behind the card's kebab; mobile lists it in the detail sheet.
+    if (isMobile) {
+      await openTaskDetail(page, isMobile, taskTitle);
+      await page
+        .locator("app-task-detail-sheet")
+        .getByRole("button", { name: "Verwijderen" })
+        .first()
+        .click();
+    } else {
+      const card = taskCard(page, taskTitle);
+      await card.locator('button[title="Acties"]').first().click();
+      // Scoping to the card disambiguates this from the project header's
+      // "Project verwijderen"; an exact name would not match because Font
+      // Awesome glyphs form part of the accessible name.
+      await card.getByRole("button", { name: "Verwijderen" }).first().click();
+    }
     await confirmDelete(page);
-    await expect(page.locator("h3", { hasText: taskTitle })).toBeHidden();
+    await expect(taskCard(page, taskTitle)).toBeHidden();
 
     await deleteProject(page, isMobile, project);
     await deleteTaskType(page, typeName);
@@ -156,9 +161,17 @@ test.describe("tasks", () => {
     await expect(dlg).toBeHidden();
     await showTask(page, section, taskTitle);
 
-    const card = taskCard(page, taskTitle);
-    await card.locator('button[title="Acties"]').first().click();
-    await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
+    if (isMobile) {
+      await openTaskDetail(page, isMobile, taskTitle);
+      await page
+        .locator("app-task-detail-sheet")
+        .getByRole("button", { name: "Subtaak" })
+        .click();
+    } else {
+      const card = taskCard(page, taskTitle);
+      await card.locator('button[title="Acties"]').first().click();
+      await page.getByRole("button", { name: "Subtaak toevoegen" }).click();
+    }
     dlg = dialog(page);
     await expect(
       dlg.locator("h2", { hasText: "Nieuwe subtaak aanmaken" })
@@ -179,7 +192,9 @@ test.describe("tasks", () => {
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, "CDK drag handles are desktop-only interactions");
+    // Touch reordering is covered by mobile-layout.spec.ts; this exercises the
+    // hover-revealed desktop handle.
+    test.skip(isMobile, "Covered for touch by mobile-layout.spec.ts");
     const project = uniqueName("DragProj");
     const first = uniqueName("Eerste");
     const second = uniqueName("Tweede");
@@ -189,26 +204,22 @@ test.describe("tasks", () => {
     await createSection(page, false, first);
     await createSection(page, false, second);
 
-    const secondHandle = page
-      .locator(".cdk-drag", { has: page.locator("h3", { hasText: second }) })
-      .locator("div[cdkdraghandle], div.cursor-grab")
+    const secondHandle = sectionRow(page, second)
+      .locator("[cdkdraghandle]")
       .first();
-    const firstSection = page
-      .locator(".cdk-drag", { has: page.locator("h3", { hasText: first }) })
-      .first();
+    const firstSection = sectionRow(page, first);
 
-    const from = await secondHandle.boundingBox();
-    const to = await firstSection.boundingBox();
-    expect(from && to).toBeTruthy();
-    await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(to!.x + to!.width / 2, to!.y + 5, { steps: 12 });
-    await page.mouse.up();
+    await dragOnto(page, secondHandle, firstSection);
 
-    const titles = await page.locator(".cdk-drag h3").allTextContents();
-    const firstIdx = titles.findIndex((t) => t.includes(first));
-    const secondIdx = titles.findIndex((t) => t.includes(second));
-    expect(secondIdx).toBeLessThan(firstIdx);
+    // The reorder is persisted asynchronously, so poll rather than reading the
+    // DOM once immediately after the drop.
+    await expect(async () => {
+      const titles = await page.locator(".cdk-drag h3").allTextContents();
+      const firstIdx = titles.findIndex((t) => t.includes(first));
+      const secondIdx = titles.findIndex((t) => t.includes(second));
+      expect(secondIdx).toBeGreaterThanOrEqual(0);
+      expect(secondIdx).toBeLessThan(firstIdx);
+    }).toPass({ timeout: 10_000 });
 
     await deleteProject(page, false, project);
   });

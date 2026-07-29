@@ -5,6 +5,7 @@ import { BottomNavComponent } from './core/components/bottom-nav/bottom-nav.comp
 import { MobileHeaderComponent } from './core/components/mobile-header/mobile-header.component';
 import { AuthFacade } from './core/facades/auth.facade';
 import { NotificationService } from './core/services/notification.service';
+import { PwaUpdateService } from './core/services/pwa-update.service';
 import { catchError, EMPTY } from 'rxjs';
 
 @Component({
@@ -17,6 +18,7 @@ import { catchError, EMPTY } from 'rxjs';
 export class AppComponent {
   #authFacade = inject(AuthFacade);
   #notificationService = inject(NotificationService);
+  #pwaUpdates = inject(PwaUpdateService);
 
   isAuthenticated = this.#authFacade.isAuthenticated;
   currentUser = this.#authFacade.currentUser;
@@ -32,6 +34,10 @@ export class AppComponent {
 
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   });
+
+  constructor() {
+    this.#pwaUpdates.initialize();
+  }
 
   onLogout(): void {
     this.#authFacade.logout()

@@ -61,7 +61,7 @@ test.describe("auth", () => {
   });
 
   test("logout returns to login (desktop sidebar)", async ({ page, isMobile, request }) => {
-    test.skip(isMobile, "Logout button lives in the desktop sidebar (hidden < lg)");
+    test.skip(isMobile, "Covered for phones by 'logout from the mobile header'");
     // Logging out bumps the user's TokenVersion server-side, killing every other
     // session of that user — so this test gets its own throwaway account instead
     // of invalidating the shared e2e user's storageState.
@@ -86,6 +86,41 @@ test.describe("auth", () => {
       timeout: 15_000,
     });
     await page.locator('button[title="Uitloggen"]').click();
+    await page.waitForURL((url) => url.toString().includes("/login"), {
+      timeout: 10_000,
+    });
+  });
+
+  test("logout from the mobile header", async ({ page, isMobile, request }) => {
+    test.skip(!isMobile, "Covered for wide screens by the sidebar logout test");
+    // Phones have no sidebar, so signing out has to be reachable from the
+    // mobile header's account menu. Uses a throwaway account for the same
+    // TokenVersion reason as the sidebar test above.
+    const API_URL = process.env["E2E_API_URL"] ?? "http://localhost:5229";
+    const email = `e2e+mobilelogout${Date.now()}@flowie.test`;
+    const register = await request.post(`${API_URL}/auth/register`, {
+      data: {
+        firstName: "E2E",
+        lastName: "MobileLogout",
+        email,
+        password: PASSWORD,
+        registrationCode: REGISTRATION_CODE,
+      },
+    });
+    expect(register.ok(), await register.text()).toBeTruthy();
+
+    await page.goto("/login");
+    await page.fill("#email", email);
+    await page.fill("#password", PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL((url) => !url.toString().includes("/login"), {
+      timeout: 15_000,
+    });
+
+    const header = page.locator("app-mobile-header");
+    await expect(header.locator("header")).toBeVisible();
+    await header.locator('button[title="Account"]').click();
+    await header.locator('button[title="Uitloggen"]').click();
     await page.waitForURL((url) => url.toString().includes("/login"), {
       timeout: 10_000,
     });

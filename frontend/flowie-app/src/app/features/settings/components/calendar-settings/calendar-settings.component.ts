@@ -1,10 +1,8 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { CalendarFacade } from "../../facade/calendar.facade";
-import { catchError, EMPTY } from "rxjs";
-import { HttpErrorResponse } from "@angular/common/http";
-import { extractErrorMessage } from "../../../../core/utils/error-message.util";
 import { NotificationService } from "../../../../core/services/notification.service";
 import { Dialog } from "@angular/cdk/dialog";
+import { RegenerateFeedDialogComponent } from "../regenerate-feed-dialog/regenerate-feed-dialog.component";
 
 @Component({
   selector: "app-calendar-settings",
@@ -21,7 +19,6 @@ export class CalendarSettingsComponent implements OnInit {
   feedUrl = this.#facade.feedUrl;
   isLoadingFeedUrl = this.#facade.isLoadingFeedUrl;
   errorMessage = signal<string | null>(null);
-  isRegenerating = signal<boolean>(false);
 
   ngOnInit(): void {
     this.#facade.getCalendarFeedUrl();
@@ -36,30 +33,13 @@ export class CalendarSettingsComponent implements OnInit {
     }
   }
 
-  regenerateToken(): void {
-    const confirmed = confirm(
-      "Weet je zeker dat je de agenda feed URL wilt vernieuwen? De oude URL zal niet meer werken."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.errorMessage.set(null);
-    this.isRegenerating.set(true);
-
-    this.#facade
-      .regenerateToken()
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          this.errorMessage.set(extractErrorMessage(error));
-          this.isRegenerating.set(false);
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        this.isRegenerating.set(false);
-        this.#notifications.showSuccess("Agenda feed URL succesvol vernieuwd");
-      });
+  // A native confirm() renders as a system alert titled with the origin, which
+  // looks broken inside an installed PWA — so this uses the same CDK dialog as
+  // every other confirmation in the app.
+  openRegenerateDialog(): void {
+    this.#dialog.open(RegenerateFeedDialogComponent, {
+      backdropClass: ["fixed", "inset-0", "bg-black/40"],
+      panelClass: ["dialog-panel", "flex", "items-center", "justify-center"]
+    });
   }
 }

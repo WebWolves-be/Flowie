@@ -7,10 +7,10 @@ import { NotificationService } from "../../services/notification.service";
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed top-0 left-0 right-0 md:bottom-4 md:top-auto md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 md:max-w-md">
+    <div class="fixed top-0 left-0 right-0 pt-safe-t lg:bottom-4 lg:top-auto lg:pt-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-50 lg:max-w-md">
       @for (notification of notifications(); track notification.id) {
         <div
-          class="rounded-none md:rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-in border border-b-0 md:border-b last:border-b md:mb-2"
+          class="rounded-none lg:rounded-lg shadow-lg p-3 lg:p-4 flex items-start gap-3 animate-slide-in border border-b-0 lg:border-b last:border-b lg:mb-2 min-w-0"
           [ngClass]="{
             'bg-red-50 border-red-200': notification.type === 'error',
             'bg-green-50 border-green-200': notification.type === 'success',
@@ -53,11 +53,20 @@ import { NotificationService } from "../../services/notification.service";
                 {{ notification.message }}
               </p>
             }
+            @if (notification.action; as action) {
+              <button
+                (click)="run(action.run, notification.id)"
+                class="mt-2 inline-flex items-center justify-center px-3 min-h-touch text-sm font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-500"
+                type="button">
+                {{ action.label }}
+              </button>
+            }
           </div>
 
           <button
             (click)="remove(notification.id)"
-            class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+            class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch -m-2 lg:m-0 rounded-full text-gray-500 hover:text-gray-700 transition-colors"
+            title="Sluiten"
             type="button">
             <i class="fas fa-times w-5 h-5"></i>
           </button>
@@ -89,5 +98,10 @@ export class NotificationContainerComponent {
 
   remove(id: number): void {
     this.#notificationService.remove(id);
+  }
+
+  run(action: () => void, id: number): void {
+    this.#notificationService.remove(id);
+    action();
   }
 }
