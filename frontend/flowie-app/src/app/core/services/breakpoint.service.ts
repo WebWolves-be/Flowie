@@ -31,4 +31,12 @@ export class BreakpointService {
     const state = this.#breakpoints();
     return (state.breakpoints as Record<string, boolean>)["(min-width: 1024px)"] ?? false;
   });
+
+  /**
+   * True below the `lg` breakpoint, which is where the app shows the mobile
+   * header and bottom nav. A phone in landscape is wider than 768px but still
+   * far too short for the two-pane desktop layout, so single-pane navigation
+   * has to key off this rather than `isMobile`.
+   */
+  isCompact = computed(() => !this.isDesktop());
 }

@@ -1,0 +1,208 @@
+<div class="absolute inset-0 bg-black/40" (click)="close.emit()"></div>
+
+<div
+  class="absolute inset-x-0 bottom-0 flex flex-col max-h-[88dvh] bg-white rounded-t-2xl shadow-2xl min-w-0"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="task().title">
+  <!-- Grab bar: the standard affordance that this panel is dismissible. -->
+  <div class="flex-shrink-0 flex justify-center pt-2 pb-1">
+    <span class="block w-10 h-1 rounded-full bg-gray-300"></span>
+  </div>
+
+  <div class="flex-shrink-0 flex items-center gap-2 px-4 py-2 border-b border-gray-200 min-w-0">
+    <h2 class="flex-1 min-w-0 text-base font-semibold text-gray-900 break-words">
+      {{ task().title }}
+    </h2>
+    <button
+      type="button"
+      (click)="close.emit()"
+      title="Sluiten"
+      class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch -mr-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="flex-1 min-w-0 scroll-pane px-4 py-4 space-y-5">
+    @if (task().description) {
+      <div class="text-sm text-gray-900 min-w-0 description-content" [innerHTML]="task().description"></div>
+    }
+
+    <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm min-w-0">
+      <dt class="text-gray-500">Status</dt>
+      <dd class="text-gray-900 font-medium">{{ statusLabel() }}</dd>
+
+      <dt class="text-gray-500">Type</dt>
+      <dd class="text-gray-900 min-w-0 break-words">{{ task().taskTypeName }}</dd>
+
+      <dt class="text-gray-500">Deadline</dt>
+      <dd class="min-w-0 break-words" [class.text-red-600]="isTaskOverdue()" [class.font-medium]="isTaskOverdue()">
+        {{ task().dueDate ? (task().dueDate | date: 'd MMMM y' : '' : 'nl-NL') : 'Geen' }}
+      </dd>
+
+      <dt class="text-gray-500">Medewerker</dt>
+      <dd class="text-gray-900 min-w-0 break-words">{{ task().employeeName || 'Niet toegewezen' }}</dd>
+
+      @if (isWaitingOn() && waitingDays() !== null) {
+        <dt class="text-gray-500">Wachten sinds</dt>
+        <dd class="text-amber-700">{{ waitingDays() === 0 ? 'vandaag' : waitingDays() + ' dagen' }}</dd>
+      }
+
+      <dt class="text-gray-500">Aangemaakt</dt>
+      <dd class="text-gray-600">{{ task().createdAt | date: 'd MMMM y' : '' : 'nl-NL' }}</dd>
+    </dl>
+
+    @if (hasSubtasks()) {
+      <div class="min-w-0">
+        <h3 class="text-sm font-medium text-gray-700 mb-2">
+          Subtaken ({{ taskProgress() }}% voltooid)
+        </h3>
+        <ul class="space-y-2 min-w-0">
+          @for (subtask of orderedSubtasks(); track subtask.taskId) {
+            <li
+              class="rounded-lg border px-3 py-2 min-w-0"
+              [class.border-green-300]="isSubtaskDone(subtask)"
+              [class.bg-green-50]="isSubtaskDone(subtask)"
+              [class.border-gray-200]="!isSubtaskDone(subtask)">
+              <div class="flex items-start gap-2 min-w-0">
+                <span
+                  class="flex-1 min-w-0 text-sm break-words"
+                  [class.text-gray-500]="isSubtaskDone(subtask)"
+                  [class.line-through]="isSubtaskDone(subtask)"
+                  [class.text-gray-900]="!isSubtaskDone(subtask)">
+                  {{ subtask.title }}
+                </span>
+                @if (!isSubtaskDone(subtask)) {
+                  <button
+                    type="button"
+                    (click)="onUpdateSubtask(subtask)"
+                    title="Bewerken"
+                    class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch -mr-2 -mt-1 rounded-full text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                }
+              </div>
+
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-gray-500 min-w-0">
+                <span class="inline-flex items-center gap-1 min-w-0">
+                  <i class="fas fa-tag flex-shrink-0"></i>
+                  <span class="truncate">{{ subtask.taskTypeName }}</span>
+                </span>
+                @if (subtask.dueDate) {
+                  <span
+                    class="inline-flex items-center gap-1 whitespace-nowrap"
+                    [class.text-red-600]="!isSubtaskDone(subtask) && isSubtaskOverdue(subtask)">
+                    <i class="fas fa-calendar-day"></i>
+                    {{ subtask.dueDate | date: 'd MMM' : '' : 'nl-NL' }}
+                  </span>
+                }
+                @if (subtask.employeeName) {
+                  <span class="inline-flex items-center gap-1 min-w-0">
+                    <i class="fas fa-user flex-shrink-0"></i>
+                    <span class="truncate">{{ subtask.employeeName }}</span>
+                  </span>
+                }
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 mt-2 min-w-0">
+                @if (isSubtaskPending(subtask)) {
+                  <button (click)="onStartSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-teal-600 text-teal-600 text-sm whitespace-nowrap bg-transparent">
+                    Beginnen
+                  </button>
+                  <button (click)="onDeleteSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-red-600 text-red-600 text-sm whitespace-nowrap bg-transparent">
+                    Verwijderen
+                  </button>
+                }
+                @if (isSubtaskOngoing(subtask)) {
+                  <button (click)="onCompleteSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-green-600 text-green-600 text-sm whitespace-nowrap bg-transparent">
+                    Klaar
+                  </button>
+                  <button (click)="onWaitSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-amber-600 text-amber-600 text-sm whitespace-nowrap bg-transparent">
+                    Wachten op
+                  </button>
+                }
+                @if (isSubtaskWaitingOn(subtask)) {
+                  <button (click)="onCompleteSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-green-600 text-green-600 text-sm whitespace-nowrap bg-transparent">
+                    Klaar
+                  </button>
+                  <button (click)="onReopenSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-teal-600 text-teal-600 text-sm whitespace-nowrap bg-transparent">
+                    Heropenen
+                  </button>
+                }
+                @if (isSubtaskDone(subtask)) {
+                  <button (click)="onReopenSubtask(subtask)"
+                          class="inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-teal-600 text-teal-600 text-sm whitespace-nowrap bg-transparent">
+                    Openzetten
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  <div class="flex-shrink-0 border-t border-gray-200 px-4 py-3 space-y-2 safe-area-bottom min-w-0">
+    @if (!hasSubtasks()) {
+      <div class="flex flex-wrap items-center gap-2 min-w-0">
+        @if (isPending()) {
+          <button (click)="onStartTask()"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-transparent bg-teal-600 text-white text-sm font-medium">
+            Beginnen
+          </button>
+        }
+        @if (isOngoing() || isWaitingOn()) {
+          <button (click)="onCompleteTask()"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-transparent bg-green-600 text-white text-sm font-medium">
+            Klaar
+          </button>
+        }
+        @if (isOngoing()) {
+          <button (click)="onWaitTask()"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-amber-600 text-amber-700 text-sm font-medium whitespace-nowrap bg-transparent">
+            Wachten op
+          </button>
+        }
+        @if (isWaitingOn()) {
+          <button (click)="onReopenTask()"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-teal-600 text-teal-600 text-sm font-medium whitespace-nowrap bg-transparent">
+            Heropenen
+          </button>
+        }
+        @if (isDone()) {
+          <button (click)="onReopenTask()"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-2 min-h-touch rounded-lg border border-teal-600 text-teal-600 text-sm font-medium whitespace-nowrap bg-transparent">
+            Openzetten
+          </button>
+        }
+      </div>
+    }
+
+    <div class="flex flex-wrap items-center gap-2 min-w-0">
+      <button (click)="onCreateSubtask()"
+              class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 min-h-touch rounded-lg text-sm text-gray-700 hover:bg-gray-100">
+        <i class="fas fa-plus"></i>
+        Subtaak
+      </button>
+      <button (click)="onUpdateTask()"
+              class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 min-h-touch rounded-lg text-sm text-gray-700 hover:bg-gray-100">
+        <i class="fas fa-edit"></i>
+        Bewerken
+      </button>
+      @if (isPending()) {
+        <button (click)="onDeleteTask()"
+                class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 min-h-touch rounded-lg text-sm text-red-600 hover:bg-red-50">
+          <i class="fas fa-trash"></i>
+          Verwijderen
+        </button>
+      }
+    </div>
+  </div>
+</div>

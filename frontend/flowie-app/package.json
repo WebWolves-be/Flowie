@@ -1,10 +1,12 @@
 {
   "name": "flowie-app",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "ng": "ng",
+    "build-info": "node scripts/generate-build-info.mjs",
     "start": "ng serve",
+    "prebuild": "npm run build-info",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

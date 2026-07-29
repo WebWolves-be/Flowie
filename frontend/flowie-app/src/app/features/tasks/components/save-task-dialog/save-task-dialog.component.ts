@@ -123,6 +123,19 @@ export class SaveTaskDialogComponent implements OnInit {
     this.#dialogRef.close();
   }
 
+  onOpenDatePicker(event: Event): void {
+    const input = event.target as HTMLInputElement & { showPicker?: () => void };
+    if (typeof input.showPicker !== "function") {
+      return;
+    }
+    try {
+      input.showPicker();
+    } catch {
+      // Browsers reject showPicker() outside a user gesture; the native tap
+      // target still works in that case.
+    }
+  }
+
   onSubmit(): void {
     if (this.taskForm.invalid) {
       this.taskForm.markAllAsTouched();

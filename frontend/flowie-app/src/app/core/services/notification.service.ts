@@ -2,12 +2,18 @@ import { Injectable, signal } from "@angular/core";
 
 export type NotificationType = "error" | "success" | "info" | "warning";
 
+export interface NotificationAction {
+  label: string;
+  run: () => void;
+}
+
 export interface Notification {
   id: number;
   type: NotificationType;
   title: string;
   message?: string;
   duration?: number;
+  action?: NotificationAction;
 }
 
 @Injectable({
@@ -35,6 +41,15 @@ export class NotificationService {
     this.#show("error", title, message, duration);
   }
 
+  showAction(
+    type: NotificationType,
+    title: string,
+    message: string | undefined,
+    action: NotificationAction
+  ): number {
+    return this.#show(type, title, message, undefined, action);
+  }
+
   remove(id: number): void {
     this.#notifications.update(notifications =>
       notifications.filter(n => n.id !== id)
@@ -45,13 +60,20 @@ export class NotificationService {
     this.#notifications.set([]);
   }
 
-  #show(type: NotificationType, title: string, message?: string, duration?: number): void {
+  #show(
+    type: NotificationType,
+    title: string,
+    message?: string,
+    duration?: number,
+    action?: NotificationAction
+  ): number {
     const notification: Notification = {
       id: this.#nextId++,
       type,
       title,
       message,
-      duration
+      duration,
+      action
     };
 
     this.#notifications.update(notifications => [...notifications, notification]);
@@ -59,6 +81,8 @@ export class NotificationService {
     if (duration) {
       setTimeout(() => this.remove(notification.id), duration);
     }
+
+    return notification.id;
   }
 
 }
