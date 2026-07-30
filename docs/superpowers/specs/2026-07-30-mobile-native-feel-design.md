@@ -161,15 +161,17 @@ the component host.
 ### 5. Self-hosted icons
 
 **Problem.** `src/index.html` loads Font Awesome from `cdnjs.cloudflare.com`.
-In an installed PWA every icon renders as an empty box when offline or on a bad
-connection, and the request blocks first paint on every cold start. Icons are
-load-bearing here: status glyphs, chevrons, and kebab menus are all Font
-Awesome.
+`ngsw-config.json` does already precache it through an `icon-font` asset group,
+so this is narrower than "icons vanish offline" — but the app's entire icon set
+(status glyphs, chevrons, kebab menus) depends on a third party being reachable
+at service-worker install time, and on the very first load the stylesheet is a
+render-blocking cross-origin request. If cdnjs is slow, blocked, or unreachable
+when the worker installs, the precache silently fails and the icons are gone.
 
 **Change.** Install `@fortawesome/fontawesome-free`, serve its CSS and webfonts
-locally through `angular.json`, and add them to the asset groups in
-`ngsw-config.json` so the service worker precaches them. Remove the CDN
-`<link>`.
+locally through `angular.json`, and delete the now-redundant `icon-font` asset
+group from `ngsw-config.json` — locally served CSS and fonts are already
+covered by the existing `app` and `assets` groups. Remove the CDN `<link>`.
 
 Every existing `<i class="fas fa-*">` keeps working unchanged — no template
 churn.
