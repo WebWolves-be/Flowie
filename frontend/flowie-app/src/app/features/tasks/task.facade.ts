@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "../../../environments/environment";
 import { Company } from "./models/company.enum";
-import { finalize, Observable } from "rxjs";
+import { catchError, finalize, Observable, throwError } from "rxjs";
 import { Project } from "./models/project.model";
 import { Task } from "./models/task.model";
 import { Section } from "./models/section.model";
@@ -16,6 +16,7 @@ import { UpdateSectionRequest } from "./models/update-section-request.model";
 import { CreateTaskRequest } from "./models/create-task-request.model";
 import { UpdateTaskRequest } from "./models/update-task-request.model";
 import { UpdateTaskStatusRequest } from "./models/update-task-status-request.model";
+import { TaskStatus } from "./models/task-status.enum";
 
 @Injectable({
   providedIn: "root"
@@ -145,7 +146,45 @@ export class TaskFacade {
   }
 
   updateTaskStatus(taskId: number, request: UpdateTaskStatusRequest): Observable<void> {
-    return this.#http.patch<void>(`${this.#apiUrl}/api/tasks/${taskId}/status`, request);
+    const previous = this.#tasks();
+
+    this.#applyStatusLocally(taskId, request.status);
+
+    return this.#http.patch<void>(`${this.#apiUrl}/api/tasks/${taskId}/status`, request).pipe(
+      catchError(error => {
+        this.#tasks.set(previous);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Writes the new status straight into the signal so the row changes on tap.
+   * A subtask lives inside its parent's `subtasks` array and the parent derives
+   * its own status from them, so both shapes have to be handled here — anything
+   * derived from that (section counts, project progress) is reconciled by the
+   * refetch the caller fires afterwards.
+   */
+  #applyStatusLocally(taskId: number, status: TaskStatus): void {
+    this.#tasks.update(tasks =>
+      tasks.map(task => {
+        if (task.taskId === taskId) {
+          return { ...task, status };
+        }
+
+        const subtasks = task.subtasks ?? [];
+        if (!subtasks.some(subtask => subtask.taskId === taskId)) {
+          return task;
+        }
+
+        return {
+          ...task,
+          subtasks: subtasks.map(subtask =>
+            subtask.taskId === taskId ? { ...subtask, status } : subtask
+          )
+        };
+      })
+    );
   }
 
   reorderTasks(items: { taskId: number; displayOrder: number }[]): Observable<void> {

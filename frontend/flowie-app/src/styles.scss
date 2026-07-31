@@ -197,3 +197,66 @@ quill-editor {
   max-width: 100%;
   overflow-x: auto;
 }
+
+/* Below `lg` the list and the detail are two screens that replace each other, so
+   they should slide the way a native push/pop does. At `lg` and up both are on
+   screen at once and nothing is navigating between them, so naming them there
+   would animate a pane that never left. */
+@media (max-width: 1023px) {
+  /* Named only while a transition is actually running. A `view-transition-name`
+     makes its element a stacking context permanently, which trapped the task
+     detail sheet's `z-index: 60` inside the detail pane — the bottom nav then
+     painted over the sheet and swallowed its buttons. Scoped this way the
+     stacking context exists only for the 220ms the animation lasts, and the
+     sheet is never open during a list/detail navigation. */
+  html:active-view-transition .pane-list {
+    view-transition-name: pane-list;
+  }
+
+  html:active-view-transition .pane-detail {
+    view-transition-name: pane-detail;
+  }
+
+  ::view-transition-old(pane-list),
+  ::view-transition-new(pane-detail) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  ::view-transition-new(pane-detail) {
+    animation-name: slide-in-from-right;
+  }
+
+  ::view-transition-old(pane-list) {
+    animation-name: slide-out-to-left;
+  }
+}
+
+/* The snapshot overlay sits above the whole document while it animates, so
+   without this a tap landing in that window hits the overlay instead of the
+   control the user aimed at. */
+::view-transition {
+  pointer-events: none;
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-out-to-left {
+  to {
+    transform: translateX(-25%);
+    opacity: 0.6;
+  }
+}
+
+/* A transition the user did not ask for is exactly what this setting turns off. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

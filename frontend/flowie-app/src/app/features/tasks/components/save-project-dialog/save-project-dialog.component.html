@@ -23,6 +23,8 @@
           id="title"
           type="text"
           formControlName="title"
+          autocapitalize="sentences"
+          enterkeyhint="next"
           class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
           [class]="form.controls.title.invalid && form.controls.title.touched
             ? 'border-2 border-red-500 focus:ring-red-500 focus:border-red-500'
@@ -39,6 +41,11 @@
           type="text"
           formControlName="code"
           maxlength="5"
+          autocapitalize="characters"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="next"
           class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
           [class]="form.controls.code.invalid && form.controls.code.touched
             ? 'border-2 border-red-500 focus:ring-red-500 focus:border-red-500'
@@ -54,6 +61,8 @@
           id="description"
           rows="3"
           formControlName="description"
+          autocapitalize="sentences"
+          enterkeyhint="enter"
           class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
           [class]="form.controls.description.invalid && form.controls.description.touched
             ? 'border-2 border-red-500 focus:ring-red-500 focus:border-red-500'

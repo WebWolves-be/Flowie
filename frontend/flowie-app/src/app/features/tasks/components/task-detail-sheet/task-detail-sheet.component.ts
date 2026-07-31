@@ -1,6 +1,7 @@
 import { Component, HostListener, output } from "@angular/core";
 import { DatePipe } from "@angular/common";
 import { TaskItemBase } from "../task-item/task-item-base";
+import { SheetDragDirective } from "../../../../core/directives/sheet-drag.directive";
 
 /**
  * Task detail for phones, as a bottom sheet.
@@ -15,7 +16,7 @@ import { TaskItemBase } from "../task-item/task-item-base";
 @Component({
   selector: "app-task-detail-sheet",
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, SheetDragDirective],
   templateUrl: "./task-detail-sheet.component.html",
   styleUrl: "./task-detail-sheet.component.scss"
 })

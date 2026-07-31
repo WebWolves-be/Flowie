@@ -356,13 +356,16 @@ export class TasksPage implements OnInit {
   }
 
   onTaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
-    const statusMessages = {
-      [TaskStatus.Ongoing]: "Taak gestart",
-      [TaskStatus.Done]: "Taak voltooid",
-      [TaskStatus.Pending]: "Taak heropend",
-      [TaskStatus.WaitingOn]: "Taak in wacht gezet"
-    };
+    this.#changeStatus(event);
+  }
 
+  /**
+   * The facade has already moved the row, so there is nothing to wait for and
+   * nothing to announce — a toast on every tap would only cover the header. The
+   * refetch runs afterwards to reconcile the counts the row cannot derive
+   * itself, and only an actual failure is worth interrupting the user for.
+   */
+  #changeStatus(event: { taskId: number; status: TaskStatus }) {
     this.#taskFacade
       .updateTaskStatus(event.taskId, { status: event.status })
       .pipe(
@@ -377,7 +380,6 @@ export class TasksPage implements OnInit {
           this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
           this.#taskFacade.getProjects();
         }
-        this.#notificationService.showSuccess(statusMessages[event.status]);
       });
   }
 
@@ -409,29 +411,7 @@ export class TasksPage implements OnInit {
   }
 
   onSubtaskStatusChanged(event: { taskId: number; status: TaskStatus }) {
-    const statusMessages = {
-      [TaskStatus.Ongoing]: "Subtaak gestart",
-      [TaskStatus.Done]: "Subtaak voltooid",
-      [TaskStatus.Pending]: "Subtaak heropend",
-      [TaskStatus.WaitingOn]: "Subtaak in wacht gezet"
-    };
-
-    this.#taskFacade
-      .updateTaskStatus(event.taskId, { status: event.status })
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          this.#notificationService.showError(extractErrorMessage(error));
-          return EMPTY;
-        })
-      )
-      .subscribe(() => {
-        const projectId = this.selectedProjectId();
-        if (projectId) {
-          this.#taskFacade.getTasks(projectId, this.showOnlyMyTasks());
-          this.#taskFacade.getProjects();
-        }
-        this.#notificationService.showSuccess(statusMessages[event.status]);
-      });
+    this.#changeStatus(event);
   }
 
   onOpenCreateSubtaskDialog(parentTaskId: number) {

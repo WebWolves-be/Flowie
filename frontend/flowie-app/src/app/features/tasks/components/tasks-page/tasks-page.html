@@ -1,6 +1,6 @@
 <div class="flex h-full min-w-0 bg-white">
   @if (showProjectList()) {
-    <aside class="w-full lg:w-80 min-w-0 bg-white border-r border-gray-200 flex flex-col lg:flex-shrink-0">
+    <aside class="pane-list w-full lg:w-80 min-w-0 bg-white border-r border-gray-200 flex flex-col lg:flex-shrink-0">
       <div class="p-4 border-b border-gray-200 flex-shrink-0">
         <div class="flex items-center justify-between gap-3 mb-4">
           <h1 class="text-lg font-semibold text-gray-900 min-w-0 truncate">Projecten</h1>
@@ -67,7 +67,7 @@
     </aside>
   }
   @if (showProjectDetail()) {
-    <div class="w-full lg:flex-1 min-w-0 flex flex-col min-h-0 h-full">
+    <div class="pane-detail w-full lg:flex-1 min-w-0 flex flex-col min-h-0 h-full">
       @if (selectedProject()) {
         <app-project-detail
         class="flex-1 flex flex-col min-w-0 min-h-0 h-full"

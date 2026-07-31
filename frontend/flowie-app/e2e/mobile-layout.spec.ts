@@ -608,4 +608,30 @@ test.describe("mobile layout", () => {
       await expect(page.locator("h3", { hasText: section })).toBeInViewport();
     }
   });
+
+  test("the back bar is pinned and costs no more than 44px", async ({ page }) => {
+    test.slow();
+
+    const project = uniqueName("PinnedBarProj");
+    await createProject(page, project);
+    await openProject(page, project);
+
+    const bar = page.locator("app-project-detail > div > div").first();
+    const box = await bar.boundingBox();
+    expect(box, "the compact back bar is not rendered").not.toBeNull();
+
+    // A landscape phone is 375px tall. Every pixel of pinned chrome comes out of
+    // the task list, which is why the full header was left scrolling.
+    expect(
+      box!.height,
+      `the pinned bar is ${box!.height}px tall; it must stay at the 44px minimum`
+    ).toBeLessThanOrEqual(46);
+
+    // Still the same large title in the scroll pane, still scrolling away.
+    await expect(
+      page.locator(".scroll-pane").first().locator("h2", { hasText: project })
+    ).toHaveCount(1);
+
+    await deleteProject(page, true, project);
+  });
 });
