@@ -140,7 +140,10 @@ export class MyDialogComponent {
 - **Input valid**: `border border-gray-300 focus:ring-teal-500 focus:border-teal-500`
 - **Input invalid**: `border-2 border-red-500 focus:ring-red-500 focus:border-red-500`
 - **Error box**: `bg-red-50 border border-red-200 text-red-800`
-- **Icons**: Use Font Awesome via CDN (`<i class="fas fa-X"></i>`). Drag handles use inline SVG (no FA equivalent).
+- **Icons**: Use Font Awesome (`<i class="fas fa-X"></i>`), served locally from
+  the `@fortawesome/fontawesome-free` package via `angular.json` — never from a
+  CDN, or the icon set depends on a third party being reachable when the service
+  worker installs. Drag handles use inline SVG (no FA equivalent).
 
 ## Mobile / PWA layout rules (non-negotiable)
 
@@ -209,6 +212,24 @@ produced horizontal scrolling and content hidden under the notch:
   inside the `.scroll-pane` via `ngTemplateOutlet`; only at `lg` and up are they
   pinned chrome. Pinned they cost ~170px — half a landscape phone. Section
   headers are `sticky top-0` so context survives the scroll.
+- **A 44px back bar is pinned above the project detail below `lg`**, and is the
+  one exception to the rule above that the header scrolls. A standalone PWA has
+  no browser back button and no edge-swipe, so when the header scrolled away the
+  user had no way out of a project at all. It carries the project title in a
+  `<span>`, never an `<h2>` — `e2e/mobile-layout.spec.ts` asserts the large
+  `<h2>` title leaves the viewport, and a pinned duplicate would defeat it.
+- **A sheet's drag-to-dismiss belongs on its handle, not its panel.** Applied to
+  the whole panel it takes the gesture from the scrolling body, so a downward
+  swipe over the description closes the sheet instead of scrolling it. The
+  mechanics live in `core/directives/sheet-drag.directive.ts`, which emits
+  `dismissed` and knows nothing about tasks; the dismiss/spring-back decision is
+  the exported `shouldDismiss` and is unit-tested rather than driven through a
+  browser.
+- **Status writes are optimistic and must not be awaited.** `TaskFacade`
+  applies the new status to its signal before the request leaves, and restores
+  the previous value if it fails. Callers refetch afterwards only to reconcile
+  the counts a row cannot derive itself, and show no success toast — the row
+  changing is the feedback, and a toast on every tap covers the mobile header.
 - Custom utilities live in `tailwind.config.js`: `min-h-touch`, `min-w-touch`,
   `h-dvh`, `min-h-dvh`, `pt-safe-t`, `pt-4-safe-t`, `pb-safe-b`,
   `pt-header-safe`, `pb-nav-safe`.
