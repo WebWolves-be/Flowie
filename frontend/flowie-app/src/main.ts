@@ -1,5 +1,5 @@
 import { bootstrapApplication } from "@angular/platform-browser";
-import { provideRouter, Routes } from "@angular/router";
+import { provideRouter, Routes, withViewTransitions } from "@angular/router";
 import {
   provideHttpClient,
   withInterceptors,
@@ -78,7 +78,7 @@ const routes: Routes = [
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, withViewTransitions()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideServiceWorker("ngsw-worker.js", {
       enabled: !isDevMode(),
