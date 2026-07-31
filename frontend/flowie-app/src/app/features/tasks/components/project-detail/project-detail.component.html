@@ -1,13 +1,5 @@
 <ng-template #projectHeader>
   <div class="bg-white border-b border-gray-200 px-3 py-3 lg:p-6 flex-shrink-0 min-w-0">
-    @if (isCompact()) {
-      <button
-        (click)="backToList.emit()"
-        class="inline-flex items-center gap-2 min-h-touch px-2 -ml-2 mb-2 lg:mb-4 rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50">
-        <i class="fas fa-chevron-left"></i>
-        Terug naar projecten
-      </button>
-    }
       <!-- The project is always already loaded here — it came from the list the
            user just tapped — so the header renders straight away. Replacing it
            with a skeleton hid a title we already had, and the skeleton was
@@ -146,6 +138,20 @@
      phone, which left the task list a sliver; the section headers stay sticky,
      so scrolling never loses the context that actually matters. -->
 <div class="flex flex-col h-full min-h-0 min-w-0">
+  @if (isCompact()) {
+    <div class="flex-shrink-0 flex items-center gap-1 px-1 h-11 bg-white border-b border-gray-200 min-w-0">
+      <button
+        (click)="backToList.emit()"
+        aria-label="Terug naar projecten"
+        title="Terug naar projecten"
+        class="flex-shrink-0 flex items-center justify-center min-w-touch min-h-touch rounded-full text-teal-600">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <span class="flex-1 min-w-0 truncate text-sm font-semibold text-gray-900">
+        {{ project().title }}
+      </span>
+    </div>
+  }
   @if (!isCompact()) {
     <ng-container [ngTemplateOutlet]="projectHeader"></ng-container>
     <ng-container [ngTemplateOutlet]="taskFilter"></ng-container>

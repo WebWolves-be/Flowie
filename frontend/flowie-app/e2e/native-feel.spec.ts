@@ -111,4 +111,40 @@ test.describe("native feel", () => {
     await deleteProject(page, true, project);
     await deleteTaskType(page, taskType);
   });
+
+  test("the way back stays on screen no matter how far you scroll", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "the desktop layout shows the list beside the detail");
+    test.slow();
+
+    const project = uniqueName("BackBarProj");
+    const taskType = uniqueName("BackBarType");
+
+    await createTaskType(page, taskType);
+    await createProject(page, project);
+    await openProject(page, project);
+
+    // Enough sections that the pane is genuinely taller than the viewport.
+    for (const suffix of ["Een", "Twee", "Drie", "Vier", "Vijf", "Zes"]) {
+      await createSection(page, true, uniqueName(`BackBarSectie${suffix}`));
+    }
+
+    const back = page.getByRole("button", { name: "Terug naar projecten" });
+    await expect(back).toBeInViewport();
+
+    const pane = page.locator(".scroll-pane").first();
+    await pane.evaluate((el) => el.scrollBy(0, el.scrollHeight));
+
+    // Standalone PWAs have no browser back button and no edge-swipe, so if this
+    // control scrolls away the user is stranded in the project.
+    await expect(back).toBeInViewport();
+
+    await back.click();
+    await expect(page.getByRole("heading", { name: "Projecten" })).toBeVisible();
+
+    await deleteProject(page, true, project);
+    await deleteTaskType(page, taskType);
+  });
 });
