@@ -50,6 +50,11 @@ export class SheetDragDirective {
   #dragging = false;
 
   onPointerDown(event: PointerEvent): void {
+    // Capturing the pointer retargets the following `click` to the capturing
+    // element, so a press that starts on a control inside the region would
+    // never reach that control — which silently broke the sheet's close button.
+    if ((event.target as HTMLElement).closest("button")) return;
+
     this.#dragging = true;
     this.#startY = event.clientY;
     this.#startedAt = event.timeStamp;

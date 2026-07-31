@@ -60,8 +60,10 @@ test.describe("native feel", () => {
     // the PATCH is still in flight.
     await expect(status).toHaveAttribute("title", "Bezig", { timeout: 2_000 });
 
+    // Releasing lets the held handler run `route.continue()`. Unrouting here
+    // instead would tear the route down underneath it and fail the test with
+    // "Route is already handled!".
     release();
-    await page.unroute("**/api/tasks/*/status");
 
     await expect(status).toHaveAttribute("title", "Bezig");
 

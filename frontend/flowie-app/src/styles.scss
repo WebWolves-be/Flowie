@@ -203,11 +203,17 @@ quill-editor {
    screen at once and nothing is navigating between them, so naming them there
    would animate a pane that never left. */
 @media (max-width: 1023px) {
-  .pane-list {
+  /* Named only while a transition is actually running. A `view-transition-name`
+     makes its element a stacking context permanently, which trapped the task
+     detail sheet's `z-index: 60` inside the detail pane — the bottom nav then
+     painted over the sheet and swallowed its buttons. Scoped this way the
+     stacking context exists only for the 220ms the animation lasts, and the
+     sheet is never open during a list/detail navigation. */
+  html:active-view-transition .pane-list {
     view-transition-name: pane-list;
   }
 
-  .pane-detail {
+  html:active-view-transition .pane-detail {
     view-transition-name: pane-detail;
   }
 
@@ -224,6 +230,13 @@ quill-editor {
   ::view-transition-old(pane-list) {
     animation-name: slide-out-to-left;
   }
+}
+
+/* The snapshot overlay sits above the whole document while it animates, so
+   without this a tap landing in that window hits the overlay instead of the
+   control the user aimed at. */
+::view-transition {
+  pointer-events: none;
 }
 
 @keyframes slide-in-from-right {
