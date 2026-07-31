@@ -8,6 +8,7 @@ import {
   dialog,
   openCreateTaskDialog,
   openProject,
+  openTaskDetail,
   showTask,
   taskCard,
   uniqueName,
@@ -143,6 +144,60 @@ test.describe("native feel", () => {
 
     await back.click();
     await expect(page.getByRole("heading", { name: "Projecten" })).toBeVisible();
+
+    await deleteProject(page, true, project);
+    await deleteTaskType(page, taskType);
+  });
+
+  test("the sheet can be dragged away by its grab bar", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "the detail sheet only exists below `lg`");
+    test.slow();
+
+    const project = uniqueName("SheetDragProj");
+    const section = uniqueName("SheetDragSectie");
+    const task = uniqueName("SheetDragTaak");
+    const taskType = uniqueName("SheetDragType");
+
+    await createTaskType(page, taskType);
+    await createProject(page, project);
+    await openProject(page, project);
+    await createSection(page, true, section);
+    await openCreateTaskDialog(page, true, section);
+    const dlg = dialog(page);
+    await dlg.locator("#title").fill(task);
+    await dlg.locator("#taskTypeId").selectOption({ label: taskType });
+    await dlg.locator('button[type="submit"]').click();
+    await expect(dlg).toBeHidden();
+    await showTask(page, section, task);
+
+    const sheet = page.locator("app-task-detail-sheet");
+    // The directive stamps `data-sheet-handle` on its host. An `[appSheetDrag]`
+    // locator would match nothing: it is a property binding, and Angular does
+    // not leave binding attributes in the DOM.
+    const grabRegion = sheet.locator("[data-sheet-handle]").first();
+
+    const dragBy = async (dy: number) => {
+      const box = await grabRegion.boundingBox();
+      if (!box) throw new Error("the drag region has no bounding box");
+      const x = box.x + box.width / 2;
+      const y = box.y + 6;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x, y + dy, { steps: 12 });
+      await page.mouse.up();
+    };
+
+    // A small drag is not intent — the sheet must come back.
+    await openTaskDetail(page, true, task);
+    await dragBy(30);
+    await expect(sheet).toBeVisible();
+
+    // A long one is.
+    await dragBy(400);
+    await expect(sheet).toBeHidden();
 
     await deleteProject(page, true, project);
     await deleteTaskType(page, taskType);
